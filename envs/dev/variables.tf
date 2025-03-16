@@ -52,8 +52,8 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     }
-    function = {
-      name                              = "function"
+    func = {
+      name                              = "func"
       target_vnet                       = "spoke1"
       address_prefixes                  = ["10.10.2.0/24"]
       default_outbound_access_enabled   = false
@@ -99,9 +99,9 @@ variable "network_security_group" {
       name          = "app"
       target_subnet = "app"
     }
-    function = {
-      name          = "function"
-      target_subnet = "function"
+    func = {
+      name          = "func"
+      target_subnet = "func"
     }
     db = {
       name          = "db"
@@ -185,7 +185,7 @@ variable "network_security_rule" {
     },
     {
       target_nsg                 = "pe"
-      name                       = "AllowFunctionSubnetHTTPSInbound"
+      name                       = "AllowFuncSubnetHTTPSInbound"
       priority                   = 1100
       direction                  = "Inbound"
       access                     = "Allow"
@@ -270,7 +270,7 @@ variable "network_security_rule" {
     },
     # Function Subnet
     {
-      target_nsg                 = "function"
+      target_nsg                 = "func"
       name                       = "AllowPeSubnetHTTPSOutbound"
       priority                   = 1000
       direction                  = "Outbound"
@@ -282,7 +282,7 @@ variable "network_security_rule" {
       destination_address_prefix = "10.10.0.0/24"
     },
     {
-      target_nsg                 = "function"
+      target_nsg                 = "func"
       name                       = "AllowInternetOutbound"
       priority                   = 1100
       direction                  = "Outbound"
@@ -294,7 +294,7 @@ variable "network_security_rule" {
       destination_address_prefix = "Internet"
     },
     {
-      target_nsg                 = "function"
+      target_nsg                 = "func"
       name                       = "DenyAllOutbound"
       priority                   = 4096
       direction                  = "Outbound"
