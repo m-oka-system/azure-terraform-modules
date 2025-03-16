@@ -84,3 +84,336 @@ variable "subnet" {
     }
   }
 }
+
+variable "network_security_group" {
+  type = map(object({
+    name          = string
+    target_subnet = string
+  }))
+  default = {
+    pe = {
+      name          = "pe"
+      target_subnet = "pe"
+    }
+    app = {
+      name          = "app"
+      target_subnet = "app"
+    }
+    function = {
+      name          = "function"
+      target_subnet = "function"
+    }
+    db = {
+      name          = "db"
+      target_subnet = "db"
+    }
+    vm = {
+      name          = "vm"
+      target_subnet = "vm"
+    }
+  }
+}
+
+variable "network_security_rule" {
+  type = list(object({
+    target_nsg                   = string
+    name                         = string
+    priority                     = number
+    direction                    = string
+    access                       = string
+    protocol                     = string
+    source_port_range            = optional(string)
+    source_port_ranges           = optional(list(string))
+    destination_port_range       = optional(string)
+    destination_port_ranges      = optional(list(string))
+    source_address_prefix        = optional(string)
+    source_address_prefixes      = optional(list(string))
+    destination_address_prefix   = optional(string)
+    destination_address_prefixes = optional(list(string))
+  }))
+
+  # 単数・複数の排他的なパラメータはどちらか一方を指定する
+  validation {
+    condition = alltrue([
+      for rule in var.network_security_rule :
+      (rule.source_port_range != null && rule.source_port_ranges == null) ||
+      (rule.source_port_range == null && rule.source_port_ranges != null)
+    ])
+    error_message = "送信元ポートは単数(source_port_range)または複数(source_port_ranges)のどちらか一方のみ指定してください。"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.network_security_rule :
+      (rule.destination_port_range != null && rule.destination_port_ranges == null) ||
+      (rule.destination_port_range == null && rule.destination_port_ranges != null)
+    ])
+    error_message = "宛先ポートは単数(destination_port_range)または複数(destination_port_ranges)のどちらか一方のみ指定してください。"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.network_security_rule :
+      (rule.source_address_prefix != null && rule.source_address_prefixes == null) ||
+      (rule.source_address_prefix == null && rule.source_address_prefixes != null)
+    ])
+    error_message = "送信元アドレスは単数(source_address_prefix)または複数(source_address_prefixes)のどちらか一方のみ指定してください。"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.network_security_rule :
+      (rule.destination_address_prefix != null && rule.destination_address_prefixes == null) ||
+      (rule.destination_address_prefix == null && rule.destination_address_prefixes != null)
+    ])
+    error_message = "宛先アドレスは単数(destination_address_prefix)または複数(destination_address_prefixes)のどちらか一方のみ指定してください。"
+  }
+
+  default = [
+    # PE Subnet
+    {
+      target_nsg                 = "pe"
+      name                       = "AllowAppSubnetHTTPSInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "10.10.1.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
+      name                       = "AllowFunctionSubnetHTTPSInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "10.10.2.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # App Subnet
+    {
+      target_nsg                 = "app"
+      name                       = "AllowPeSubnetHTTPSOutbound"
+      priority                   = 1000
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "*"
+      destination_address_prefix = "10.10.0.0/24"
+    },
+    {
+      target_nsg                 = "app"
+      name                       = "AllowDbSubnetMySQLOutbound"
+      priority                   = 1100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "3306"
+      source_address_prefix      = "*"
+      destination_address_prefix = "10.10.3.0/24"
+    },
+    {
+      target_nsg                 = "app"
+      name                       = "AllowInternetOutbound"
+      priority                   = 1200
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "Internet"
+    },
+    {
+      target_nsg                 = "app"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # Function Subnet
+    {
+      target_nsg                 = "function"
+      name                       = "AllowPeSubnetHTTPSOutbound"
+      priority                   = 1000
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "*"
+      destination_address_prefix = "10.10.0.0/24"
+    },
+    {
+      target_nsg                 = "function"
+      name                       = "AllowInternetOutbound"
+      priority                   = 1100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "Internet"
+    },
+    {
+      target_nsg                 = "function"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # DB Subnet
+    {
+      target_nsg                 = "db"
+      name                       = "AllowAppSubnetMySQLInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "3306"
+      source_address_prefix      = "10.10.1.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "db"
+      name                       = "AllowVmSubnetMySQLInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "3306"
+      source_address_prefix      = "10.10.4.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "db"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "db"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # VM Subnet
+    {
+      target_nsg                 = "vm"
+      name                       = "AllowSshRdpInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_ranges    = ["22", "3389"]
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "vm"
+      name                       = "AllowDbSubnetMySQLOutbound"
+      priority                   = 1000
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "3306"
+      source_address_prefix      = "*"
+      destination_address_prefix = "10.10.3.0/24"
+    },
+    {
+      target_nsg                 = "vm"
+      name                       = "AllowInternetOutbound"
+      priority                   = 1100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "Internet"
+    },
+    {
+      target_nsg                 = "vm"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "vm"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+  ]
+}
