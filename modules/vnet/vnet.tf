@@ -3,7 +3,7 @@
 ################################
 resource "azurerm_virtual_network" "this" {
   for_each            = var.vnet
-  name                = "vnet-${var.common.project}-${var.common.env}-${each.value.name}"
+  name                = "vnet-${each.value.name}-${var.common.project}-${var.common.env}"
   address_space       = each.value.address_space
   location            = var.common.location
   resource_group_name = var.resource_group_name

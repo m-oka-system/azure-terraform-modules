@@ -3,7 +3,7 @@
 ################################
 resource "azurerm_network_security_group" "this" {
   for_each            = var.network_security_group
-  name                = "nsg-${var.common.project}-${var.common.env}-${each.value.name}"
+  name                = "nsg-${each.value.name}-${var.common.project}-${var.common.env}"
   location            = var.common.location
   resource_group_name = var.resource_group_name
 

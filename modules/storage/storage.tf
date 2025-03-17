@@ -3,7 +3,7 @@
 ################################
 resource "azurerm_storage_account" "this" {
   for_each                      = var.storage
-  name                          = replace("st-${var.common.project}-${var.common.env}-${each.value.name}-${var.random}", "-", "")
+  name                          = replace("st-${each.value.name}-${var.common.project}-${var.common.env}-${var.random}", "-", "")
   resource_group_name           = var.resource_group_name
   location                      = var.common.location
   account_tier                  = each.value.account_tier
