@@ -633,3 +633,32 @@ variable "log_analytics" {
     }
   }
 }
+
+variable "application_insights" {
+  type = map(object({
+    name                       = string
+    application_type           = string
+    target_workspace           = string
+    retention_in_days          = number
+    internet_ingestion_enabled = bool
+    internet_query_enabled     = bool
+  }))
+  default = {
+    app = {
+      name                       = "app"
+      target_workspace           = "logs"
+      application_type           = "web"
+      retention_in_days          = 90
+      internet_ingestion_enabled = false
+      internet_query_enabled     = true
+    }
+    func = {
+      name                       = "func"
+      target_workspace           = "logs"
+      application_type           = "web"
+      retention_in_days          = 90
+      internet_ingestion_enabled = false
+      internet_query_enabled     = true
+    }
+  }
+}

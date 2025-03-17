@@ -57,3 +57,12 @@ module "log_analytics" {
   tags                = azurerm_resource_group.rg.tags
   log_analytics       = var.log_analytics
 }
+
+module "application_insights" {
+  source               = "../../modules/application_insights"
+  common               = var.common
+  resource_group_name  = azurerm_resource_group.rg.name
+  tags                 = azurerm_resource_group.rg.tags
+  application_insights = var.application_insights
+  log_analytics        = module.log_analytics.log_analytics
+}
