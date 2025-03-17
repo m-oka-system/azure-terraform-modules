@@ -1,0 +1,5 @@
+# AVD-AZU-0007 (HIGH): Container allows public access.
+AVD-AZU-0007
+
+# AVD-AZU-0012 (CRITICAL): Network rules allow access by default.
+AVD-AZU-0012
