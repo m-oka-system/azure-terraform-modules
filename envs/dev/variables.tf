@@ -616,3 +616,20 @@ variable "key_vault" {
     }
   }
 }
+
+variable "log_analytics" {
+  type = map(object({
+    sku                        = string
+    retention_in_days          = number
+    internet_ingestion_enabled = bool
+    internet_query_enabled     = bool
+  }))
+  default = {
+    logs = {
+      sku                        = "PerGB2018"
+      retention_in_days          = 30
+      internet_ingestion_enabled = false
+      internet_query_enabled     = true
+    }
+  }
+}

@@ -49,3 +49,11 @@ module "key_vault" {
   key_vault           = var.key_vault
   allowed_cidr        = var.allowed_cidr
 }
+
+module "log_analytics" {
+  source              = "../../modules/log_analytics"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  log_analytics       = var.log_analytics
+}
