@@ -81,3 +81,13 @@ module "activity_log" {
   log_analytics_workspace_id = module.log_analytics.log_analytics["logs"].id
   activity_log_categories    = toset(local.activity_log_categories)
 }
+
+module "openai" {
+  source              = "../../modules/openai"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  openai              = var.openai
+  openai_deployment   = var.openai_deployment
+  allowed_cidr        = var.allowed_cidr
+}

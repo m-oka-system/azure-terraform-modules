@@ -705,3 +705,72 @@ variable "role_assignment" {
     }
   }
 }
+
+variable "openai" {
+  type = map(object({
+    name     = string
+    location = string
+    kind     = string
+    sku_name = string
+    network_acls = object({
+      default_action = string
+      ip_rules       = list(string)
+    })
+  }))
+  default = {
+    app = {
+      name     = "app"
+      location = "eastus2"
+      kind     = "OpenAI"
+      sku_name = "S0"
+      network_acls = {
+        default_action = "Deny"
+        ip_rules       = ["MyIP"]
+      }
+    }
+  }
+}
+
+variable "openai_deployment" {
+  type = map(object({
+    name                   = string
+    target_openai          = string
+    version_upgrade_option = string
+    model = object({
+      name    = string
+      version = optional(string)
+    })
+    sku = object({
+      name     = string
+      capacity = number
+    })
+  }))
+  default = {
+    o1-mini = {
+      name                   = "o1-mini"
+      target_openai          = "app"
+      version_upgrade_option = "OnceNewDefaultVersionAvailable"
+      model = {
+        name    = "o1-mini"
+        version = "2024-09-12"
+      }
+      sku = {
+        name     = "GlobalStandard"
+        capacity = 10
+      }
+    }
+    o3-mini = {
+      name                   = "o3-mini"
+      target_openai          = "app"
+      version_upgrade_option = "OnceNewDefaultVersionAvailable"
+      model = {
+        name    = "o3-mini"
+        version = "2025-01-31"
+      }
+      sku = {
+        name     = "GlobalStandard"
+        capacity = 10
+      }
+    }
+  }
+}
