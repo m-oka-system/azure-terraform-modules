@@ -17,4 +17,15 @@ locals {
       env     = var.common.env
     }
   }
+
+  activity_log_categories = [
+    "Administrative",
+    "Security",
+    "ServiceHealth",
+    "Alert",
+    "Recommendation",
+    "Policy",
+    "Autoscale",
+    "ResourceHealth",
+  ]
 }

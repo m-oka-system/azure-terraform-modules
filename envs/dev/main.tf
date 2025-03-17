@@ -75,3 +75,9 @@ module "user_assigned_identity" {
   user_assigned_identity = var.user_assigned_identity
   role_assignment        = var.role_assignment
 }
+
+module "activity_log" {
+  source                     = "../../modules/activity_log"
+  log_analytics_workspace_id = module.log_analytics.log_analytics["logs"].id
+  activity_log_categories    = toset(local.activity_log_categories)
+}
