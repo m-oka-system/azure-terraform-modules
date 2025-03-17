@@ -12,7 +12,7 @@ resource "azurerm_cognitive_account" "this" {
 
   network_acls {
     default_action = each.value.network_acls.default_action
-    ip_rules       = join(",", lookup(each.value.network_acls, "ip_rules", null)) == "MyIP" ? split(",", var.allowed_cidr) : lookup(each.value.network_acls, "ip_rules", null)
+    ip_rules       = join(",", lookup(each.value.network_acls, "ip_rules", null)) == "MyIP" ? var.allowed_cidr : lookup(each.value.network_acls, "ip_rules", null)
   }
 
   tags = var.tags

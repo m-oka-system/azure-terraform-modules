@@ -37,7 +37,7 @@ module "storage" {
   random                    = local.common.random
   storage                   = var.storage
   blob_container            = var.blob_container
-  allowed_cidr              = var.allowed_cidr
+  allowed_cidr              = split(",", var.allowed_cidr)
   storage_management_policy = var.storage_management_policy
 }
 
@@ -47,7 +47,7 @@ module "key_vault" {
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
   key_vault           = var.key_vault
-  allowed_cidr        = var.allowed_cidr
+  allowed_cidr        = split(",", var.allowed_cidr)
 }
 
 module "log_analytics" {
@@ -89,7 +89,7 @@ module "openai" {
   tags                = azurerm_resource_group.rg.tags
   openai              = var.openai
   openai_deployment   = var.openai_deployment
-  allowed_cidr        = var.allowed_cidr
+  allowed_cidr        = split(",", var.allowed_cidr)
 }
 
 module "aisearch" {

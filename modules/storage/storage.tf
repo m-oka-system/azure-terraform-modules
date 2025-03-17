@@ -34,7 +34,7 @@ resource "azurerm_storage_account" "this" {
     content {
       default_action             = each.value.network_rules.default_action
       bypass                     = each.value.network_rules.bypass
-      ip_rules                   = join(",", lookup(each.value.network_rules, "ip_rules", null)) == "MyIP" ? split(",", var.allowed_cidr) : lookup(each.value.network_rules, "ip_rules", null)
+      ip_rules                   = join(",", lookup(each.value.network_rules, "ip_rules", null)) == "MyIP" ? var.allowed_cidr : lookup(each.value.network_rules, "ip_rules", null)
       virtual_network_subnet_ids = each.value.network_rules.virtual_network_subnet_ids
     }
   }

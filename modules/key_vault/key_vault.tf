@@ -18,7 +18,7 @@ resource "azurerm_key_vault" "this" {
   network_acls {
     default_action             = each.value.network_acls.default_action
     bypass                     = each.value.network_acls.bypass
-    ip_rules                   = join(",", lookup(each.value.network_acls, "ip_rules", null)) == "MyIP" ? split(",", var.allowed_cidr) : lookup(each.value.network_acls, "ip_rules", null)
+    ip_rules                   = join(",", lookup(each.value.network_acls, "ip_rules", null)) == "MyIP" ? var.allowed_cidr : lookup(each.value.network_acls, "ip_rules", null)
     virtual_network_subnet_ids = each.value.network_acls.virtual_network_subnet_ids
   }
 
