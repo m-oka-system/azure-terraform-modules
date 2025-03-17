@@ -66,3 +66,12 @@ module "application_insights" {
   application_insights = var.application_insights
   log_analytics        = module.log_analytics.log_analytics
 }
+
+module "user_assigned_identity" {
+  source                 = "../../modules/user_assigned_identity"
+  common                 = var.common
+  resource_group_name    = azurerm_resource_group.rg.name
+  tags                   = azurerm_resource_group.rg.tags
+  user_assigned_identity = var.user_assigned_identity
+  role_assignment        = var.role_assignment
+}

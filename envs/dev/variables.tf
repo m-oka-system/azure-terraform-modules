@@ -662,3 +662,46 @@ variable "application_insights" {
     }
   }
 }
+
+variable "user_assigned_identity" {
+  type = map(object({
+    name = string
+  }))
+  default = {
+    app = {
+      name = "app"
+    }
+    func = {
+      name = "func"
+    }
+  }
+}
+
+variable "role_assignment" {
+  type = map(object({
+    target_identity      = string
+    role_definition_name = string
+  }))
+  default = {
+    app_acr_pull = {
+      target_identity      = "app"
+      role_definition_name = "AcrPull"
+    }
+    app_key_vault_secrets_user = {
+      target_identity      = "app"
+      role_definition_name = "Key Vault Secrets User"
+    }
+    app_storage_blob_data_contributor = {
+      target_identity      = "app"
+      role_definition_name = "Storage Blob Data Contributor"
+    }
+    func_acr_pull = {
+      target_identity      = "func"
+      role_definition_name = "AcrPull"
+    }
+    func_key_vault_secrets_user = {
+      target_identity      = "func"
+      role_definition_name = "Key Vault Secrets User"
+    }
+  }
+}
