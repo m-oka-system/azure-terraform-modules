@@ -464,12 +464,7 @@ variable "storage" {
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
       }
-      network_rules = {
-        default_action             = "Allow"
-        bypass                     = ["AzureServices"]
-        ip_rules                   = []
-        virtual_network_subnet_ids = []
-      }
+      network_rules = null
     }
     func = {
       name                          = "func"
