@@ -40,3 +40,12 @@ module "storage" {
   allowed_cidr              = var.allowed_cidr
   storage_management_policy = var.storage_management_policy
 }
+
+module "key_vault" {
+  source              = "../../modules/key_vault"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  key_vault           = var.key_vault
+  allowed_cidr        = var.allowed_cidr
+}

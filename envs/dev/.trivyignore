@@ -3,3 +3,6 @@ AVD-AZU-0007
 
 # AVD-AZU-0012 (CRITICAL): Network rules allow access by default.
 AVD-AZU-0012
+
+# AVD-AZU-0016 (MEDIUM): Vault does not have purge protection enabled.
+AVD-AZU-0016

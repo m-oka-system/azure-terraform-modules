@@ -585,3 +585,34 @@ variable "storage_management_policy" {
     }
   }
 }
+
+variable "key_vault" {
+  type = map(object({
+    name                       = string
+    sku_name                   = string
+    enable_rbac_authorization  = bool
+    purge_protection_enabled   = bool
+    soft_delete_retention_days = number
+    network_acls = object({
+      default_action             = string
+      bypass                     = string
+      ip_rules                   = list(string)
+      virtual_network_subnet_ids = list(string)
+    })
+  }))
+  default = {
+    app = {
+      name                       = "app"
+      sku_name                   = "standard"
+      enable_rbac_authorization  = true
+      purge_protection_enabled   = false
+      soft_delete_retention_days = 7
+      network_acls = {
+        default_action             = "Deny"
+        bypass                     = "None"
+        ip_rules                   = ["MyIP"]
+        virtual_network_subnet_ids = []
+      }
+    }
+  }
+}
