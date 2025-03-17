@@ -774,3 +774,28 @@ variable "openai_deployment" {
     }
   }
 }
+
+variable "aisearch" {
+  type = map(object({
+    name                          = string
+    sku                           = string
+    semantic_search_sku           = string
+    partition_count               = number
+    replica_count                 = number
+    public_network_access_enabled = bool
+    network_rule_bypass_option    = string
+    allowed_ips                   = list(string)
+  }))
+  default = {
+    app = {
+      name                          = "app"
+      sku                           = "basic"
+      semantic_search_sku           = "free"
+      partition_count               = 1
+      replica_count                 = 1
+      public_network_access_enabled = true
+      network_rule_bypass_option    = "AzureServices"
+      allowed_ips                   = ["MyIP"]
+    }
+  }
+}

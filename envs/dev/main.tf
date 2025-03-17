@@ -91,3 +91,17 @@ module "openai" {
   openai_deployment   = var.openai_deployment
   allowed_cidr        = var.allowed_cidr
 }
+
+module "aisearch" {
+  count = local.aisearch_enabled ? 1 : 0
+
+  source              = "../../modules/aisearch"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  aisearch            = var.aisearch
+  allowed_cidr = concat(
+    split(",", var.allowed_cidr),
+    split(",", local.azure_portal_ips.aisearch)
+  )
+}
