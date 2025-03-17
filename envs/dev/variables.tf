@@ -7,6 +7,11 @@ variable "common" {
   }
 }
 
+variable "allowed_cidr" {
+  type    = string
+  default = "203.0.113.10,203.0.113.11"
+}
+
 variable "vnet" {
   type = map(object({
     name          = string
@@ -416,4 +421,172 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
   ]
+}
+
+variable "storage" {
+  type = map(object({
+    name                          = string
+    account_tier                  = string
+    account_kind                  = string
+    account_replication_type      = string
+    access_tier                   = string
+    https_traffic_only_enabled    = bool
+    public_network_access_enabled = bool
+    is_hns_enabled                = bool
+    blob_properties = object({
+      versioning_enabled                = bool
+      change_feed_enabled               = bool
+      last_access_time_enabled          = bool
+      delete_retention_policy           = number
+      container_delete_retention_policy = number
+    })
+    network_rules = object({
+      default_action             = string
+      bypass                     = list(string)
+      ip_rules                   = list(string)
+      virtual_network_subnet_ids = list(string)
+    })
+  }))
+  default = {
+    app = {
+      name                          = "app"
+      account_tier                  = "Standard"
+      account_kind                  = "StorageV2"
+      account_replication_type      = "LRS"
+      access_tier                   = "Hot"
+      https_traffic_only_enabled    = true
+      public_network_access_enabled = true
+      is_hns_enabled                = false
+      blob_properties = {
+        versioning_enabled                = false
+        change_feed_enabled               = false
+        last_access_time_enabled          = false
+        delete_retention_policy           = 7
+        container_delete_retention_policy = 7
+      }
+      network_rules = {
+        default_action             = "Allow"
+        bypass                     = ["AzureServices"]
+        ip_rules                   = []
+        virtual_network_subnet_ids = []
+      }
+    }
+    func = {
+      name                          = "func"
+      account_tier                  = "Standard"
+      account_kind                  = "StorageV2"
+      account_replication_type      = "LRS"
+      access_tier                   = "Hot"
+      https_traffic_only_enabled    = true
+      public_network_access_enabled = true
+      is_hns_enabled                = false
+      blob_properties = {
+        versioning_enabled                = false
+        change_feed_enabled               = false
+        last_access_time_enabled          = false
+        delete_retention_policy           = 7
+        container_delete_retention_policy = 7
+      }
+      network_rules = {
+        default_action             = "Deny"
+        bypass                     = ["AzureServices"]
+        ip_rules                   = ["MyIP"]
+        virtual_network_subnet_ids = []
+      }
+    }
+    log = {
+      name                          = "log"
+      account_tier                  = "Standard"
+      account_kind                  = "StorageV2"
+      account_replication_type      = "LRS"
+      access_tier                   = "Hot"
+      https_traffic_only_enabled    = true
+      public_network_access_enabled = true
+      is_hns_enabled                = false
+      blob_properties = {
+        versioning_enabled                = false
+        change_feed_enabled               = false
+        last_access_time_enabled          = false
+        delete_retention_policy           = 7
+        container_delete_retention_policy = 7
+      }
+      network_rules = {
+        default_action             = "Deny"
+        bypass                     = ["AzureServices"]
+        ip_rules                   = ["MyIP"]
+        virtual_network_subnet_ids = []
+      }
+    }
+  }
+}
+
+variable "blob_container" {
+  type = map(map(string))
+  default = {
+    app_static = {
+      target_storage_account = "app"
+      container_name         = "static"
+      container_access_type  = "blob"
+    }
+    app_media = {
+      target_storage_account = "app"
+      container_name         = "media"
+      container_access_type  = "blob"
+    }
+  }
+}
+
+variable "storage_management_policy" {
+  type = map(object({
+    name                   = string
+    target_storage_account = string
+    blob_types             = list(string)
+    actions = object({
+      base_blob = optional(object({
+        auto_tier_to_hot_from_cool_enabled                             = optional(bool)
+        delete_after_days_since_creation_greater_than                  = optional(number)
+        delete_after_days_since_last_access_time_greater_than          = optional(number)
+        delete_after_days_since_modification_greater_than              = optional(number)
+        tier_to_archive_after_days_since_creation_greater_than         = optional(number)
+        tier_to_archive_after_days_since_last_access_time_greater_than = optional(number)
+        tier_to_archive_after_days_since_last_tier_change_greater_than = optional(number)
+        tier_to_archive_after_days_since_modification_greater_than     = optional(number)
+        tier_to_cold_after_days_since_creation_greater_than            = optional(number)
+        tier_to_cold_after_days_since_last_access_time_greater_than    = optional(number)
+        tier_to_cold_after_days_since_modification_greater_than        = optional(number)
+        tier_to_cool_after_days_since_creation_greater_than            = optional(number)
+        tier_to_cool_after_days_since_last_access_time_greater_than    = optional(number)
+        tier_to_cool_after_days_since_modification_greater_than        = optional(number)
+      }))
+      snapshot = optional(object({
+        change_tier_to_archive_after_days_since_creation               = optional(number)
+        change_tier_to_cool_after_days_since_creation                  = optional(number)
+        delete_after_days_since_creation_greater_than                  = optional(number)
+        tier_to_archive_after_days_since_last_tier_change_greater_than = optional(number)
+        tier_to_cold_after_days_since_creation_greater_than            = optional(number)
+      }))
+      version = optional(object({
+        change_tier_to_archive_after_days_since_creation               = optional(number)
+        change_tier_to_cool_after_days_since_creation                  = optional(number)
+        delete_after_days_since_creation                               = optional(number)
+        tier_to_archive_after_days_since_last_tier_change_greater_than = optional(number)
+        tier_to_cold_after_days_since_creation_greater_than            = optional(number)
+      }))
+    })
+  }))
+  default = {
+    log = {
+      name                   = "move-cold-after-30-days"
+      target_storage_account = "log"
+      blob_types             = ["blockBlob"]
+      actions = {
+        base_blob = {
+          tier_to_cold_after_days_since_modification_greater_than = 30
+          delete_after_days_since_modification_greater_than       = 365
+        }
+        snapshot = null
+        version  = null
+      }
+    }
+  }
 }

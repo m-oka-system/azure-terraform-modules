@@ -28,3 +28,15 @@ module "network_security_group" {
   network_security_rule  = var.network_security_rule
   subnet                 = module.vnet.subnet
 }
+
+module "storage" {
+  source                    = "../../modules/storage"
+  common                    = var.common
+  resource_group_name       = azurerm_resource_group.rg.name
+  tags                      = azurerm_resource_group.rg.tags
+  random                    = local.common.random
+  storage                   = var.storage
+  blob_container            = var.blob_container
+  allowed_cidr              = var.allowed_cidr
+  storage_management_policy = var.storage_management_policy
+}
