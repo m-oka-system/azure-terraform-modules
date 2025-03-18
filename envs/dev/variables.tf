@@ -799,3 +799,100 @@ variable "aisearch" {
     }
   }
 }
+
+variable "cosmosdb_account" {
+  type = map(object({
+    name                          = string
+    offer_type                    = string
+    kind                          = string
+    free_tier_enabled             = bool
+    public_network_access_enabled = bool
+    ip_range_filter               = list(string)
+    consistency_policy = object({
+      consistency_level       = string
+      max_interval_in_seconds = number
+      max_staleness_prefix    = number
+    })
+    geo_location = object({
+      location          = string
+      failover_priority = number
+      zone_redundant    = bool
+    })
+    capacity = object({
+      total_throughput_limit = number
+    })
+    backup = object({
+      type = string
+      tier = string
+    })
+  }))
+  default = {
+    app = {
+      name                          = "app"
+      offer_type                    = "Standard"
+      kind                          = "GlobalDocumentDB"
+      free_tier_enabled             = false
+      public_network_access_enabled = true
+      ip_range_filter               = ["MyIP"]
+      consistency_policy = {
+        consistency_level       = "Session"
+        max_interval_in_seconds = 5
+        max_staleness_prefix    = 100
+      }
+      geo_location = {
+        location          = "japaneast"
+        failover_priority = 0
+        zone_redundant    = false
+      }
+      capacity = {
+        total_throughput_limit = 1000
+      }
+      backup = {
+        type = "Continuous"
+        tier = "Continuous7Days"
+      }
+    }
+  }
+}
+
+variable "cosmosdb_sql_database" {
+  type = map(object({
+    name                    = string
+    target_cosmosdb_account = string
+    autoscale_settings = object({
+      max_throughput = number
+    })
+  }))
+  default = {
+    database1 = {
+      name                    = "database1"
+      target_cosmosdb_account = "app"
+      autoscale_settings = {
+        max_throughput = 1000
+      }
+    }
+  }
+}
+
+variable "cosmosdb_sql_container" {
+  type = map(object({
+    name                         = string
+    target_cosmosdb_account      = string
+    target_cosmosdb_sql_database = string
+    partition_key_paths          = list(string)
+    partition_key_version        = number
+    autoscale_settings = object({
+      max_throughput = number
+    })
+  }))
+  default = {
+    container1 = {
+      name                         = "container1"
+      target_cosmosdb_account      = "app"
+      target_cosmosdb_sql_database = "database1"
+      partition_key_paths          = ["/id"]
+      partition_key_version        = 2
+      autoscale_settings           = null
+    }
+  }
+}

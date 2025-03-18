@@ -105,3 +105,19 @@ module "aisearch" {
     split(",", local.azure_portal_ips.aisearch)
   )
 }
+
+module "cosmosdb" {
+  count = local.cosmosdb_enabled ? 1 : 0
+
+  source                 = "../../modules/cosmosdb"
+  common                 = var.common
+  resource_group_name    = azurerm_resource_group.rg.name
+  tags                   = azurerm_resource_group.rg.tags
+  cosmosdb_account       = var.cosmosdb_account
+  cosmosdb_sql_database  = var.cosmosdb_sql_database
+  cosmosdb_sql_container = var.cosmosdb_sql_container
+  allowed_cidr = concat(
+    split(",", var.allowed_cidr),
+    split(",", local.azure_portal_ips.cosmosdb)
+  )
+}
