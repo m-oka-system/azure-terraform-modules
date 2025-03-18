@@ -1,6 +1,6 @@
 terraform {
   # Terraform のバージョン
-  required_version = ">= 1.9.5"
+  required_version = "~> 1.11"
 
   # リソースプロバイダーのバージョン
   required_providers {
