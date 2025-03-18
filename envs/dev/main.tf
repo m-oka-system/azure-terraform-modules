@@ -121,3 +121,18 @@ module "cosmosdb" {
     split(",", local.azure_portal_ips.cosmosdb)
   )
 }
+
+module "mysql" {
+  count = local.mysql_enabled ? 1 : 0
+
+  source                  = "../../modules/mysql"
+  common                  = var.common
+  resource_group_name     = azurerm_resource_group.rg.name
+  tags                    = azurerm_resource_group.rg.tags
+  random                  = local.common.random
+  mysql_flexible_server   = var.mysql_flexible_server
+  mysql_authentication    = var.mysql_authentication
+  mysql_flexible_database = var.mysql_flexible_database
+  vnet                    = module.vnet.vnet
+  subnet                  = module.vnet.subnet
+}

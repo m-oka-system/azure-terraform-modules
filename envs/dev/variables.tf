@@ -896,3 +896,70 @@ variable "cosmosdb_sql_container" {
     }
   }
 }
+
+variable "mysql_flexible_server" {
+  type = map(object({
+    name                         = string
+    target_vnet                  = string
+    target_subnet                = string
+    sku_name                     = string
+    version                      = string
+    backup_retention_days        = number
+    geo_redundant_backup_enabled = bool
+    zone                         = string
+    high_availability = object({
+      mode                      = string
+      standby_availability_zone = string
+    })
+    storage = object({
+      auto_grow_enabled = bool
+      iops              = number
+      size_gb           = number
+    })
+  }))
+  default = {
+    app = {
+      name                         = "app"
+      target_vnet                  = "spoke1"
+      target_subnet                = "db"
+      sku_name                     = "B_Standard_B1ms"
+      version                      = "8.0.21"
+      backup_retention_days        = 7
+      geo_redundant_backup_enabled = false
+      zone                         = "2"
+      high_availability            = null
+      storage = {
+        auto_grow_enabled = true
+        iops              = 360
+        size_gb           = 20
+      }
+    }
+  }
+}
+
+variable "mysql_authentication" {
+  type = map(object({
+    administrator_login               = string
+    administrator_password_wo         = string
+    administrator_password_wo_version = number
+  }))
+  default = {
+    app = {
+      administrator_login               = "your-username"
+      administrator_password_wo         = "your-password"
+      administrator_password_wo_version = 1
+    }
+  }
+}
+
+variable "mysql_flexible_database" {
+  type = map(map(string))
+  default = {
+    database1 = {
+      name                = "database1"
+      target_mysql_server = "app"
+      charset             = "utf8mb4"
+      collation           = "utf8mb4_0900_ai_ci"
+    }
+  }
+}

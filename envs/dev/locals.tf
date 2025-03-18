@@ -10,6 +10,7 @@ locals {
   # 特定の Azure リソースを作成する/しない
   aisearch_enabled = false
   cosmosdb_enabled = false
+  mysql_enabled    = false
 
   # 共通の変数
   common = {
