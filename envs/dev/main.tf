@@ -50,6 +50,18 @@ module "key_vault" {
   allowed_cidr        = split(",", var.allowed_cidr)
 }
 
+module "key_vault_secret" {
+  source    = "../../modules/key_vault_secret"
+  key_vault = module.key_vault.key_vault
+
+  key_vault_secret = {
+    target_key_vault = "app"
+    secrets = {
+      "SSH_PRIVATE_KEY" = module.ssh_public_key.private_key_pem
+    }
+  }
+}
+
 module "log_analytics" {
   source              = "../../modules/log_analytics"
   common              = var.common
