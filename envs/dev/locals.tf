@@ -8,12 +8,13 @@ data "http" "ipify" {
 
 locals {
   # 特定の Azure リソースを作成する/しない
-  aisearch_enabled = false
-  cosmosdb_enabled = false
-  mysql_enabled    = false
-  redis_enabled    = false
-  vm_enabled       = false
-  bastion_enabled  = false
+  aisearch_enabled    = false
+  cosmosdb_enabled    = false
+  mysql_enabled       = false
+  redis_enabled       = false
+  vm_enabled          = false
+  bastion_enabled     = false
+  nat_gateway_enabled = false
 
   # 共通の変数
   common = {

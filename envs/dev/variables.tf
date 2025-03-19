@@ -1244,3 +1244,28 @@ variable "bastion" {
     }
   }
 }
+
+variable "nat_gateway" {
+  type = object({
+    target_subnets          = list(string)
+    sku_name                = string
+    idle_timeout_in_minutes = number
+    zones                   = list(string)
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+  })
+  default = {
+    target_subnets          = ["vm", "app", "func"]
+    sku_name                = "Standard"
+    idle_timeout_in_minutes = 4
+    zones                   = ["1"]
+    public_ip = {
+      sku               = "Standard"
+      allocation_method = "Static"
+      zones             = ["1"]
+    }
+  }
+}

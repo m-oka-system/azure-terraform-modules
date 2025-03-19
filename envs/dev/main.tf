@@ -190,3 +190,14 @@ module "bastion" {
   bastion             = var.bastion
   subnet              = module.vnet.subnet
 }
+
+module "nat_gateway" {
+  count = local.nat_gateway_enabled ? 1 : 0
+
+  source              = "../../modules/nat_gateway"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  nat_gateway         = var.nat_gateway
+  subnet              = module.vnet.subnet
+}
