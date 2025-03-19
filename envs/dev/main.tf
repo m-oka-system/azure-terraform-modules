@@ -147,3 +147,15 @@ module "redis" {
   random              = local.common.random
   redis_cache         = var.redis_cache
 }
+
+module "vm" {
+  count = local.vm_enabled ? 1 : 0
+
+  source              = "../../modules/vm"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  vm                  = var.vm
+  vm_authentication   = var.vm_authentication
+  subnet              = module.vnet.subnet
+}

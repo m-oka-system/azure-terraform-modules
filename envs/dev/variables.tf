@@ -988,3 +988,99 @@ variable "redis_cache" {
     }
   }
 }
+
+variable "vm" {
+  type = map(object({
+    name                            = string
+    target_subnet                   = string
+    vm_size                         = string
+    zone                            = string
+    allow_extension_operations      = bool
+    disable_password_authentication = bool
+    encryption_at_host_enabled      = bool
+    patch_mode                      = string
+    secure_boot_enabled             = bool
+    vtpm_enabled                    = bool
+    os_disk = object({
+      os_disk_cache             = string
+      os_disk_type              = string
+      os_disk_size              = number
+      write_accelerator_enabled = bool
+    })
+    source_image_reference = object({
+      offer     = string
+      publisher = string
+      sku       = string
+      version   = string
+    })
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+    vm_shutdown_schedule = object({
+      daily_recurrence_time = string
+      timezone              = string
+      enabled               = bool
+      notification_settings = object({
+        enabled         = bool
+        time_in_minutes = number
+        email           = string
+      })
+    })
+  }))
+  default = {
+    jumpbox = {
+      name                            = "jumpbox"
+      target_subnet                   = "vm"
+      vm_size                         = "Standard_DS1_v2"
+      zone                            = "1"
+      allow_extension_operations      = true
+      disable_password_authentication = true
+      encryption_at_host_enabled      = false
+      patch_mode                      = "ImageDefault"
+      secure_boot_enabled             = true
+      vtpm_enabled                    = true
+      os_disk = {
+        os_disk_cache             = "ReadWrite"
+        os_disk_type              = "Standard_LRS"
+        os_disk_size              = 30
+        write_accelerator_enabled = false
+      }
+      source_image_reference = {
+        offer     = "ubuntu-24_04-lts"
+        publisher = "canonical"
+        sku       = "server"
+        version   = "latest"
+      }
+      public_ip = {
+        sku               = "Standard"
+        allocation_method = "Static"
+        zones             = ["1", "2", "3"]
+      }
+      vm_shutdown_schedule = {
+        daily_recurrence_time = "1900"
+        timezone              = "Tokyo Standard Time"
+        enabled               = true
+        notification_settings = {
+          enabled         = false
+          time_in_minutes = 15
+          email           = "admin@example.com"
+        }
+      }
+    }
+  }
+}
+
+variable "vm_authentication" {
+  type = map(object({
+    username   = string
+    public_key = string
+  }))
+  default = {
+    jumpbox = {
+      username   = "your-username"
+      public_key = "your-public-key"
+    }
+  }
+}
