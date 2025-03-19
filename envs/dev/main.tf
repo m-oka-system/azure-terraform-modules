@@ -159,3 +159,10 @@ module "vm" {
   vm_authentication   = var.vm_authentication
   subnet              = module.vnet.subnet
 }
+
+module "ssh_public_key" {
+  source              = "../../modules/ssh_public_key"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+}
