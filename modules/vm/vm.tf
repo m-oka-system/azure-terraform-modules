@@ -2,7 +2,7 @@
 # Virtual machines
 ################################
 resource "azurerm_public_ip" "this" {
-  for_each            = var.vm
+  for_each            = { for k, v in var.vm : k => v if v.public_ip != null }
   name                = "ip-${each.value.name}-${var.common.project}-${var.common.env}"
   resource_group_name = var.resource_group_name
   location            = var.common.location
@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "this" {
     name                          = "ipconfig1"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = var.subnet[each.value.target_subnet].id
-    public_ip_address_id          = azurerm_public_ip.this[each.key].id
+    public_ip_address_id          = each.value.public_ip != null ? azurerm_public_ip.this[each.key].id : null
   }
 
   tags = var.tags

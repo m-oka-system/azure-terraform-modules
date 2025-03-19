@@ -1186,11 +1186,7 @@ variable "vm" {
         sku       = "server"
         version   = "latest"
       }
-      public_ip = {
-        sku               = "Standard"
-        allocation_method = "Static"
-        zones             = ["1", "2", "3"]
-      }
+      public_ip = null
       vm_shutdown_schedule = {
         daily_recurrence_time = "1900"
         timezone              = "Tokyo Standard Time"
