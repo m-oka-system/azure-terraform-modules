@@ -13,6 +13,7 @@ locals {
   mysql_enabled    = false
   redis_enabled    = false
   vm_enabled       = false
+  bastion_enabled  = false
 
   # 共通の変数
   common = {

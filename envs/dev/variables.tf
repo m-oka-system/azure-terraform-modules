@@ -1209,3 +1209,42 @@ variable "vm_admin_username" {
   type    = string
   default = "azureuser"
 }
+
+variable "bastion" {
+  type = object({
+    target_subnet             = string
+    sku                       = string
+    scale_units               = number
+    zones                     = list(string)
+    copy_paste_enabled        = bool
+    file_copy_enabled         = bool
+    ip_connect_enabled        = bool
+    kerberos_enabled          = bool
+    shareable_link_enabled    = bool
+    tunneling_enabled         = bool
+    session_recording_enabled = bool
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+  })
+  default = {
+    target_subnet             = "bastion"
+    sku                       = "Standard"
+    scale_units               = 2
+    zones                     = [] # Japan East is not supported at 2025/03
+    copy_paste_enabled        = true
+    file_copy_enabled         = true
+    ip_connect_enabled        = true
+    kerberos_enabled          = false
+    shareable_link_enabled    = true
+    tunneling_enabled         = true
+    session_recording_enabled = false
+    public_ip = {
+      sku               = "Standard"
+      allocation_method = "Static"
+      zones             = ["1", "2", "3"]
+    }
+  }
+}

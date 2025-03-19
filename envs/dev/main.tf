@@ -179,3 +179,14 @@ module "ssh_public_key" {
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
 }
+
+module "bastion" {
+  count = local.bastion_enabled ? 1 : 0
+
+  source              = "../../modules/bastion"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  bastion             = var.bastion
+  subnet              = module.vnet.subnet
+}
