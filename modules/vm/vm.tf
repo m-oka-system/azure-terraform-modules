@@ -36,7 +36,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   resource_group_name             = var.resource_group_name
   location                        = var.common.location
   size                            = each.value.vm_size
-  admin_username                  = var.vm_authentication[each.key].username
+  admin_username                  = var.vm_admin_username
   zone                            = each.value.zone
   allow_extension_operations      = each.value.allow_extension_operations
   disable_password_authentication = each.value.disable_password_authentication
@@ -55,8 +55,8 @@ resource "azurerm_linux_virtual_machine" "this" {
   eviction_policy = "Deallocate"
 
   admin_ssh_key {
-    username   = var.vm_authentication[each.key].username
-    public_key = var.vm_authentication[each.key].public_key
+    username   = var.vm_admin_username
+    public_key = var.public_key
   }
 
   boot_diagnostics {}

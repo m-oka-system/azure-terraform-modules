@@ -1072,15 +1072,7 @@ variable "vm" {
   }
 }
 
-variable "vm_authentication" {
-  type = map(object({
-    username   = string
-    public_key = string
-  }))
-  default = {
-    jumpbox = {
-      username   = "your-username"
-      public_key = "your-public-key"
-    }
-  }
+variable "vm_admin_username" {
+  type    = string
+  default = "azureuser"
 }

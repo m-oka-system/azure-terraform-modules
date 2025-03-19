@@ -168,7 +168,8 @@ module "vm" {
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
   vm                  = var.vm
-  vm_authentication   = var.vm_authentication
+  vm_admin_username   = var.vm_admin_username
+  public_key          = module.ssh_public_key.public_key_openssh
   subnet              = module.vnet.subnet
 }
 
