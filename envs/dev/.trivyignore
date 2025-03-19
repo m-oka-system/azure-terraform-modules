@@ -6,3 +6,9 @@ AVD-AZU-0012
 
 # AVD-AZU-0016 (MEDIUM): Vault does not have purge protection enabled.
 AVD-AZU-0016
+
+# AVD-AZU-0015 (LOW): Secret does not have a content-type specified.
+AVD-AZU-0015
+
+# AVD-AZU-0017 (LOW): Secret should have an expiry date specified.
+AVD-AZU-0017
