@@ -136,3 +136,14 @@ module "mysql" {
   vnet                    = module.vnet.vnet
   subnet                  = module.vnet.subnet
 }
+
+module "redis" {
+  count = local.redis_enabled ? 1 : 0
+
+  source              = "../../modules/redis"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  random              = local.common.random
+  redis_cache         = var.redis_cache
+}

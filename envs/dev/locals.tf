@@ -11,6 +11,7 @@ locals {
   aisearch_enabled = false
   cosmosdb_enabled = false
   mysql_enabled    = false
+  redis_enabled    = false
 
   # 共通の変数
   common = {

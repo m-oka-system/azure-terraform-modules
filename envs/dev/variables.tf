@@ -963,3 +963,28 @@ variable "mysql_flexible_database" {
     }
   }
 }
+
+variable "redis_cache" {
+  type = map(object({
+    name                          = string
+    capacity                      = number
+    family                        = string
+    sku_name                      = string
+    redis_version                 = number
+    public_network_access_enabled = bool
+    non_ssl_port_enabled          = bool
+    minimum_tls_version           = string
+  }))
+  default = {
+    app = {
+      name                          = "app"
+      capacity                      = 0
+      family                        = "C"
+      sku_name                      = "Basic"
+      redis_version                 = 6
+      public_network_access_enabled = false
+      non_ssl_port_enabled          = false
+      minimum_tls_version           = "1.2"
+    }
+  }
+}
