@@ -5,7 +5,7 @@ data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "this" {
   for_each                   = var.key_vault
-  name                       = "vault-${each.value.name}-${var.common.project}-${var.common.env}"
+  name                       = "kv-${each.value.name}-${var.common.project}-${var.common.env}"
   location                   = var.common.location
   resource_group_name        = var.resource_group_name
   sku_name                   = each.value.sku_name
