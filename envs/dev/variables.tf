@@ -1292,3 +1292,23 @@ variable "action_group" {
     }
   }
 }
+
+variable "service_health_alert" {
+  type = map(object({
+    name                = string
+    target_action_group = string
+    events              = list(string)
+  }))
+  default = {
+    info = {
+      name                = "Service Health Alert (Except Incidents)"
+      target_action_group = "info"
+      events              = ["Maintenance", "Informational", "ActionRequired", "Security"]
+    }
+    # incident = {
+    #   name                = "Service Health Alert (Incidents Only)"
+    #   target_action_group = "incident"
+    #   events              = ["Incident"]
+    # }
+  }
+}
