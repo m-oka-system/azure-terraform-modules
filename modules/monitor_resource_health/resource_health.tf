@@ -4,7 +4,7 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_monitor_activity_log_alert" "this" {
-  for_each            = var.resource_health_alert
+  for_each            = var.resource_health_alert.resource_ids
   name                = "Resource_Health_${each.key}"
   resource_group_name = var.resource_group_name
   location            = "global"
@@ -39,7 +39,7 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   }
 
   action {
-    action_group_id = var.action_group.id
+    action_group_id = var.action_group[var.resource_health_alert.target_action_group].id
   }
 
   tags = var.tags

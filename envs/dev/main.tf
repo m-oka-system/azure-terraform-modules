@@ -215,13 +215,16 @@ module "resource_health" {
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
-  action_group        = module.action_group.action_group["info"]
+  action_group        = module.action_group.action_group
 
-  resource_health_alert = merge(
-    { for k, v in module.storage.storage_account : v.name => v.id },
-    { for k, v in module.key_vault.key_vault : v.name => v.id },
-    # And more...
-  )
+  resource_health_alert = {
+    target_action_group = "info",
+    resource_ids = merge(
+      { for k, v in module.storage.storage_account : v.name => v.id },
+      { for k, v in module.key_vault.key_vault : v.name => v.id },
+      # And more...
+    )
+  }
 }
 
 module "service_health" {
