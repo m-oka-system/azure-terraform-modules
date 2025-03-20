@@ -210,8 +210,8 @@ module "action_group" {
   action_group        = var.action_group
 }
 
-module "resource_health" {
-  source              = "../../modules/monitor_resource_health"
+module "resource_health_alert" {
+  source              = "../../modules/monitor_resource_health_alert"
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
@@ -227,8 +227,8 @@ module "resource_health" {
   }
 }
 
-module "service_health" {
-  source               = "../../modules/monitor_service_health"
+module "service_health_alert" {
+  source               = "../../modules/monitor_service_health_alert"
   common               = var.common
   resource_group_name  = azurerm_resource_group.rg.name
   tags                 = azurerm_resource_group.rg.tags
