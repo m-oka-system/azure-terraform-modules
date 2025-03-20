@@ -235,3 +235,12 @@ module "service_health_alert" {
   action_group         = module.action_group.action_group
   service_health_alert = var.service_health_alert
 }
+
+module "metric_alert" {
+  source              = "../../modules/monitor_metric_alert"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  action_group        = module.action_group.action_group
+  metric_alert        = local.metric_alert
+}

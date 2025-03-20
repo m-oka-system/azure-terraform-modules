@@ -45,4 +45,62 @@ locals {
     aisearch = "52.139.243.237"                                         # https://learn.microsoft.com/ja-jp/azure/search/service-configure-firewall
     cosmosdb = "13.91.105.215,4.210.172.107,13.88.56.148,40.91.218.243" # https://learn.microsoft.com/ja-jp/azure/cosmos-db/how-to-configure-firewall
   }
+
+  # Alert Rule
+  metric_alert = {
+    "Microsoft.Storage/storageAccounts" = {
+      resources = module.storage.storage_account
+      metrics = [
+        {
+          enabled             = false
+          metric_name         = "Availability"
+          aggregation         = "Average"
+          operator            = "LessThan"
+          threshold           = 100
+          frequency           = "PT1M"
+          window_size         = "PT5M"
+          severity            = 1
+          target_action_group = "info"
+        },
+        {
+          enabled             = false
+          metric_name         = "UsedCapacity"
+          aggregation         = "Average"
+          operator            = "GreaterThan"
+          threshold           = 80
+          frequency           = "PT15M"
+          window_size         = "PT1H"
+          severity            = 3
+          target_action_group = "info"
+        },
+      ]
+    },
+    "Microsoft.KeyVault/vaults" = {
+      resources = module.key_vault.key_vault
+      metrics = [
+        {
+          enabled             = false
+          metric_name         = "Availability"
+          aggregation         = "Average"
+          operator            = "LessThan"
+          threshold           = 100
+          frequency           = "PT1M"
+          window_size         = "PT5M"
+          severity            = 1
+          target_action_group = "info"
+        },
+        {
+          enabled             = false
+          metric_name         = "ServiceApiLatency"
+          aggregation         = "Average"
+          operator            = "GreaterThan"
+          threshold           = 1000
+          frequency           = "PT1M"
+          window_size         = "PT5M"
+          severity            = 2
+          target_action_group = "info"
+        },
+      ]
+    },
+  }
 }
