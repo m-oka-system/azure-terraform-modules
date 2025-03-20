@@ -1269,3 +1269,26 @@ variable "nat_gateway" {
     }
   }
 }
+
+variable "action_group" {
+  type = map(object({
+    name = string
+    email_receivers = list(object({
+      name                    = string
+      email_address           = string
+      use_common_alert_schema = bool
+    }))
+  }))
+  default = {
+    info = {
+      name = "info"
+      email_receivers = [
+        {
+          name                    = "運用チーム"
+          email_address           = "support@example.com"
+          use_common_alert_schema = true
+        }
+      ]
+    }
+  }
+}

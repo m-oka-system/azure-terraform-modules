@@ -201,3 +201,11 @@ module "nat_gateway" {
   nat_gateway         = var.nat_gateway
   subnet              = module.vnet.subnet
 }
+
+module "action_group" {
+  source              = "../../modules/monitor_action_group"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  action_group        = var.action_group
+}
