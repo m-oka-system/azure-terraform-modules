@@ -209,3 +209,17 @@ module "action_group" {
   tags                = azurerm_resource_group.rg.tags
   action_group        = var.action_group
 }
+
+module "resource_health" {
+  source              = "../../modules/monitor_resource_health"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  action_group        = module.action_group.action_group["info"]
+
+  resource_health_alert = merge(
+    { for k, v in module.storage.storage_account : v.name => v.id },
+    { for k, v in module.key_vault.key_vault : v.name => v.id },
+    # And more...
+  )
+}
