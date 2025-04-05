@@ -104,4 +104,18 @@ locals {
       ]
     },
   }
+
+  activity_log_alert = {
+    "Microsoft.Storage/storageAccounts/delete" = {
+      signal_name = "Delete Storage Accounts"
+      scopes      = [azurerm_resource_group.rg.id]
+      enabled     = true
+      criteria = {
+        category      = "Administrative"
+        statuses      = ["Started"]
+        resource_type = "Microsoft.Storage/storageAccounts"
+      }
+      target_action_group = "info"
+    }
+  }
 }

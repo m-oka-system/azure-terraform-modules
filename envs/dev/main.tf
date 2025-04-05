@@ -246,3 +246,12 @@ module "metric_alert" {
   action_group        = module.action_group.action_group
   metric_alert        = local.metric_alert
 }
+
+module "activity_log_alert" {
+  source              = "../../modules/monitor_activity_log_alert"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  action_group        = module.action_group.action_group
+  activity_log_alert  = local.activity_log_alert
+}
