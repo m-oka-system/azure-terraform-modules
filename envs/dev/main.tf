@@ -255,3 +255,12 @@ module "activity_log_alert" {
   action_group        = module.action_group.action_group
   activity_log_alert  = local.activity_log_alert
 }
+
+module "log_query_alert" {
+  source              = "../../modules/monitor_log_query_alert"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  action_group        = module.action_group.action_group
+  log_query_alert     = local.log_query_alert
+}

@@ -118,4 +118,28 @@ locals {
       target_action_group = "info"
     }
   }
+
+  log_query_alert = {
+    "RequestCountByCountry" = {
+      enabled              = false
+      severity             = 4
+      evaluation_frequency = "PT10M"
+      window_duration      = "PT10M"
+      scope_id             = module.application_insights.application_insights["app"].id
+      criteria = {
+        query                   = <<-EOT
+          requests
+             | summarize CountByCountry=count() by client_CountryOrRegion
+        EOT
+        time_aggregation_method = "Maximum"
+        metric_measure_column   = "CountByCountry" # time_aggregation_method が Average, Maximum, Minimum, Total の場合は集計対象の列を指定する。Count の場合は null を指定する。
+        operator                = "LessThan"
+        threshold               = 20
+      }
+      auto_mitigation_enabled          = true
+      workspace_alerts_storage_enabled = false
+      skip_query_validation            = false
+      target_action_group              = "info"
+    }
+  }
 }
