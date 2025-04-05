@@ -211,6 +211,8 @@ module "action_group" {
 }
 
 module "resource_health_alert" {
+  count = local.resource_health_alert_enabled ? 1 : 0
+
   source              = "../../modules/monitor_resource_health_alert"
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
