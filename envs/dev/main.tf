@@ -94,6 +94,15 @@ module "activity_log" {
   activity_log_categories    = toset(local.activity_log_categories)
 }
 
+module "dns_zone" {
+  count = local.dns_zone_enabled ? 1 : 0
+
+  source              = "../../modules/dns_zone"
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  dns_zone            = var.dns_zone
+}
+
 module "container_registry" {
   count = local.container_registry_enabled ? 1 : 0
 

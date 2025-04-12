@@ -839,6 +839,19 @@ variable "role_assignment" {
   }
 }
 
+variable "dns_zone" {
+  type = map(object({
+    dns_zone_name = string
+    subdomain     = string
+  }))
+  default = {
+    app = {
+      dns_zone_name = "azphoto.xyz"
+      subdomain     = "www"
+    }
+  }
+}
+
 variable "container_registry" {
   type = map(object({
     sku_name                      = string
