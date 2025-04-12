@@ -94,6 +94,16 @@ module "activity_log" {
   activity_log_categories    = toset(local.activity_log_categories)
 }
 
+module "container_registry" {
+  count = local.container_registry_enabled ? 1 : 0
+
+  source              = "../../modules/container_registry"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  container_registry  = var.container_registry
+}
+
 module "openai" {
   source              = "../../modules/openai"
   common              = var.common

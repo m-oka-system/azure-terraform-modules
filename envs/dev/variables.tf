@@ -839,6 +839,23 @@ variable "role_assignment" {
   }
 }
 
+variable "container_registry" {
+  type = map(object({
+    sku_name                      = string
+    admin_enabled                 = bool
+    public_network_access_enabled = bool
+    zone_redundancy_enabled       = bool
+  }))
+  default = {
+    app = {
+      sku_name                      = "Basic"
+      admin_enabled                 = false
+      public_network_access_enabled = true
+      zone_redundancy_enabled       = false
+    }
+  }
+}
+
 variable "openai" {
   type = map(object({
     name     = string
