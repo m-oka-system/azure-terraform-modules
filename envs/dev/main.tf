@@ -104,6 +104,16 @@ module "container_registry" {
   container_registry  = var.container_registry
 }
 
+module "app_service_plan" {
+  count = local.app_service_plan_enabled ? 1 : 0
+
+  source              = "../../modules/app_service_plan"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  app_service_plan    = var.app_service_plan
+}
+
 module "openai" {
   source              = "../../modules/openai"
   common              = var.common

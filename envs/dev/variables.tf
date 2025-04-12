@@ -856,6 +856,21 @@ variable "container_registry" {
   }
 }
 
+variable "app_service_plan" {
+  type = map(object({
+    name     = string
+    os_type  = string
+    sku_name = string
+  }))
+  default = {
+    app = {
+      name     = "app"
+      os_type  = "Linux"
+      sku_name = "B1"
+    }
+  }
+}
+
 variable "openai" {
   type = map(object({
     name     = string
