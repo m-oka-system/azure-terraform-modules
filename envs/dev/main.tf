@@ -100,7 +100,7 @@ module "dns_zone" {
   source              = "../../modules/dns_zone"
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
-  dns_zone            = var.dns_zone
+  custom_domain       = var.custom_domain
 }
 
 module "container_registry" {

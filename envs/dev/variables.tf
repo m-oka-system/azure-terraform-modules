@@ -839,7 +839,8 @@ variable "role_assignment" {
   }
 }
 
-variable "dns_zone" {
+variable "custom_domain" {
+  # Memo: Front Door のエンドポイントと関連付けするために map 形式で定義し key でマッピングする
   type = map(object({
     dns_zone_name = string
     subdomain     = string
