@@ -13,6 +13,7 @@ locals {
   frontdoor_waf_enabled         = false
   container_registry_enabled    = false
   app_service_plan_enabled      = false
+  app_service_enabled           = false
   aisearch_enabled              = false
   cosmosdb_enabled              = false
   mysql_enabled                 = false
@@ -50,6 +51,16 @@ locals {
   azure_portal_ips = {
     aisearch = "52.139.243.237"                                         # https://learn.microsoft.com/ja-jp/azure/search/service-configure-firewall
     cosmosdb = "13.91.105.215,4.210.172.107,13.88.56.148,40.91.218.243" # https://learn.microsoft.com/ja-jp/azure/cosmos-db/how-to-configure-firewall
+  }
+
+  # App Service
+  app_service = {
+
+    app_settings = {
+      app = {
+        APPINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
+      }
+    }
   }
 
   # Alert Rule

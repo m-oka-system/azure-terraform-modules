@@ -165,6 +165,35 @@ module "app_service_plan" {
   app_service_plan    = var.app_service_plan
 }
 
+module "app_service" {
+  count = local.app_service_enabled ? 1 : 0
+
+  source              = "../../modules/app_service"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  app_service         = var.app_service
+  allowed_cidr        = split(",", var.allowed_cidr)
+  app_service_plan    = module.app_service_plan[0].app_service_plan
+  subnet              = module.vnet.subnet
+  identity            = module.user_assigned_identity.user_assigned_identity
+  frontdoor_profile   = module.frontdoor[0].frontdoor_profile
+
+  app_settings = {
+    app = {
+      WEBSITE_PULL_IMAGE_OVER_VNET          = true
+      APPLICATIONINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
+    }
+  }
+  allowed_origins = {
+    app = [
+      "https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}",
+      "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
+      "https://localhost:3000",
+    ]
+  }
+}
+
 module "openai" {
   source              = "../../modules/openai"
   common              = var.common

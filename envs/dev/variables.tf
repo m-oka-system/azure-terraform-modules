@@ -1111,6 +1111,93 @@ variable "app_service_plan" {
   }
 }
 
+variable "app_service" {
+  type = map(object({
+    name                                           = string
+    target_service_plan                            = string
+    target_subnet                                  = string
+    target_user_assigned_identity                  = string
+    ftp_publish_basic_authentication_enabled       = bool
+    webdeploy_publish_basic_authentication_enabled = bool
+    https_only                                     = bool
+    public_network_access_enabled                  = bool
+    site_config = object({
+      always_on              = bool
+      ftps_state             = string
+      vnet_route_all_enabled = bool
+      cors = object({
+        support_credentials = bool
+      })
+    })
+    ip_restriction = map(object({
+      name        = string
+      priority    = number
+      action      = string
+      ip_address  = string
+      service_tag = string
+    }))
+    scm_ip_restriction = map(object({
+      name        = string
+      priority    = number
+      action      = string
+      ip_address  = string
+      service_tag = string
+    }))
+  }))
+  default = {
+    app = {
+      name                                           = "app"
+      target_service_plan                            = "app"
+      target_subnet                                  = "app"
+      target_user_assigned_identity                  = "app"
+      ftp_publish_basic_authentication_enabled       = false
+      webdeploy_publish_basic_authentication_enabled = false
+      https_only                                     = true
+      public_network_access_enabled                  = true
+      site_config = {
+        always_on              = true
+        ftps_state             = "Disabled"
+        vnet_route_all_enabled = true
+        cors = {
+          support_credentials = true
+        }
+      }
+      ip_restriction = {
+        frontdoor = {
+          name        = "AllowFrontDoor"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureFrontDoor.Backend"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+    }
+  }
+}
+
 variable "openai" {
   type = map(object({
     name     = string
