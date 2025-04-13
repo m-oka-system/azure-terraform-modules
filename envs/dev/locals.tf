@@ -9,6 +9,7 @@ data "http" "ipify" {
 locals {
   # 特定の Azure リソースを作成する/しない
   dns_zone_enabled              = false
+  frontdoor_enabled             = false
   container_registry_enabled    = false
   app_service_plan_enabled      = false
   aisearch_enabled              = false

@@ -103,6 +103,29 @@ module "dns_zone" {
   custom_domain       = var.custom_domain
 }
 
+module "frontdoor" {
+  count = local.frontdoor_enabled ? 1 : 0
+
+  source                 = "../../modules/frontdoor"
+  common                 = var.common
+  resource_group_name    = azurerm_resource_group.rg.name
+  tags                   = azurerm_resource_group.rg.tags
+  frontdoor_profile      = var.frontdoor_profile
+  frontdoor_endpoint     = var.frontdoor_endpoint
+  frontdoor_origin_group = var.frontdoor_origin_group
+  frontdoor_origin       = var.frontdoor_origin
+  frontdoor_route        = var.frontdoor_route
+  dns_zone               = module.dns_zone[0].dns_zone
+  custom_domain          = var.custom_domain
+
+  backend_origins = {
+    blob = {
+      host_name          = module.storage.storage_account["app"].primary_blob_host
+      origin_host_header = module.storage.storage_account["app"].primary_blob_host
+    }
+  }
+}
+
 module "container_registry" {
   count = local.container_registry_enabled ? 1 : 0
 
