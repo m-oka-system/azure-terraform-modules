@@ -1018,6 +1018,67 @@ variable "frontdoor_route" {
   }
 }
 
+variable "frontdoor_security_policy" {
+  type = map(object({
+    name                   = string
+    target_firewall_policy = string
+    patterns_to_match      = list(string)
+  }))
+  default = {
+    app = {
+      name                   = "app"
+      target_firewall_policy = "app"
+      patterns_to_match      = ["/*"]
+    }
+  }
+}
+
+variable "frontdoor_firewall_policy" {
+  type = map(object({
+    name                              = string
+    sku_name                          = string
+    mode                              = string
+    custom_block_response_status_code = number
+  }))
+  default = {
+    app = {
+      name                              = "IPRestrictionPolicy"
+      sku_name                          = "Standard_AzureFrontDoor"
+      mode                              = "Prevention"
+      custom_block_response_status_code = 403
+    }
+  }
+}
+
+variable "frontdoor_firewall_custom_rule" {
+  type = map(object({
+    target_firewall_policy = string
+    priority               = number
+    type                   = string
+    action                 = string
+    match_condition = object({
+      match_variable     = string
+      operator           = string
+      negation_condition = bool
+      match_values       = list(string)
+    })
+  }))
+  default = {
+    AllowClientIP = {
+      target_firewall_policy = "app"
+      priority               = 100
+      type                   = "MatchRule"
+      action                 = "Block"
+      match_condition = {
+        match_variable     = "RemoteAddr"
+        operator           = "IPMatch"
+        negation_condition = true # 含まない場合
+        match_values       = ["MyIP"]
+      }
+    }
+  }
+}
+
 variable "container_registry" {
   type = map(object({
     sku_name                      = string
