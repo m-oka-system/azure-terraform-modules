@@ -27,8 +27,8 @@ resource "azurerm_linux_web_app" "this" {
     always_on                                     = each.value.site_config.always_on
     ftps_state                                    = each.value.site_config.ftps_state
     vnet_route_all_enabled                        = each.value.site_config.vnet_route_all_enabled
-    scm_use_main_ip_restriction                   = false
-    container_registry_use_managed_identity       = true
+    scm_use_main_ip_restriction                   = each.value.site_config.scm_use_main_ip_restriction
+    container_registry_use_managed_identity       = each.value.site_config.container_registry_use_managed_identity
     container_registry_managed_identity_client_id = var.identity[each.value.target_user_assigned_identity].client_id
 
 

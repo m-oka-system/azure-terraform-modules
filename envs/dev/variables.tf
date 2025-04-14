@@ -1122,9 +1122,11 @@ variable "app_service" {
     https_only                                     = bool
     public_network_access_enabled                  = bool
     site_config = object({
-      always_on              = bool
-      ftps_state             = string
-      vnet_route_all_enabled = bool
+      always_on                               = bool
+      ftps_state                              = string
+      vnet_route_all_enabled                  = bool
+      scm_use_main_ip_restriction             = bool
+      container_registry_use_managed_identity = bool
       cors = object({
         support_credentials = bool
       })
@@ -1155,9 +1157,11 @@ variable "app_service" {
       https_only                                     = true
       public_network_access_enabled                  = true
       site_config = {
-        always_on              = true
-        ftps_state             = "Disabled"
-        vnet_route_all_enabled = true
+        always_on                               = true
+        ftps_state                              = "Disabled"
+        vnet_route_all_enabled                  = true
+        scm_use_main_ip_restriction             = false
+        container_registry_use_managed_identity = true
         cors = {
           support_credentials = true
         }
