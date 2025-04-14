@@ -104,6 +104,18 @@ module "dns_zone" {
   custom_domain       = var.custom_domain
 }
 
+module "private_dns_zone" {
+  count = local.private_dns_zone_enabled ? 1 : 0
+
+  source              = "../../modules/private_dns_zone"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  private_dns_zone    = var.private_dns_zone
+  vnet                = module.vnet.vnet
+  target_vnet         = "spoke1"
+}
+
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 

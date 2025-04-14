@@ -854,6 +854,14 @@ variable "custom_domain" {
   }
 }
 
+variable "private_dns_zone" {
+  type = map(string)
+  default = {
+    blob      = "privatelink.blob.core.windows.net"
+    key_vault = "privatelink.vaultcore.azure.net"
+  }
+}
+
 variable "frontdoor_profile" {
   type = object({
     sku_name                 = string
