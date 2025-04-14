@@ -45,7 +45,7 @@ locals {
       "storage_${k}" => {
         name                           = v.name
         subnet_id                      = module.vnet.subnet["pe"].id
-        private_dns_zone_ids           = [module.private_dns_zone[0].private_dns_zone["blob"].id]
+        private_dns_zone_ids           = try(module.private_dns_zone[0].private_dns_zone["blob"].id, [])
         subresource_names              = ["blob"]
         private_connection_resource_id = v.id
       }
@@ -55,7 +55,7 @@ locals {
       "kv_${k}" => {
         name                           = v.name
         subnet_id                      = module.vnet.subnet["pe"].id
-        private_dns_zone_ids           = [module.private_dns_zone[0].private_dns_zone["key_vault"].id]
+        private_dns_zone_ids           = try(module.private_dns_zone[0].private_dns_zone["key_vault"].id, [])
         subresource_names              = ["vault"]
         private_connection_resource_id = v.id
       }
