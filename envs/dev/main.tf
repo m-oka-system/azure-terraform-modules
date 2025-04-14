@@ -116,6 +116,16 @@ module "private_dns_zone" {
   target_vnet         = "spoke1"
 }
 
+module "private_endpoint" {
+  count = local.private_endpoint_enabled ? 1 : 0
+
+  source              = "../../modules/private_endpoint"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  private_endpoint    = local.private_endpoint
+}
+
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 

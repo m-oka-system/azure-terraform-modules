@@ -10,6 +10,7 @@ locals {
   # 特定の Azure リソースを作成する/しない
   dns_zone_enabled              = false
   private_dns_zone_enabled      = false
+  private_endpoint_enabled      = false
   frontdoor_enabled             = false
   frontdoor_waf_enabled         = false
   container_registry_enabled    = false
@@ -36,6 +37,30 @@ locals {
       env     = var.common.env
     }
   }
+
+  # プライベートエンドポイント
+  private_endpoint = merge(
+    {
+      for k, v in module.storage.storage_account :
+      "storage_${k}" => {
+        name                           = v.name
+        subnet_id                      = module.vnet.subnet["pe"].id
+        private_dns_zone_ids           = [module.private_dns_zone[0].private_dns_zone["blob"].id]
+        subresource_names              = ["blob"]
+        private_connection_resource_id = v.id
+      }
+    },
+    {
+      for k, v in module.key_vault.key_vault :
+      "kv_${k}" => {
+        name                           = v.name
+        subnet_id                      = module.vnet.subnet["pe"].id
+        private_dns_zone_ids           = [module.private_dns_zone[0].private_dns_zone["key_vault"].id]
+        subresource_names              = ["vault"]
+        private_connection_resource_id = v.id
+      }
+    }
+  )
 
   # アクティビティログのカテゴリ
   activity_log_categories = [
