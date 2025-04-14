@@ -126,6 +126,15 @@ module "private_endpoint" {
   private_endpoint    = local.private_endpoint
 }
 
+module "private_link_scope" {
+  source                      = "../../modules/private_link_scope"
+  common                      = var.common
+  resource_group_name         = azurerm_resource_group.rg.name
+  tags                        = azurerm_resource_group.rg.tags
+  private_link_scope          = var.private_link_scope
+  private_link_scoped_service = local.private_link_scoped_service
+}
+
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 

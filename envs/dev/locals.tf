@@ -59,6 +59,42 @@ locals {
         subresource_names              = ["vault"]
         private_connection_resource_id = v.id
       }
+    },
+    # Azure Monitor Private Link Scope (AMPLS) のプライベートエンドポイント
+    {
+      for k, v in module.private_link_scope.private_link_scope :
+      "ampls_${k}" => {
+        name      = v.name
+        subnet_id = module.vnet.subnet["pe"].id
+        private_dns_zone_ids = try([
+          module.private_dns_zone[0].private_dns_zone["monitor"].id,
+          module.private_dns_zone[0].private_dns_zone["oms"].id,
+          module.private_dns_zone[0].private_dns_zone["ods"].id,
+          module.private_dns_zone[0].private_dns_zone["agentsvc"].id,
+        ], [])
+        subresource_names              = ["azuremonitor"]
+        private_connection_resource_id = v.id
+      }
+    }
+  )
+
+  # Azure Monitor Private Link Scope (AMPLS) にリンクするサービス
+  private_link_scoped_service = merge(
+    {
+      for k, v in module.log_analytics.log_analytics :
+      "log_${k}" => {
+        name               = k
+        linked_resource_id = v.id
+        target_ampls       = "app"
+      }
+    },
+    {
+      for k, v in module.application_insights.application_insights :
+      "appi_${k}" => {
+        name               = k
+        linked_resource_id = v.id
+        target_ampls       = "app"
+      }
     }
   )
 

@@ -859,6 +859,26 @@ variable "private_dns_zone" {
   default = {
     blob      = "privatelink.blob.core.windows.net"
     key_vault = "privatelink.vaultcore.azure.net"
+    # Azure Monitor Private Link Scope (AMPLS) のプライベート DNS ゾーン
+    monitor  = "privatelink.monitor.azure.com"
+    oms      = "privatelink.oms.opinsights.azure.com"
+    ods      = "privatelink.ods.opinsights.azure.com"
+    agentsvc = "privatelink.agentsvc.azure-automation.net"
+  }
+}
+
+variable "private_link_scope" {
+  type = map(object({
+    name                  = string
+    ingestion_access_mode = string
+    query_access_mode     = string
+  }))
+  default = {
+    app = {
+      name                  = "app"
+      ingestion_access_mode = "Open"
+      query_access_mode     = "Open"
+    }
   }
 }
 
