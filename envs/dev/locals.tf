@@ -25,6 +25,7 @@ locals {
   bastion_enabled               = false
   nat_gateway_enabled           = false
   resource_health_alert_enabled = false
+  diagnostic_setting_enabled    = false
 
   # 共通の変数
   common = {

@@ -423,3 +423,23 @@ module "log_query_alert" {
   action_group        = module.action_group.action_group
   log_query_alert     = local.log_query_alert
 }
+
+module "diagnostic_setting" {
+  count = local.diagnostic_setting_enabled ? 1 : 0
+
+  source                  = "../../modules/diagnostic_setting"
+  common                  = var.common
+  log_analytics_workspace = module.log_analytics.log_analytics
+  storage_account         = module.storage.storage_account
+
+  diagnostic_setting = {
+    target_log_analytics_workspace = "logs"
+    target_storage_account         = "log"
+    target_resources = merge(
+      { for k, v in module.storage.storage_account : format("storage_account_%s", k) => v.id },
+      { for k, v in module.storage.storage_account : format("blob_%s", k) => format("%s/blobServices/default", v.id) },
+      { for k, v in module.key_vault.key_vault : format("key_vault_%s", k) => v.id },
+      # And more...
+    )
+  }
+}
