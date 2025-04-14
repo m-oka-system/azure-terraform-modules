@@ -1696,6 +1696,69 @@ variable "vm_admin_username" {
   default = "azureuser"
 }
 
+variable "loadbalancer" {
+  type = object({
+    sku               = string
+    frontend_ip_name  = string
+    backend_pool_name = string
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+    probe = object({
+      name                = string
+      port                = number
+      interval_in_seconds = number
+      number_of_probes    = number
+      protocol            = string
+      request_path        = string
+    })
+    rule = object({
+      name                           = string
+      protocol                       = string
+      frontend_port                  = number
+      backend_port                   = number
+      frontend_ip_configuration_name = string
+      enable_floating_ip             = bool
+      idle_timeout_in_minutes        = number
+      load_distribution              = string
+      disable_outbound_snat          = bool
+      enable_tcp_reset               = bool
+    })
+  })
+  default = {
+    sku               = "Standard"
+    frontend_ip_name  = "frontend"
+    backend_pool_name = "bepool"
+    public_ip = {
+      sku               = "Standard"
+      allocation_method = "Static"
+      zones             = ["1", "2", "3"]
+    }
+    probe = {
+      name                = "http-probe"
+      port                = 80
+      interval_in_seconds = 5
+      number_of_probes    = 3
+      protocol            = "Http"
+      request_path        = "/"
+    }
+    rule = {
+      name                           = "http-rule"
+      protocol                       = "Tcp"
+      frontend_port                  = 80
+      backend_port                   = 80
+      frontend_ip_configuration_name = "frontend"
+      enable_floating_ip             = false
+      idle_timeout_in_minutes        = 4
+      load_distribution              = "Default"
+      disable_outbound_snat          = false
+      enable_tcp_reset               = false
+    }
+  }
+}
+
 variable "bastion" {
   type = object({
     target_subnet             = string

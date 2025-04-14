@@ -339,6 +339,17 @@ module "ssh_public_key" {
   tags                = azurerm_resource_group.rg.tags
 }
 
+module "loadbalancer" {
+  count = local.vm_enabled ? 1 : 0
+
+  source              = "../../modules/loadbalancer"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  loadbalancer        = var.loadbalancer
+  network_interfaces  = module.vm[0].vm_network_interface
+}
+
 module "bastion" {
   count = local.bastion_enabled ? 1 : 0
 
