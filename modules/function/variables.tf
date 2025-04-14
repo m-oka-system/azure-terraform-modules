@@ -1,0 +1,11 @@
+variable "common" {}
+variable "resource_group_name" {}
+variable "tags" {}
+variable "function" {}
+variable "allowed_cidr" {}
+variable "app_service_plan" {}
+variable "subnet" {}
+variable "application_insights" {}
+variable "identity" {}
+variable "key_vault_secret" {}
+variable "app_settings" {}

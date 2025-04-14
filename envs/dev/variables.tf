@@ -1108,6 +1108,11 @@ variable "app_service_plan" {
       os_type  = "Linux"
       sku_name = "B1"
     }
+    # func = {
+    #   name     = "func"
+    #   os_type  = "Linux"
+    #   sku_name = "B1"
+    # }
   }
 }
 
@@ -1197,6 +1202,100 @@ variable "app_service" {
           ip_address  = "MyIP"
           service_tag = null
         }
+      }
+    }
+  }
+}
+
+variable "function" {
+  type = map(object({
+    name                                           = string
+    target_service_plan                            = string
+    target_subnet                                  = string
+    target_key_vault_secret                        = string
+    target_user_assigned_identity                  = string
+    target_application_insights                    = string
+    functions_extension_version                    = string
+    ftp_publish_basic_authentication_enabled       = bool
+    webdeploy_publish_basic_authentication_enabled = bool
+    https_only                                     = bool
+    public_network_access_enabled                  = bool
+    builtin_logging_enabled                        = bool
+    site_config = object({
+      always_on                               = bool
+      ftps_state                              = string
+      vnet_route_all_enabled                  = bool
+      scm_use_main_ip_restriction             = bool
+      container_registry_use_managed_identity = bool
+    })
+    ip_restriction = map(object({
+      name        = string
+      priority    = number
+      action      = string
+      ip_address  = string
+      service_tag = string
+    }))
+    scm_ip_restriction = map(object({
+      name        = string
+      priority    = number
+      action      = string
+      ip_address  = string
+      service_tag = string
+    }))
+    app_service_logs = object({
+      disk_quota_mb         = number
+      retention_period_days = number
+    })
+  }))
+  default = {
+    func = {
+      name                                           = "func"
+      target_service_plan                            = "func"
+      target_subnet                                  = "func"
+      target_key_vault_secret                        = "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING"
+      target_user_assigned_identity                  = "func"
+      target_application_insights                    = "func"
+      functions_extension_version                    = "~4"
+      ftp_publish_basic_authentication_enabled       = false
+      webdeploy_publish_basic_authentication_enabled = false
+      https_only                                     = true
+      public_network_access_enabled                  = true
+      builtin_logging_enabled                        = false
+      site_config = {
+        always_on                               = true
+        ftps_state                              = "Disabled"
+        vnet_route_all_enabled                  = true
+        scm_use_main_ip_restriction             = false
+        container_registry_use_managed_identity = true
+      }
+      ip_restriction = {
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      app_service_logs = {
+        disk_quota_mb         = 35
+        retention_period_days = 7
       }
     }
   }

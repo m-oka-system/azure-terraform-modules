@@ -57,7 +57,8 @@ module "key_vault_secret" {
   key_vault_secret = {
     target_key_vault = "app"
     secrets = {
-      "SSH_PRIVATE_KEY" = module.ssh_public_key.private_key_pem
+      "SSH_PRIVATE_KEY"                            = module.ssh_public_key.private_key_pem
+      "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING" = module.storage.storage_account["func"].primary_connection_string
     }
   }
 }
@@ -191,6 +192,33 @@ module "app_service" {
       "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
       "https://localhost:3000",
     ]
+  }
+}
+
+module "function" {
+  count = local.function_enabled ? 1 : 0
+
+  source               = "../../modules/function"
+  common               = var.common
+  resource_group_name  = azurerm_resource_group.rg.name
+  tags                 = azurerm_resource_group.rg.tags
+  function             = var.function
+  allowed_cidr         = split(",", var.allowed_cidr)
+  app_service_plan     = module.app_service_plan[0].app_service_plan
+  subnet               = module.vnet.subnet
+  application_insights = module.application_insights.application_insights
+  identity             = module.user_assigned_identity.user_assigned_identity
+  key_vault_secret     = module.key_vault_secret.key_vault_secret
+
+  app_settings = {
+    func = {
+      WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
+      WEBSITE_PULL_IMAGE_OVER_VNET        = true
+
+      # マネージド ID を使用して Azure Storage に接続する場合
+      # https://learn.microsoft.com/ja-jp/azure/azure-functions/functions-identity-based-connections-tutorial
+      # AzureWebJobsStorage__accountName    = module.storage.storage_account["func"].name
+    }
   }
 }
 

@@ -14,6 +14,7 @@ locals {
   container_registry_enabled    = false
   app_service_plan_enabled      = false
   app_service_enabled           = false
+  function_enabled              = false
   aisearch_enabled              = false
   cosmosdb_enabled              = false
   mysql_enabled                 = false
