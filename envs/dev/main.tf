@@ -63,6 +63,17 @@ module "key_vault_secret" {
   }
 }
 
+module "key_vault_certificate" {
+  source        = "../../modules/key_vault_certificate"
+  custom_domain = var.custom_domain
+  key_vault     = module.key_vault.key_vault
+
+  key_vault_certificate = {
+    target_key_vault = "app"
+    certificate_name = "self"
+  }
+}
+
 module "log_analytics" {
   source              = "../../modules/log_analytics"
   common              = var.common
