@@ -398,6 +398,18 @@ variable "network_security_rule" {
     },
     {
       target_nsg                 = "vm"
+      name                       = "AllowHttpInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "vm"
       name                       = "AllowDbSubnetMySQLOutbound"
       priority                   = 1000
       direction                  = "Outbound"
@@ -1905,6 +1917,51 @@ variable "loadbalancer" {
       load_distribution              = "Default"
       disable_outbound_snat          = false
       enable_tcp_reset               = false
+    }
+  }
+}
+
+variable "application_gateway" {
+  type = object({
+    enable_http2                      = bool
+    fips_enabled                      = bool
+    force_firewall_policy_association = bool
+    target_user_assigned_identity     = string
+    zones                             = list(string)
+    sku = object({
+      name     = string
+      tier     = string
+      capacity = number
+    })
+    autoscale_configuration = object({
+      min_capacity = number
+      max_capacity = number
+    })
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+  })
+  default = {
+    enable_http2                      = true
+    fips_enabled                      = false
+    force_firewall_policy_association = false
+    target_user_assigned_identity     = "appgw"
+    zones                             = ["1", "2", "3"]
+    sku = {
+      name     = "Standard_v2"
+      tier     = "Standard_v2"
+      capacity = 0
+    }
+    autoscale_configuration = {
+      min_capacity = 1
+      max_capacity = 2
+    }
+    public_ip = {
+      sku               = "Standard"
+      allocation_method = "Static"
+      zones             = ["1", "2", "3"]
     }
   }
 }

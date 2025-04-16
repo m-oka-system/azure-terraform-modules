@@ -353,14 +353,15 @@ module "vm" {
 module "vmss" {
   count = local.vmss_enabled ? 1 : 0
 
-  source              = "../../modules/vmss"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = azurerm_resource_group.rg.tags
-  vmss                = var.vmss
-  vmss_admin_username = var.vmss_admin_username
-  public_key          = module.ssh_public_key.public_key_openssh
-  subnet              = module.vnet.subnet
+  source                                       = "../../modules/vmss"
+  common                                       = var.common
+  resource_group_name                          = azurerm_resource_group.rg.name
+  tags                                         = azurerm_resource_group.rg.tags
+  vmss                                         = var.vmss
+  vmss_admin_username                          = var.vmss_admin_username
+  public_key                                   = module.ssh_public_key.public_key_openssh
+  subnet                                       = module.vnet.subnet
+  application_gateway_backend_address_pool_ids = [tolist(module.application_gateway[0].application_gateway.backend_address_pool)[0].id]
 }
 
 module "loadbalancer" {
@@ -372,6 +373,20 @@ module "loadbalancer" {
   tags                = azurerm_resource_group.rg.tags
   loadbalancer        = var.loadbalancer
   network_interfaces  = module.vm[0].vm_network_interface
+}
+
+module "application_gateway" {
+  count = local.vmss_enabled ? 1 : 0
+
+  source               = "../../modules/application_gateway"
+  common               = var.common
+  resource_group_name  = azurerm_resource_group.rg.name
+  tags                 = azurerm_resource_group.rg.tags
+  application_gateway  = var.application_gateway
+  subnet_id            = module.vnet.subnet["appgw"].id
+  identity_id          = module.user_assigned_identity.user_assigned_identity["appgw"].id
+  ssl_certificate_name = module.key_vault_certificate.key_vault_certificate["app"].name
+  key_vault_secret_id  = module.key_vault_certificate.key_vault_certificate["app"].versionless_secret_id # シークレット識別子: https://{keyvault_name}.vault.azure.net/secretes/{certificate_name}/
 }
 
 module "bastion" {
