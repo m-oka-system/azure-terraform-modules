@@ -4,7 +4,7 @@
 USER_NAME="azureuser"
 
 # Install MySQL client
-sudo apt-get -y update && sudo apt-get install -y mysql-client-core-8.0
+sudo apt-get -y update && sudo apt-get install -y nginx mysql-client-core-8.0
 
 # Install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
