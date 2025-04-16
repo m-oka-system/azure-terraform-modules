@@ -807,6 +807,9 @@ variable "user_assigned_identity" {
     func = {
       name = "func"
     }
+    appgw = {
+      name = "appgw"
+    }
   }
 }
 
@@ -835,6 +838,10 @@ variable "role_assignment" {
     func_key_vault_secrets_user = {
       target_identity      = "func"
       role_definition_name = "Key Vault Secrets User"
+    }
+    appgw_key_vault_certificate_user = {
+      target_identity      = "appgw"
+      role_definition_name = "Key Vault Certificate User"
     }
   }
 }
