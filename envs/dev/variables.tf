@@ -912,9 +912,9 @@ variable "role_assignment" {
       target_identity      = "func"
       role_definition_name = "Key Vault Secrets User"
     }
-    appgw_key_vault_certificate_user = {
+    appgw_key_vault_secrets_user = {
       target_identity      = "appgw"
-      role_definition_name = "Key Vault Certificate User"
+      role_definition_name = "Key Vault Secrets User"
     }
   }
 }
