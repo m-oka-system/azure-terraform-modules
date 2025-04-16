@@ -22,6 +22,7 @@ locals {
   mysql_enabled                 = false
   redis_enabled                 = false
   vm_enabled                    = false
+  vmss_enabled                  = false
   bastion_enabled               = false
   nat_gateway_enabled           = false
   resource_health_alert_enabled = false

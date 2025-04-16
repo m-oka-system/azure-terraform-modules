@@ -332,6 +332,19 @@ module "vm" {
   subnet              = module.vnet.subnet
 }
 
+module "vmss" {
+  count = local.vmss_enabled ? 1 : 0
+
+  source              = "../../modules/vmss"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  vmss                = var.vmss
+  vmss_admin_username = var.vmss_admin_username
+  public_key          = module.ssh_public_key.public_key_openssh
+  subnet              = module.vnet.subnet
+}
+
 module "ssh_public_key" {
   source              = "../../modules/ssh_public_key"
   common              = var.common

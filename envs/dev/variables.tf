@@ -1696,6 +1696,76 @@ variable "vm_admin_username" {
   default = "azureuser"
 }
 
+variable "vmss" {
+  type = map(object({
+    name                        = string
+    target_subnet               = string
+    sku_name                    = string
+    platform_fault_domain_count = number
+    encryption_at_host_enabled  = bool
+    instances                   = number
+    zone_balance                = bool
+    zones                       = list(string)
+    os_profile = object({
+      linux_configuration = object({
+        patch_assessment_mode = string
+        patch_mode            = string
+        provision_vm_agent    = bool
+      })
+    })
+    public_ip_address_enabled = bool
+    os_disk = object({
+      os_disk_cache             = string
+      os_disk_type              = string
+      os_disk_size              = number
+      write_accelerator_enabled = bool
+    })
+    source_image_reference = object({
+      offer     = string
+      publisher = string
+      sku       = string
+      version   = string
+    })
+  }))
+  default = {
+    app = {
+      name                        = "app"
+      target_subnet               = "vm"
+      sku_name                    = "Standard_DS1_v2"
+      platform_fault_domain_count = 1
+      encryption_at_host_enabled  = false
+      instances                   = 2
+      zone_balance                = true
+      zones                       = ["1", "2", "3"]
+      os_profile = {
+        linux_configuration = {
+          patch_assessment_mode = "ImageDefault"
+          patch_mode            = "ImageDefault"
+          provision_vm_agent    = true
+        }
+      }
+      public_ip_address_enabled = true
+      os_disk = {
+        os_disk_cache             = "ReadWrite"
+        os_disk_type              = "Standard_LRS"
+        os_disk_size              = 30
+        write_accelerator_enabled = false
+      }
+      source_image_reference = {
+        offer     = "ubuntu-24_04-lts"
+        publisher = "canonical"
+        sku       = "server"
+        version   = "latest"
+      }
+    }
+  }
+}
+
+variable "vmss_admin_username" {
+  type    = string
+  default = "azureuser"
+}
+
 variable "loadbalancer" {
   type = object({
     sku               = string
