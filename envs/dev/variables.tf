@@ -742,7 +742,7 @@ variable "key_vault" {
       soft_delete_retention_days = 7
       network_acls = {
         default_action             = "Deny"
-        bypass                     = "None"
+        bypass                     = "AzureServices"
         ip_rules                   = ["MyIP"]
         virtual_network_subnet_ids = []
       }
