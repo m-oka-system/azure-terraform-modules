@@ -8,7 +8,8 @@ data "azurerm_monitor_diagnostic_categories" "this" {
 
 locals {
   providers_with_dedicated_log_type = [
-    "Microsoft.DocumentDB"
+    "Microsoft.DocumentDB",
+    "Microsoft.Network/applicationGateways",
   ]
 }
 
