@@ -95,6 +95,14 @@ variable "subnet" {
       private_endpoint_network_policies = "Disabled"
       service_delegation                = null
     }
+    appgw = {
+      name                              = "appgw"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.6.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
   }
 }
 
@@ -127,6 +135,10 @@ variable "network_security_group" {
     bastion = {
       name          = "bastion"
       target_subnet = "bastion"
+    }
+    appgw = {
+      name          = "appgw"
+      target_subnet = "appgw"
     }
   }
 }
@@ -546,6 +558,67 @@ variable "network_security_rule" {
       name                       = "DenyAllOutbound"
       priority                   = 4096
       direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # Application Gateway Subnet
+    {
+      target_nsg                 = "appgw"
+      name                       = "AllowGatewayManagerInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "65200-65535"
+      source_address_prefix      = "GatewayManager"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "appgw"
+      name                       = "AllowAzureLoadBalancerInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "AzureLoadBalancer"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "appgw"
+      name                       = "AllowInternetHTTPInbound"
+      priority                   = 1200
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "appgw"
+      name                       = "AllowInternetHTTPSInbound"
+      priority                   = 1300
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "appgw"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
       access                     = "Deny"
       protocol                   = "*"
       source_port_range          = "*"
