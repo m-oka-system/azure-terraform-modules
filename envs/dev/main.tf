@@ -319,6 +319,13 @@ module "redis" {
   redis_cache         = var.redis_cache
 }
 
+module "ssh_public_key" {
+  source              = "../../modules/ssh_public_key"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+}
+
 module "vm" {
   count = local.vm_enabled ? 1 : 0
 
@@ -343,13 +350,6 @@ module "vmss" {
   vmss_admin_username = var.vmss_admin_username
   public_key          = module.ssh_public_key.public_key_openssh
   subnet              = module.vnet.subnet
-}
-
-module "ssh_public_key" {
-  source              = "../../modules/ssh_public_key"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = azurerm_resource_group.rg.tags
 }
 
 module "loadbalancer" {
