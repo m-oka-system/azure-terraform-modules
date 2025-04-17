@@ -14,6 +14,7 @@ locals {
   frontdoor_enabled             = false
   frontdoor_waf_enabled         = false
   container_registry_enabled    = false
+  container_app_enabled         = false
   app_service_plan_enabled      = false
   app_service_enabled           = false
   function_enabled              = false

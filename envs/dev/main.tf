@@ -198,6 +198,18 @@ module "container_registry" {
   container_registry  = var.container_registry
 }
 
+module "container_app_environment" {
+  count = local.container_app_enabled ? 1 : 0
+
+  source                    = "../../modules/container_app_environment"
+  common                    = var.common
+  resource_group_name       = azurerm_resource_group.rg.name
+  tags                      = azurerm_resource_group.rg.tags
+  container_app_environment = var.container_app_environment
+  subnet                    = module.vnet.subnet
+  log_analytics_workspace   = module.log_analytics.log_analytics
+}
+
 module "app_service_plan" {
   count = local.app_service_plan_enabled ? 1 : 0
 

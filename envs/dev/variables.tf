@@ -1228,6 +1228,25 @@ variable "container_registry" {
   }
 }
 
+variable "container_app_environment" {
+  type = map(object({
+    name                           = string
+    zone_redundancy_enabled        = bool
+    logs_destination               = string
+    target_subnet                  = string
+    target_log_analytics_workspace = string
+  }))
+  default = {
+    app = {
+      name                           = "app"
+      zone_redundancy_enabled        = true
+      logs_destination               = "log-analytics"
+      target_subnet                  = "cae"
+      target_log_analytics_workspace = "logs"
+    }
+  }
+}
+
 variable "app_service_plan" {
   type = map(object({
     name     = string
