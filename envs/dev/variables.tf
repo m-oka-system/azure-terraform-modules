@@ -103,6 +103,14 @@ variable "subnet" {
       private_endpoint_network_policies = "Disabled"
       service_delegation                = null
     }
+    cae = {
+      name                              = "cae"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.10.0/23"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
   }
 }
 
@@ -139,6 +147,10 @@ variable "network_security_group" {
     appgw = {
       name          = "appgw"
       target_subnet = "appgw"
+    }
+    cae = {
+      name          = "cae"
+      target_subnet = "cae"
     }
   }
 }
