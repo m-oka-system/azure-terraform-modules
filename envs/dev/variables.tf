@@ -106,10 +106,13 @@ variable "subnet" {
     cae = {
       name                              = "cae"
       target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.10.0/23"]
+      address_prefixes                  = ["10.10.11.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
+      service_delegation = {
+        name    = "Microsoft.App/environments"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
     }
   }
 }
@@ -1235,6 +1238,12 @@ variable "container_app_environment" {
     logs_destination               = string
     target_subnet                  = string
     target_log_analytics_workspace = string
+    workload_profile = object({
+      name                  = string
+      workload_profile_type = string
+      maximum_count         = number
+      minimum_count         = number
+    })
   }))
   default = {
     app = {
@@ -1243,6 +1252,12 @@ variable "container_app_environment" {
       logs_destination               = "log-analytics"
       target_subnet                  = "cae"
       target_log_analytics_workspace = "logs"
+      workload_profile = {
+        name                  = "Consumption"
+        workload_profile_type = "Consumption"
+        maximum_count         = 6
+        minimum_count         = 3
+      }
     }
   }
 }
