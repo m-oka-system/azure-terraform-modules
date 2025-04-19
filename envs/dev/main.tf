@@ -210,6 +210,20 @@ module "container_app_environment" {
   log_analytics_workspace   = module.log_analytics.log_analytics
 }
 
+module "container_app" {
+  count = local.container_app_enabled ? 1 : 0
+
+  source                    = "../../modules/container_app"
+  common                    = var.common
+  resource_group_name       = azurerm_resource_group.rg.name
+  tags                      = azurerm_resource_group.rg.tags
+  container_app             = var.container_app
+  allowed_cidr              = split(",", var.allowed_cidr)
+  container_app_environment = module.container_app_environment[0].container_app_environment
+  identity                  = module.user_assigned_identity.user_assigned_identity
+  container_registry        = module.container_registry[0].container_registry
+}
+
 module "app_service_plan" {
   count = local.app_service_plan_enabled ? 1 : 0
 

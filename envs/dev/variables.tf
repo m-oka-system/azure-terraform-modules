@@ -1263,6 +1263,83 @@ variable "container_app_environment" {
   }
 }
 
+variable "container_app" {
+  type = map(object({
+    name                             = string
+    target_container_app_environment = string
+    target_user_assigned_identity    = string
+    target_container_registry        = string
+    workload_profile_name            = string
+    revision_mode                    = string
+    template = object({
+      min_replicas = number
+      max_replicas = number
+      container = object({
+        name   = string
+        cpu    = number
+        memory = string
+      })
+      http_scale_rule = object({
+        name                = string
+        concurrent_requests = number
+      })
+    })
+    ingress = object({
+      external_enabled           = bool
+      allow_insecure_connections = bool
+      client_certificate_mode    = string
+      transport                  = string
+      target_port                = number
+      ip_security_restriction = object({
+        name   = string
+        action = string
+      })
+      traffic_weight = object({
+        latest_revision = bool
+        percentage      = number
+      })
+    })
+  }))
+  default = {
+    app = {
+      name                             = "app"
+      target_container_app_environment = "app"
+      target_user_assigned_identity    = "app"
+      target_container_registry        = "app"
+      workload_profile_name            = "Consumption"
+      revision_mode                    = "Single"
+      template = {
+        min_replicas = 0
+        max_replicas = 10
+        container = {
+          name   = "app"
+          cpu    = 0.25
+          memory = "0.5Gi"
+        }
+        http_scale_rule = {
+          name                = "http-scale"
+          concurrent_requests = 100
+        }
+      }
+      ingress = {
+        external_enabled           = true
+        allow_insecure_connections = false
+        client_certificate_mode    = "ignore"
+        transport                  = "auto"
+        target_port                = 50505
+        ip_security_restriction = {
+          name   = "AllowMyIP"
+          action = "Allow"
+        }
+        traffic_weight = {
+          latest_revision = true
+          percentage      = 100
+        }
+      }
+    }
+  }
+}
+
 variable "app_service_plan" {
   type = map(object({
     name     = string
