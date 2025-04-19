@@ -1241,8 +1241,8 @@ variable "container_app_environment" {
     workload_profile = object({
       name                  = string
       workload_profile_type = string
-      maximum_count         = number
       minimum_count         = number
+      maximum_count         = number
     })
   }))
   default = {
@@ -1255,8 +1255,9 @@ variable "container_app_environment" {
       workload_profile = {
         name                  = "Consumption"
         workload_profile_type = "Consumption"
-        maximum_count         = 6
-        minimum_count         = 3
+        # Consumption の場合は 0 にする
+        minimum_count = 0
+        maximum_count = 0
       }
     }
   }

@@ -15,8 +15,8 @@ resource "azurerm_container_app_environment" "this" {
   workload_profile {
     name                  = each.value.workload_profile.name
     workload_profile_type = each.value.workload_profile.workload_profile_type
-    maximum_count         = each.value.workload_profile.maximum_count
     minimum_count         = each.value.workload_profile.minimum_count
+    maximum_count         = each.value.workload_profile.maximum_count
   }
 
   tags = var.tags
