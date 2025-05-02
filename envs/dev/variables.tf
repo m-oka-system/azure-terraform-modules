@@ -1614,6 +1614,31 @@ variable "openai_deployment" {
   }
 }
 
+variable "document_intelligence" {
+  type = map(object({
+    name     = string
+    location = string
+    kind     = string
+    sku_name = string
+    network_acls = object({
+      default_action = string
+      ip_rules       = list(string)
+    })
+  }))
+  default = {
+    app = {
+      name     = "app"
+      location = "eastus"
+      kind     = "FormRecognizer"
+      sku_name = "S0"
+      network_acls = {
+        default_action = "Deny"
+        ip_rules       = ["MyIP"]
+      }
+    }
+  }
+}
+
 variable "aisearch" {
   type = map(object({
     name                          = string

@@ -300,6 +300,15 @@ module "openai" {
   allowed_cidr        = split(",", var.allowed_cidr)
 }
 
+module "document_intelligence" {
+  source                = "../../modules/document_intelligence"
+  common                = var.common
+  resource_group_name   = azurerm_resource_group.rg.name
+  tags                  = azurerm_resource_group.rg.tags
+  document_intelligence = var.document_intelligence
+  allowed_cidr          = split(",", var.allowed_cidr)
+}
+
 module "aisearch" {
   count = local.aisearch_enabled ? 1 : 0
 
