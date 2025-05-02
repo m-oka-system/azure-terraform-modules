@@ -197,6 +197,7 @@ module "container_registry" {
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
+  random              = local.common.random
   container_registry  = var.container_registry
 }
 

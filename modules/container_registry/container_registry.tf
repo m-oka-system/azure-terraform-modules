@@ -3,7 +3,7 @@
 ################################
 resource "azurerm_container_registry" "this" {
   for_each                      = var.container_registry
-  name                          = replace("cr-${var.common.project}-${var.common.env}", "-", "")
+  name                          = replace("cr-${var.common.project}-${var.common.env}-${var.random}", "-", "")
   resource_group_name           = var.resource_group_name
   location                      = var.common.location
   sku                           = each.value.sku_name
