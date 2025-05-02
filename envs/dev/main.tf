@@ -101,6 +101,8 @@ module "user_assigned_identity" {
 }
 
 module "activity_log" {
+  count = local.activity_log_enabled ? 1 : 0
+
   source                     = "../../modules/activity_log"
   log_analytics_workspace_id = module.log_analytics.log_analytics["logs"].id
   activity_log_categories    = toset(local.activity_log_categories)

@@ -8,6 +8,7 @@ data "http" "ipify" {
 
 locals {
   # 特定の Azure リソースを作成する/しない
+  activity_log_enabled          = false
   dns_zone_enabled              = false
   private_dns_zone_enabled      = false
   private_endpoint_enabled      = false
