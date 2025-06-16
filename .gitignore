@@ -28,3 +28,6 @@ terraform.rc
 # バックアップファイル
 *.backup
 *.bak
+
+# SpecStory explanation file
+.specstory/
