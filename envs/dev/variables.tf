@@ -1585,20 +1585,20 @@ variable "openai_deployment" {
     })
   }))
   default = {
-    o1-mini = {
-      name                   = "o1-mini"
+    gpt_4_1 = {
+      name                   = "gpt-4.1"
       target_openai          = "app"
       version_upgrade_option = "OnceNewDefaultVersionAvailable"
       model = {
-        name    = "o1-mini"
-        version = "2024-09-12"
+        name    = "gpt-4.1"
+        version = "2025-04-14"
       }
       sku = {
         name     = "GlobalStandard"
         capacity = 10
       }
     }
-    o3-mini = {
+    o3_mini = {
       name                   = "o3-mini"
       target_openai          = "app"
       version_upgrade_option = "OnceNewDefaultVersionAvailable"
