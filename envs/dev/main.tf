@@ -19,6 +19,24 @@ module "vnet" {
   subnet              = var.subnet
 }
 
+module "vnet_peering_hub_spoke1" {
+  source              = "../../modules/vnet_peering"
+  resource_group_name = azurerm_resource_group.rg.name
+  hub_vnet_name       = module.vnet.vnet["hub"].name
+  hub_vnet_id         = module.vnet.vnet["hub"].id
+  spoke_vnet_name     = module.vnet.vnet["spoke1"].name
+  spoke_vnet_id       = module.vnet.vnet["spoke1"].id
+}
+
+module "vnet_peering_hub_spoke2" {
+  source              = "../../modules/vnet_peering"
+  resource_group_name = azurerm_resource_group.rg.name
+  hub_vnet_name       = module.vnet.vnet["hub"].name
+  hub_vnet_id         = module.vnet.vnet["hub"].id
+  spoke_vnet_name     = module.vnet.vnet["spoke2"].name
+  spoke_vnet_id       = module.vnet.vnet["spoke2"].id
+}
+
 module "network_security_group" {
   source                 = "../../modules/network_security_group"
   common                 = var.common
