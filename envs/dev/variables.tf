@@ -18,9 +18,17 @@ variable "vnet" {
     address_space = list(string)
   }))
   default = {
+    hub = {
+      name          = "hub"
+      address_space = ["192.168.0.0/16"]
+    }
     spoke1 = {
       name          = "spoke1"
       address_space = ["10.10.0.0/16"]
+    }
+    spoke2 = {
+      name          = "spoke2"
+      address_space = ["10.20.0.0/16"]
     }
   }
 }
@@ -38,6 +46,14 @@ variable "subnet" {
     })
   }))
   default = {
+    bastion = {
+      name                              = "AzureBastionSubnet"
+      target_vnet                       = "hub"
+      address_prefixes                  = ["192.168.1.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
     pe = {
       name                              = "pe"
       target_vnet                       = "spoke1"
@@ -87,18 +103,10 @@ variable "subnet" {
       private_endpoint_network_policies = "Disabled"
       service_delegation                = null
     }
-    bastion = {
-      name                              = "AzureBastionSubnet"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.5.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
-    }
     appgw = {
       name                              = "appgw"
       target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.6.0/24"]
+      address_prefixes                  = ["10.10.5.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
       service_delegation                = null
@@ -114,6 +122,15 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    # Spoke2
+    vm2 = {
+      name                              = "vm2"
+      target_vnet                       = "spoke2"
+      address_prefixes                  = ["10.20.4.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
   }
 }
 
@@ -123,6 +140,10 @@ variable "network_security_group" {
     target_subnet = string
   }))
   default = {
+    bastion = {
+      name          = "bastion"
+      target_subnet = "bastion"
+    }
     pe = {
       name          = "pe"
       target_subnet = "pe"
@@ -143,10 +164,6 @@ variable "network_security_group" {
       name          = "vm"
       target_subnet = "vm"
     }
-    bastion = {
-      name          = "bastion"
-      target_subnet = "bastion"
-    }
     appgw = {
       name          = "appgw"
       target_subnet = "appgw"
@@ -154,6 +171,11 @@ variable "network_security_group" {
     cae = {
       name          = "cae"
       target_subnet = "cae"
+    }
+    # Spoke2
+    vm2 = {
+      name          = "vm2"
+      target_subnet = "vm2"
     }
   }
 }
@@ -214,6 +236,127 @@ variable "network_security_rule" {
   }
 
   default = [
+    # AzureBastionSubnet
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowHttpsInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowGatewayManagerInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "GatewayManager"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowAzureLoadBalancerInbound"
+      priority                   = 1200
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "AzureLoadBalancer"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowBastionHostCommunication"
+      priority                   = 1300
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_ranges    = ["8080", "5701"]
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowSshRdpOutbound"
+      priority                   = 1000
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_ranges    = ["22", "3389"]
+      source_address_prefix      = "*"
+      destination_address_prefix = "VirtualNetwork"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowAzureCloudOutbound"
+      priority                   = 1100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "*"
+      destination_address_prefix = "AzureCloud"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowBastionCommunication"
+      priority                   = 1200
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_ranges    = ["8080", "5701"]
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "AllowHttpOutbound"
+      priority                   = 1300
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "*"
+      destination_address_prefix = "Internet"
+    },
+    {
+      target_nsg                 = "bastion"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
     # PE Subnet
     {
       target_nsg                 = "pe"
@@ -461,127 +604,6 @@ variable "network_security_rule" {
     },
     {
       target_nsg                 = "vm"
-      name                       = "DenyAllOutbound"
-      priority                   = 4096
-      direction                  = "Outbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-    },
-    # AzureBastionSubnet
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowHttpsInbound"
-      priority                   = 1000
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "Internet"
-      destination_address_prefix = "*"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowGatewayManagerInbound"
-      priority                   = 1100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "GatewayManager"
-      destination_address_prefix = "*"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowAzureLoadBalancerInbound"
-      priority                   = 1200
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "AzureLoadBalancer"
-      destination_address_prefix = "*"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowBastionHostCommunication"
-      priority                   = 1300
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_ranges    = ["8080", "5701"]
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "VirtualNetwork"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "DenyAllInbound"
-      priority                   = 4096
-      direction                  = "Inbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowSshRdpOutbound"
-      priority                   = 1000
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_ranges    = ["22", "3389"]
-      source_address_prefix      = "*"
-      destination_address_prefix = "VirtualNetwork"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowAzureCloudOutbound"
-      priority                   = 1100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "AzureCloud"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowBastionCommunication"
-      priority                   = 1200
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_ranges    = ["8080", "5701"]
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "VirtualNetwork"
-    },
-    {
-      target_nsg                 = "bastion"
-      name                       = "AllowHttpOutbound"
-      priority                   = 1300
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-    },
-    {
-      target_nsg                 = "bastion"
       name                       = "DenyAllOutbound"
       priority                   = 4096
       direction                  = "Outbound"
