@@ -402,6 +402,7 @@ module "vm" {
   tags                = azurerm_resource_group.rg.tags
   vm                  = var.vm
   vm_admin_username   = var.vm_admin_username
+  vm_admin_password   = var.vm_admin_password
   public_key          = module.ssh_public_key.public_key_openssh
   subnet              = module.vnet.subnet
 }
@@ -421,7 +422,7 @@ module "vmss" {
 }
 
 module "loadbalancer" {
-  count = local.vm_enabled ? 1 : 0
+  count = local.loadbalancer_enabled ? 1 : 0
 
   source              = "../../modules/loadbalancer"
   common              = var.common

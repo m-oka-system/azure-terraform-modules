@@ -1877,12 +1877,13 @@ variable "redis_cache" {
 
 variable "vm" {
   type = map(object({
+    os_type                         = string
     name                            = string
     target_subnet                   = string
     vm_size                         = string
     zone                            = string
     allow_extension_operations      = bool
-    disable_password_authentication = bool
+    disable_password_authentication = optional(bool)
     encryption_at_host_enabled      = bool
     patch_mode                      = string
     secure_boot_enabled             = bool
@@ -1899,11 +1900,11 @@ variable "vm" {
       sku       = string
       version   = string
     })
-    public_ip = object({
+    public_ip = optional(object({
       sku               = string
       allocation_method = string
       zones             = list(string)
-    })
+    }))
     vm_shutdown_schedule = object({
       daily_recurrence_time = string
       timezone              = string
@@ -1916,17 +1917,53 @@ variable "vm" {
     })
   }))
   default = {
-    jumpbox = {
-      name                            = "jumpbox"
-      target_subnet                   = "vm"
-      vm_size                         = "Standard_DS1_v2"
-      zone                            = "1"
-      allow_extension_operations      = true
-      disable_password_authentication = true
-      encryption_at_host_enabled      = false
-      patch_mode                      = "ImageDefault"
-      secure_boot_enabled             = true
-      vtpm_enabled                    = true
+    # jumpbox = {
+    #   os_type                         = "Linux"
+    #   name                            = "jumpbox"
+    #   target_subnet                   = "vm"
+    #   vm_size                         = "Standard_DS1_v2"
+    #   zone                            = "1"
+    #   allow_extension_operations      = true
+    #   disable_password_authentication = true
+    #   encryption_at_host_enabled      = false
+    #   patch_mode                      = "ImageDefault"
+    #   secure_boot_enabled             = true
+    #   vtpm_enabled                    = true
+    #   os_disk = {
+    #     os_disk_cache             = "ReadWrite"
+    #     os_disk_type              = "Standard_LRS"
+    #     os_disk_size              = 30
+    #     write_accelerator_enabled = false
+    #   }
+    #   source_image_reference = {
+    #     offer     = "ubuntu-24_04-lts"
+    #     publisher = "canonical"
+    #     sku       = "server"
+    #     version   = "latest"
+    #   }
+    #   public_ip = null
+    #   vm_shutdown_schedule = {
+    #     daily_recurrence_time = "1900"
+    #     timezone              = "Tokyo Standard Time"
+    #     enabled               = true
+    #     notification_settings = {
+    #       enabled         = false
+    #       time_in_minutes = 15
+    #       email           = "admin@example.com"
+    #     }
+    #   }
+    # }
+    dc = {
+      os_type                    = "Windows"
+      name                       = "dc"
+      target_subnet              = "vm2"
+      vm_size                    = "Standard_DS1_v2"
+      zone                       = "1"
+      allow_extension_operations = true
+      encryption_at_host_enabled = false
+      patch_mode                 = "AutomaticByOS"
+      secure_boot_enabled        = true
+      vtpm_enabled               = true
       os_disk = {
         os_disk_cache             = "ReadWrite"
         os_disk_type              = "Standard_LRS"
@@ -1934,9 +1971,9 @@ variable "vm" {
         write_accelerator_enabled = false
       }
       source_image_reference = {
-        offer     = "ubuntu-24_04-lts"
-        publisher = "canonical"
-        sku       = "server"
+        offer     = "WindowsServer"
+        publisher = "MicrosoftWindowsServer"
+        sku       = "2022-datacenter-azure-edition-smalldisk"
         version   = "latest"
       }
       public_ip = null
@@ -1957,6 +1994,10 @@ variable "vm" {
 variable "vm_admin_username" {
   type    = string
   default = "azureuser"
+}
+
+variable "vm_admin_password" {
+  type = string
 }
 
 variable "vmss" {
