@@ -25,6 +25,7 @@ locals {
   redis_enabled                 = false
   vm_enabled                    = false
   vmss_enabled                  = false
+  loadbalancer_enabled          = false
   bastion_enabled               = false
   nat_gateway_enabled           = false
   resource_health_alert_enabled = false
