@@ -845,7 +845,7 @@ variable "key_vault" {
   type = map(object({
     name                       = string
     sku_name                   = string
-    enable_rbac_authorization  = bool
+    rbac_authorization_enabled = bool
     purge_protection_enabled   = bool
     soft_delete_retention_days = number
     network_acls = object({
@@ -859,7 +859,7 @@ variable "key_vault" {
     app = {
       name                       = "app"
       sku_name                   = "standard"
-      enable_rbac_authorization  = true
+      rbac_authorization_enabled = true
       purge_protection_enabled   = false
       soft_delete_retention_days = 7
       network_acls = {
