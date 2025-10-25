@@ -1,20 +1,20 @@
 terraform {
   # Terraform のバージョン
-  required_version = "~> 1.11"
+  required_version = "~> 1.13.0"
 
   # リソースプロバイダーのバージョン
   required_providers {
     azurerm = {
-      version = "~>4.0"
+      version = "~>4.50.0"
       source  = "hashicorp/azurerm"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.6"
+      version = "~> 3.7.0"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "~> 4.0"
+      version = "~> 4.1.0"
     }
   }
 }
