@@ -27,6 +27,9 @@ resource "azurerm_mssql_server" "this" {
     ]
   }
 
+  # 高速構成を使用して脆弱性評価を有効化 (Microsoft Defender for SQL が必要)
+  express_vulnerability_assessment_enabled = true
+
   tags = var.tags
 }
 
@@ -40,10 +43,17 @@ resource "azurerm_mssql_firewall_rule" "this" {
   end_ip_address   = each.value.end_ip_address
 }
 
-# Audit Policy
+# Audit Policy (監査ログ)
 resource "azurerm_mssql_server_extended_auditing_policy" "this" {
   server_id              = azurerm_mssql_server.this.id
   storage_endpoint       = var.storage_endpoint
   log_monitoring_enabled = true
   retention_in_days      = 7
+}
+
+# Advanced Threat Protection (脅威保護)
+resource "azurerm_mssql_server_security_alert_policy" "this" {
+  resource_group_name = var.resource_group_name
+  server_name         = azurerm_mssql_server.this.name
+  state               = "Enabled"
 }
