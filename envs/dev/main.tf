@@ -388,6 +388,16 @@ module "mssql_server" {
   storage_endpoint    = module.storage.storage_account["log"].primary_blob_endpoint
 }
 
+module "mssql_database" {
+  count = local.mssql_database_enabled ? 1 : 0
+
+  source              = "../../modules/mssql_database"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  server_id           = module.mssql_server[0].mssql_server.id
+}
+
 module "redis" {
   count = local.redis_enabled ? 1 : 0
 
@@ -559,6 +569,7 @@ module "diagnostic_setting" {
       { for k, v in module.storage.storage_account : format("storage_account_%s", k) => v.id },
       { for k, v in module.storage.storage_account : format("blob_%s", k) => format("%s/blobServices/default", v.id) },
       { for k, v in module.key_vault.key_vault : format("key_vault_%s", k) => v.id },
+      (local.mssql_database_enabled ? { "sqldb" = module.mssql_database[0].mssql_database.id } : {}),
       # And more...
     )
   }
