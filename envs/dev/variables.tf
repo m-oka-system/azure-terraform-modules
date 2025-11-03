@@ -932,6 +932,9 @@ variable "user_assigned_identity" {
     appgw = {
       name = "appgw"
     }
+    mssql = {
+      name = "mssql"
+    }
   }
 }
 
@@ -964,6 +967,10 @@ variable "role_assignment" {
     appgw_key_vault_secrets_user = {
       target_identity      = "appgw"
       role_definition_name = "Key Vault Secrets User"
+    }
+    mssql_blob_data_contributor = {
+      target_identity      = "mssql"
+      role_definition_name = "Storage Blob Data Contributor"
     }
   }
 }
@@ -1846,6 +1853,27 @@ variable "mysql_flexible_database" {
       target_mysql_server = "app"
       charset             = "utf8mb4"
       collation           = "utf8mb4_0900_ai_ci"
+    }
+  }
+}
+
+variable "firewall_rules" {
+  type = map(object({
+    start_ip_address = string
+    end_ip_address   = string
+  }))
+  default = {
+    single_ip = {
+      start_ip_address = "40.112.8.12"
+      end_ip_address   = "40.112.8.12"
+    }
+    ip_range = {
+      start_ip_address = "40.112.0.0"
+      end_ip_address   = "40.112.255.255"
+    }
+    access_azure = {
+      start_ip_address = "0.0.0.0"
+      end_ip_address   = "0.0.0.0"
     }
   }
 }
