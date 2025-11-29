@@ -1,10 +1,10 @@
 # Terraform を実行するアカウントの情報を取得する
 data "azurerm_client_config" "current" {}
 
-# クライアントの IP アドレスを取得する
-data "http" "ipify" {
-  url = "http://api.ipify.org"
-}
+# # クライアントの IP アドレスを取得する
+# data "http" "ipify" {
+#   url = "http://api.ipify.org"
+# }
 
 locals {
   # 特定の Azure リソースを作成する/しない
