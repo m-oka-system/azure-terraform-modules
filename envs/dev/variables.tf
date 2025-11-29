@@ -693,8 +693,11 @@ variable "storage" {
       versioning_enabled                = bool
       change_feed_enabled               = bool
       last_access_time_enabled          = bool
-      delete_retention_policy           = number
-      container_delete_retention_policy = number
+      delete_retention_policy           = number # 削除した BLOB の保持期間 (日数)
+      container_delete_retention_policy = number # 削除したコンテナーの保持期間 (日数)
+      restore_policy = optional(object({         # ポイントインタイムリストアのポリシー（nullの場合は無効化）
+        days = number                            # ポイントインタイムリストアの最大復元ポイント (経過日数)
+      }))
     })
     network_rules = object({
       default_action             = string
@@ -720,11 +723,14 @@ variable "storage" {
       is_hns_enabled                = false
       defender_for_storage_enabled  = false
       blob_properties = {
-        versioning_enabled                = false
-        change_feed_enabled               = false
+        versioning_enabled                = true
+        change_feed_enabled               = true
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy = {
+          days = 6
+        }
       }
       network_rules = {
         default_action             = "Deny"
@@ -749,6 +755,7 @@ variable "storage" {
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy                    = null
       }
       network_rules = {
         default_action             = "Deny"
@@ -773,6 +780,7 @@ variable "storage" {
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy                    = null
       }
       network_rules = {
         default_action             = "Deny"

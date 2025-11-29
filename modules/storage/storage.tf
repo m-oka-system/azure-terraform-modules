@@ -19,6 +19,14 @@ resource "azurerm_storage_account" "this" {
     change_feed_enabled      = each.value.blob_properties.change_feed_enabled
     last_access_time_enabled = each.value.blob_properties.last_access_time_enabled
 
+    dynamic "restore_policy" {
+      for_each = each.value.blob_properties.restore_policy != null ? [each.value.blob_properties.restore_policy] : []
+
+      content {
+        days = restore_policy.value.days
+      }
+    }
+
     delete_retention_policy {
       days = each.value.blob_properties.delete_retention_policy
     }
