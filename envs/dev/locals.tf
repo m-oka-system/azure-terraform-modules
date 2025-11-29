@@ -34,10 +34,10 @@ locals {
 
   # 共通の変数
   common = {
-    subscription_id   = data.azurerm_client_config.current.subscription_id
-    tenant_id         = data.azurerm_client_config.current.tenant_id
-    random            = random_integer.num.result
-    client_ip_address = chomp(data.http.ipify.response_body)
+    subscription_id = data.azurerm_client_config.current.subscription_id
+    tenant_id       = data.azurerm_client_config.current.tenant_id
+    random          = random_integer.num.result
+    # client_ip_address = chomp(data.http.ipify.response_body)
     tags = {
       project = var.common.project
       env     = var.common.env
