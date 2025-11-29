@@ -580,9 +580,6 @@ module "defender_for_cloud" {
 
   source                               = "../../modules/defender_for_cloud"
   security_center_subscription_pricing = var.security_center_subscription_pricing
-  depends_on = [
-    module.mssql_database[0].mssql_database,
-  ]
 }
 
 module "defender_for_cloud_security_contact" {
