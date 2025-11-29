@@ -574,3 +574,13 @@ module "diagnostic_setting" {
     )
   }
 }
+
+module "defender_for_cloud" {
+  count = local.defender_for_cloud_enabled ? 1 : 0
+
+  source                               = "../../modules/defender_for_cloud"
+  security_center_subscription_pricing = var.security_center_subscription_pricing
+  depends_on = [
+    module.mssql_database[0].mssql_database,
+  ]
+}

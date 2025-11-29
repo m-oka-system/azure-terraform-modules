@@ -2332,3 +2332,16 @@ variable "service_health_alert" {
     # }
   }
 }
+
+variable "security_center_subscription_pricing" {
+  type = map(object({
+    tier          = string # 価格プラン: "Free" または "Standard"
+    resource_type = string # リソースタイプ: "AI", "Api", "AppServices", "ContainerRegistry", "KeyVaults", "KubernetesService", "SqlServers", "SqlServerVirtualMachines", "StorageAccounts", "VirtualMachines", "Arm", "Dns", "OpenSourceRelationalDatabases", "Containers", "CosmosDbs", "CloudPosture" など。デフォルトは "VirtualMachines"
+  }))
+  default = {
+    sql_databases = {
+      tier          = "Standard"
+      resource_type = "SqlServers"
+    }
+  }
+}
