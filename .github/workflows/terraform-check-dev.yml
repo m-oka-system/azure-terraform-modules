@@ -30,7 +30,7 @@ concurrency:
 
 env:
   TFLINT_VERSION: ${{ vars.TFLINT_VERSION || 'v0.59.1' }}
-  TRIVY_VERSION: ${{ vars.TRIVY_VERSION || 'v0.67.2' }}
+  TRIVY_VERSION: ${{ vars.TRIVY_VERSION || 'v0.65.0' }}
 
 jobs:
   tflint:
