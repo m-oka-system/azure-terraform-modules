@@ -584,3 +584,11 @@ module "defender_for_cloud" {
     module.mssql_database[0].mssql_database,
   ]
 }
+
+module "defender_for_cloud_security_contact" {
+  count = local.defender_for_cloud_enabled ? 1 : 0
+
+  source           = "../../modules/defender_for_cloud_security_contact"
+  subscription_id  = local.common.subscription_id
+  security_contact = var.security_contact
+}

@@ -2345,3 +2345,38 @@ variable "security_center_subscription_pricing" {
     }
   }
 }
+
+variable "security_contact" {
+  type = object({
+    emails     = list(string) # 通知を受け取る電子メールアドレスのリスト（セミコロン区切りの文字列に変換されます）
+    is_enabled = bool         # 通知を有効にするかどうか
+    notifications_by_role = object({
+      state = string       # "On" または "Off"
+      roles = list(string) # 通知を受け取るロール: "AccountAdmin", "Contributor", "Owner", "ServiceAdmin"
+    })
+    alert_notifications = object({
+      minimal_severity = string # 通知する最小の重大度: "Low", "Medium", "High"（"Critical"は使用不可）
+    })
+    attack_path_notifications = object({
+      enabled            = bool   # 攻撃パス通知を有効にするかどうか （攻撃パス分析には Defender CSPM 有料プランが必要）
+      minimal_risk_level = string # 通知する最小のリスクレベル: "Low", "Medium", "High", "Critical"
+    })
+    phone = optional(string) # 電話番号（オプション）
+  })
+  default = {
+    emails     = ["support@example.com", "info@example.com"]
+    is_enabled = true
+    notifications_by_role = {
+      state = "On"
+      roles = ["Owner"]
+    }
+    alert_notifications = {
+      minimal_severity = "High"
+    }
+    attack_path_notifications = {
+      enabled            = false
+      minimal_risk_level = "Critical"
+    }
+    phone = null
+  }
+}
