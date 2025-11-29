@@ -786,12 +786,12 @@ variable "blob_container" {
     app_static = {
       target_storage_account = "app"
       container_name         = "static"
-      container_access_type  = "blob"
+      container_access_type  = "private"
     }
     app_media = {
       target_storage_account = "app"
       container_name         = "media"
-      container_access_type  = "blob"
+      container_access_type  = "private"
     }
   }
 }
