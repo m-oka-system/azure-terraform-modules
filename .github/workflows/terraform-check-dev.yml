@@ -30,6 +30,7 @@ concurrency:
 
 env:
   TFLINT_VERSION: ${{ vars.TFLINT_VERSION || 'v0.59.1' }}
+  TRIVY_VERSION: ${{ vars.TRIVY_VERSION || 'v0.67.2' }}
 
 jobs:
   tflint:
@@ -68,6 +69,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       name: Checkout source code
+
+    - name: Manual Trivy Setup
+      uses: aquasecurity/setup-trivy@v0.2.0
+      with:
+        cache: true
+        version: ${{ env.TRIVY_VERSION }}
 
     - name: Run Trivy config scan
       uses: aquasecurity/trivy-action@0.28.0
