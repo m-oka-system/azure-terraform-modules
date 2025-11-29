@@ -39,6 +39,18 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  # バージョンレベルの不変ストレージポリシー
+  # バージョンレベルの不変ストレージを有効にするには、blob_propertiesでversioning_enabled = trueが必要
+  dynamic "immutability_policy" {
+    for_each = each.value.immutability_policy != null ? [each.value.immutability_policy] : []
+
+    content {
+      allow_protected_append_writes = immutability_policy.value.allow_protected_append_writes
+      period_since_creation_in_days = immutability_policy.value.period_since_creation_in_days
+      state                         = immutability_policy.value.state
+    }
+  }
+
   tags = var.tags
 }
 

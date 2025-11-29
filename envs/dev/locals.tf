@@ -22,7 +22,7 @@ locals {
   aisearch_enabled              = false
   cosmosdb_enabled              = false
   mysql_enabled                 = false
-  mssql_database_enabled        = true
+  mssql_database_enabled        = false
   redis_enabled                 = false
   vm_enabled                    = false
   vmss_enabled                  = false

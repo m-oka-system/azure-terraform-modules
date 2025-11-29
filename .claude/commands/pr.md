@@ -57,7 +57,6 @@ Based on the provided option, perform one of the following actions:
 - Use appropriate diagram types (flowchart, sequence, class, etc.)
 - Show before/after states if applicable
 - Highlight new or modified components
-- Use consistent styling and colors
 - Add the diagram in a dedicated section of the PR description
 
 **Generate the PR description and create the pull request automatically.**
