@@ -835,17 +835,22 @@ variable "storage_management_policy" {
     })
   }))
   default = {
+    # リソースログ (診断設定) は appendBlob として記録される
+    # appendBlob はアクセス層をサポートしていない (削除のみ可能)
     log = {
-      name                   = "move-cold-after-30-days"
+      name                   = "delete-after-1-day"
       target_storage_account = "log"
-      blob_types             = ["blockBlob"]
+      blob_types             = ["appendBlob"]
       actions = {
         base_blob = {
-          tier_to_cold_after_days_since_modification_greater_than = 30
-          delete_after_days_since_modification_greater_than       = 365
+          delete_after_days_since_modification_greater_than = 1
         }
-        snapshot = null
-        version  = null
+        snapshot = {
+          delete_after_days_since_creation_greater_than = 1
+        }
+        version = {
+          delete_after_days_since_creation = 1
+        }
       }
     }
   }
