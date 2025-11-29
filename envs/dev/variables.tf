@@ -724,7 +724,12 @@ variable "storage" {
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
       }
-      network_rules = null
+      network_rules = {
+        default_action             = "Deny"
+        bypass                     = ["AzureServices"]
+        ip_rules                   = ["MyIP"]
+        virtual_network_subnet_ids = []
+      }
     }
     func = {
       name                          = "func"
@@ -786,12 +791,12 @@ variable "blob_container" {
     app_static = {
       target_storage_account = "app"
       container_name         = "static"
-      container_access_type  = "blob"
+      container_access_type  = "private"
     }
     app_media = {
       target_storage_account = "app"
       container_name         = "media"
-      container_access_type  = "blob"
+      container_access_type  = "private"
     }
   }
 }

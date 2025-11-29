@@ -1,10 +1,10 @@
 # Terraform を実行するアカウントの情報を取得する
 data "azurerm_client_config" "current" {}
 
-# クライアントの IP アドレスを取得する
-data "http" "ipify" {
-  url = "http://api.ipify.org"
-}
+# # クライアントの IP アドレスを取得する
+# data "http" "ipify" {
+#   url = "http://api.ipify.org"
+# }
 
 locals {
   # 特定の Azure リソースを作成する/しない
@@ -120,16 +120,6 @@ locals {
   azure_portal_ips = {
     aisearch = "52.139.243.237"                                         # https://learn.microsoft.com/ja-jp/azure/search/service-configure-firewall
     cosmosdb = "13.91.105.215,4.210.172.107,13.88.56.148,40.91.218.243" # https://learn.microsoft.com/ja-jp/azure/cosmos-db/how-to-configure-firewall
-  }
-
-  # App Service
-  app_service = {
-
-    app_settings = {
-      app = {
-        APPINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
-      }
-    }
   }
 
   # Alert Rule
