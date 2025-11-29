@@ -574,3 +574,18 @@ module "diagnostic_setting" {
     )
   }
 }
+
+module "defender_for_cloud" {
+  count = local.defender_for_cloud_enabled ? 1 : 0
+
+  source                               = "../../modules/defender_for_cloud"
+  security_center_subscription_pricing = var.security_center_subscription_pricing
+}
+
+module "defender_for_cloud_security_contact" {
+  count = local.defender_for_cloud_enabled ? 1 : 0
+
+  source           = "../../modules/defender_for_cloud_security_contact"
+  subscription_id  = local.common.subscription_id
+  security_contact = var.security_contact
+}

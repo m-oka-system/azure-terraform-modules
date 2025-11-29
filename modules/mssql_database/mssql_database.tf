@@ -20,9 +20,3 @@ resource "azurerm_mssql_database" "this" {
 
   tags = var.tags
 }
-
-# Microsoft Defender for SQL
-resource "azurerm_security_center_subscription_pricing" "this" {
-  tier          = "Standard"
-  resource_type = "SqlServers"
-}

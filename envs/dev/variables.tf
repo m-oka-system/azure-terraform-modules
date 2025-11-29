@@ -688,12 +688,16 @@ variable "storage" {
     https_traffic_only_enabled    = bool
     public_network_access_enabled = bool
     is_hns_enabled                = bool
+    defender_for_storage_enabled  = bool # Defender for Storageを有効にするかどうか
     blob_properties = object({
       versioning_enabled                = bool
       change_feed_enabled               = bool
       last_access_time_enabled          = bool
-      delete_retention_policy           = number
-      container_delete_retention_policy = number
+      delete_retention_policy           = number # 削除した BLOB の保持期間 (日数)
+      container_delete_retention_policy = number # 削除したコンテナーの保持期間 (日数)
+      restore_policy = optional(object({         # ポイントインタイムリストアのポリシー（nullの場合は無効化）
+        days = number                            # ポイントインタイムリストアの最大復元ポイント (経過日数)
+      }))
     })
     network_rules = object({
       default_action             = string
@@ -717,12 +721,16 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
-        versioning_enabled                = false
-        change_feed_enabled               = false
+        versioning_enabled                = true
+        change_feed_enabled               = true
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy = {
+          days = 6
+        }
       }
       network_rules = {
         default_action             = "Deny"
@@ -740,12 +748,14 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
         versioning_enabled                = false
         change_feed_enabled               = false
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy                    = null
       }
       network_rules = {
         default_action             = "Deny"
@@ -763,12 +773,14 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = false
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
+        restore_policy                    = null
       }
       network_rules = {
         default_action             = "Deny"
@@ -2330,5 +2342,53 @@ variable "service_health_alert" {
     #   target_action_group = "incident"
     #   events              = ["Incident"]
     # }
+  }
+}
+
+variable "security_center_subscription_pricing" {
+  type = map(object({
+    tier          = string # 価格プラン: "Free" または "Standard"
+    resource_type = string # リソースタイプ: "AI", "Api", "AppServices", "ContainerRegistry", "KeyVaults", "KubernetesService", "SqlServers", "SqlServerVirtualMachines", "StorageAccounts", "VirtualMachines", "Arm", "Dns", "OpenSourceRelationalDatabases", "Containers", "CosmosDbs", "CloudPosture" など。デフォルトは "VirtualMachines"
+  }))
+  default = {
+    sql_databases = {
+      tier          = "Standard"
+      resource_type = "SqlServers"
+    }
+  }
+}
+
+variable "security_contact" {
+  type = object({
+    emails     = list(string) # 通知を受け取る電子メールアドレスのリスト（セミコロン区切りの文字列に変換されます）
+    is_enabled = bool         # 通知を有効にするかどうか
+    notifications_by_role = object({
+      state = string       # "On" または "Off"
+      roles = list(string) # 通知を受け取るロール: "AccountAdmin", "Contributor", "Owner", "ServiceAdmin"
+    })
+    alert_notifications = object({
+      minimal_severity = string # 通知する最小の重大度: "Low", "Medium", "High"（"Critical"は使用不可）
+    })
+    attack_path_notifications = object({
+      enabled            = bool   # 攻撃パス通知を有効にするかどうか （攻撃パス分析には Defender CSPM 有料プランが必要）
+      minimal_risk_level = string # 通知する最小のリスクレベル: "Low", "Medium", "High", "Critical"
+    })
+    phone = optional(string) # 電話番号（オプション）
+  })
+  default = {
+    emails     = ["support@example.com", "info@example.com"]
+    is_enabled = true
+    notifications_by_role = {
+      state = "On"
+      roles = ["Owner"]
+    }
+    alert_notifications = {
+      minimal_severity = "High"
+    }
+    attack_path_notifications = {
+      enabled            = false
+      minimal_risk_level = "Critical"
+    }
+    phone = null
   }
 }

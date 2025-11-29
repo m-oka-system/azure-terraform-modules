@@ -19,6 +19,14 @@ resource "azurerm_storage_account" "this" {
     change_feed_enabled      = each.value.blob_properties.change_feed_enabled
     last_access_time_enabled = each.value.blob_properties.last_access_time_enabled
 
+    dynamic "restore_policy" {
+      for_each = each.value.blob_properties.restore_policy != null ? [each.value.blob_properties.restore_policy] : []
+
+      content {
+        days = restore_policy.value.days
+      }
+    }
+
     delete_retention_policy {
       days = each.value.blob_properties.delete_retention_policy
     }
@@ -120,4 +128,10 @@ resource "azurerm_storage_management_policy" "this" {
       }
     }
   }
+}
+
+# Defender for Storage
+resource "azurerm_security_center_storage_defender" "this" {
+  for_each           = { for k, v in var.storage : k => v if v.defender_for_storage_enabled }
+  storage_account_id = azurerm_storage_account.this[each.key].id
 }
