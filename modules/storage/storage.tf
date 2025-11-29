@@ -121,3 +121,9 @@ resource "azurerm_storage_management_policy" "this" {
     }
   }
 }
+
+# Defender for Storage
+resource "azurerm_security_center_storage_defender" "this" {
+  for_each           = { for k, v in var.storage : k => v if v.defender_for_storage_enabled }
+  storage_account_id = azurerm_storage_account.this[each.key].id
+}

@@ -688,6 +688,7 @@ variable "storage" {
     https_traffic_only_enabled    = bool
     public_network_access_enabled = bool
     is_hns_enabled                = bool
+    defender_for_storage_enabled  = bool # Defender for Storageを有効にするかどうか
     blob_properties = object({
       versioning_enabled                = bool
       change_feed_enabled               = bool
@@ -717,6 +718,7 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
         versioning_enabled                = false
         change_feed_enabled               = false
@@ -740,6 +742,7 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
         versioning_enabled                = false
         change_feed_enabled               = false
@@ -763,6 +766,7 @@ variable "storage" {
       https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
+      defender_for_storage_enabled  = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = false
