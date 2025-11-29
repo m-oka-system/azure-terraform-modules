@@ -122,16 +122,6 @@ locals {
     cosmosdb = "13.91.105.215,4.210.172.107,13.88.56.148,40.91.218.243" # https://learn.microsoft.com/ja-jp/azure/cosmos-db/how-to-configure-firewall
   }
 
-  # App Service
-  app_service = {
-
-    app_settings = {
-      app = {
-        APPINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
-      }
-    }
-  }
-
   # Alert Rule
   metric_alert = {
     "Microsoft.Storage/storageAccounts" = {
