@@ -15,9 +15,11 @@ resource "azurerm_storage_account" "this" {
   is_hns_enabled                = each.value.is_hns_enabled
 
   blob_properties {
-    versioning_enabled       = each.value.blob_properties.versioning_enabled
-    change_feed_enabled      = each.value.blob_properties.change_feed_enabled
-    last_access_time_enabled = each.value.blob_properties.last_access_time_enabled
+    versioning_enabled            = each.value.blob_properties.versioning_enabled
+    change_feed_enabled           = each.value.blob_properties.change_feed_enabled
+    change_feed_retention_in_days = each.value.blob_properties.change_feed_retention_in_days
+    last_access_time_enabled      = each.value.blob_properties.last_access_time_enabled
+
 
     dynamic "restore_policy" {
       for_each = each.value.blob_properties.restore_policy != null ? [each.value.blob_properties.restore_policy] : []

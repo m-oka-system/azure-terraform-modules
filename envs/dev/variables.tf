@@ -692,6 +692,7 @@ variable "storage" {
     blob_properties = object({
       versioning_enabled                = bool
       change_feed_enabled               = bool
+      change_feed_retention_in_days     = optional(number) # 変更フィードの保持期間 (日数) （nullの場合は無期限）
       last_access_time_enabled          = bool
       delete_retention_policy           = number # 削除した BLOB の保持期間 (日数)
       container_delete_retention_policy = number # 削除したコンテナーの保持期間 (日数)
@@ -725,6 +726,7 @@ variable "storage" {
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
+        change_feed_retention_in_days     = 7
         last_access_time_enabled          = false
         delete_retention_policy           = 7
         container_delete_retention_policy = 7
