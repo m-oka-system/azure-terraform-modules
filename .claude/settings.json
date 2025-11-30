@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "bash .claude/scripts/terraform-post-commit-validation.sh",
+        "description": "Run Terraform validation (validate, tflint, trivy) after git commits"
+      }
+    ]
+  }
+}

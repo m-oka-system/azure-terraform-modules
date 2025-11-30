@@ -1,0 +1,45 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "bash .claude/scripts/terraform-post-commit-validation.sh",
+        "description": "Run Terraform validation (validate, tflint, trivy) after git commits"
+      }
+    ]
+  },
+
+  "_comment_alternatives": {
+    "description": "Alternative hook configurations",
+
+    "pre_commit_validation": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *\"git commit\"* ]]; then bash .claude/scripts/terraform-post-commit-validation.sh; fi",
+          "description": "Block git commit if validation fails (stricter)"
+        }
+      ]
+    },
+
+    "auto_format_on_edit": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *.tf ]]; then terraform fmt \"$CLAUDE_PROJECT_DIR\"; fi",
+          "description": "Auto-format Terraform files after editing"
+        }
+      ]
+    },
+
+    "validation_with_timeout": {
+      "PostToolUse": [
+        {
+          "matcher": "Bash",
+          "command": "timeout 300 bash .claude/scripts/terraform-post-commit-validation.sh",
+          "description": "Run validation with 5-minute timeout"
+        }
+      ]
+    }
+  }
+}
