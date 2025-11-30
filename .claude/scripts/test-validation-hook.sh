@@ -2,8 +2,15 @@
 
 # Test script for terraform-pre-commit-validation.sh
 
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 echo "Testing Terraform Pre-Commit Validation Hook"
 echo "============================================="
+echo ""
+echo "Repository root: $PROJECT_ROOT"
 echo ""
 
 # Simulate Claude's tool input JSON
@@ -16,9 +23,10 @@ MOCK_INPUT='{
 }'
 
 echo "Simulating git commit hook trigger..."
-echo "$MOCK_INPUT" | bash .claude/scripts/terraform-pre-commit-validation.sh
-
+pushd "$PROJECT_ROOT" >/dev/null
+echo "$MOCK_INPUT" | bash "$SCRIPT_DIR/terraform-pre-commit-validation.sh"
 EXIT_CODE=$?
+popd >/dev/null
 
 echo ""
 echo "Hook exit code: $EXIT_CODE"
