@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Git Native Post-Commit Hook
-# Runs terraform validation after user commits
+# Git Native Pre-Commit Hook
+# Runs terraform validation before user commits
 
 # Reuse the same validation script used by Claude Code
-SCRIPT_PATH="$(git rev-parse --show-toplevel)/.claude/scripts/terraform-post-commit-validation.sh"
+SCRIPT_PATH="$(git rev-parse --show-toplevel)/.claude/scripts/terraform-pre-commit-validation.sh"
 
 if [[ -f "$SCRIPT_PATH" ]]; then
   # Create mock input for the validation script (simulate Claude's tool input)

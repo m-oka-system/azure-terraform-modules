@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Terraform Post-Commit Validation Hook
-# Runs terraform validate, tflint, and trivy scan after git commits
+# Terraform Pre-Commit Validation Hook
+# Runs terraform validate, tflint, and trivy scan before git commits
 # Validates each environment directory under envs/ (dev, stg, prod, etc.)
 
 set -euo pipefail
@@ -23,7 +23,7 @@ if [[ "$TOOL_NAME" != "Bash" ]] || [[ "$TOOL_COMMAND" != *"git commit"* ]]; then
   exit 0  # Not a git commit, skip validation
 fi
 
-echo -e "${YELLOW}🔍 Post-commit validation triggered${NC}"
+echo -e "${YELLOW}🔍 Pre-commit validation triggered${NC}"
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 ENVS_DIR="$PROJECT_DIR/envs"

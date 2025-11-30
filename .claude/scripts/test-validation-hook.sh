@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Test script for terraform-post-commit-validation.sh
+# Test script for terraform-pre-commit-validation.sh
 
-echo "Testing Terraform Post-Commit Validation Hook"
-echo "=============================================="
+echo "Testing Terraform Pre-Commit Validation Hook"
+echo "============================================="
 echo ""
 
 # Simulate Claude's tool input JSON
@@ -16,7 +16,7 @@ MOCK_INPUT='{
 }'
 
 echo "Simulating git commit hook trigger..."
-echo "$MOCK_INPUT" | bash .claude/scripts/terraform-post-commit-validation.sh
+echo "$MOCK_INPUT" | bash .claude/scripts/terraform-pre-commit-validation.sh
 
 EXIT_CODE=$?
 

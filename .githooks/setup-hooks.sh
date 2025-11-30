@@ -30,4 +30,4 @@ echo "Installed hooks:"
 ls -lh "$GIT_HOOKS_DIR" | grep -v "sample" || true
 
 echo ""
-echo "💡 To uninstall, run: rm $GIT_HOOKS_DIR/post-commit"
+echo "💡 To uninstall, run: rm $GIT_HOOKS_DIR/pre-commit"
