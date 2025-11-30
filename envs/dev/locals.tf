@@ -1,10 +1,10 @@
 # Terraform を実行するアカウントの情報を取得する
 data "azurerm_client_config" "current" {}
 
-# クライアントの IP アドレスを取得する
-data "http" "ipify" {
-  url = "http://api.ipify.org"
-}
+# # クライアントの IP アドレスを取得する
+# data "http" "ipify" {
+#   url = "http://api.ipify.org"
+# }
 
 locals {
   # 特定の Azure リソースを作成する/しない
@@ -22,7 +22,7 @@ locals {
   aisearch_enabled              = false
   cosmosdb_enabled              = false
   mysql_enabled                 = false
-  mssql_database_enabled        = true
+  mssql_database_enabled        = false
   redis_enabled                 = false
   vm_enabled                    = false
   vmss_enabled                  = false
@@ -31,13 +31,14 @@ locals {
   nat_gateway_enabled           = false
   resource_health_alert_enabled = false
   diagnostic_setting_enabled    = false
+  defender_for_cloud_enabled    = false
 
   # 共通の変数
   common = {
-    subscription_id   = data.azurerm_client_config.current.subscription_id
-    tenant_id         = data.azurerm_client_config.current.tenant_id
-    random            = random_integer.num.result
-    client_ip_address = chomp(data.http.ipify.response_body)
+    subscription_id = data.azurerm_client_config.current.subscription_id
+    tenant_id       = data.azurerm_client_config.current.tenant_id
+    random          = random_integer.num.result
+    # client_ip_address = chomp(data.http.ipify.response_body)
     tags = {
       project = var.common.project
       env     = var.common.env
@@ -120,16 +121,6 @@ locals {
   azure_portal_ips = {
     aisearch = "52.139.243.237"                                         # https://learn.microsoft.com/ja-jp/azure/search/service-configure-firewall
     cosmosdb = "13.91.105.215,4.210.172.107,13.88.56.148,40.91.218.243" # https://learn.microsoft.com/ja-jp/azure/cosmos-db/how-to-configure-firewall
-  }
-
-  # App Service
-  app_service = {
-
-    app_settings = {
-      app = {
-        APPINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
-      }
-    }
   }
 
   # Alert Rule

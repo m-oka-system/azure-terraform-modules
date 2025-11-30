@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "bash .claude/scripts/terraform-pre-commit-validation.sh",
+        "description": "Run Terraform validation (validate, tflint, trivy) before git commits"
+      }
+    ]
+  }
+}

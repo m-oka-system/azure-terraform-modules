@@ -46,4 +46,4 @@ provider "azurerm" {
   }
 }
 
-provider "http" {}
+# provider "http" {}

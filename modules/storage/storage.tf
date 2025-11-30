@@ -15,9 +15,19 @@ resource "azurerm_storage_account" "this" {
   is_hns_enabled                = each.value.is_hns_enabled
 
   blob_properties {
-    versioning_enabled       = each.value.blob_properties.versioning_enabled
-    change_feed_enabled      = each.value.blob_properties.change_feed_enabled
-    last_access_time_enabled = each.value.blob_properties.last_access_time_enabled
+    versioning_enabled            = each.value.blob_properties.versioning_enabled
+    change_feed_enabled           = each.value.blob_properties.change_feed_enabled
+    change_feed_retention_in_days = each.value.blob_properties.change_feed_retention_in_days
+    last_access_time_enabled      = each.value.blob_properties.last_access_time_enabled
+
+
+    dynamic "restore_policy" {
+      for_each = each.value.blob_properties.restore_policy != null ? [each.value.blob_properties.restore_policy] : []
+
+      content {
+        days = restore_policy.value.days
+      }
+    }
 
     delete_retention_policy {
       days = each.value.blob_properties.delete_retention_policy
@@ -36,6 +46,18 @@ resource "azurerm_storage_account" "this" {
       bypass                     = each.value.network_rules.bypass
       ip_rules                   = join(",", lookup(each.value.network_rules, "ip_rules", null)) == "MyIP" ? var.allowed_cidr : lookup(each.value.network_rules, "ip_rules", null)
       virtual_network_subnet_ids = each.value.network_rules.virtual_network_subnet_ids
+    }
+  }
+
+  # バージョンレベルの不変ストレージポリシー
+  # バージョンレベルの不変ストレージを有効にするには、blob_propertiesでversioning_enabled = trueが必要
+  dynamic "immutability_policy" {
+    for_each = each.value.immutability_policy != null ? [each.value.immutability_policy] : []
+
+    content {
+      allow_protected_append_writes = immutability_policy.value.allow_protected_append_writes
+      period_since_creation_in_days = immutability_policy.value.period_since_creation_in_days
+      state                         = immutability_policy.value.state
     }
   }
 
@@ -108,4 +130,10 @@ resource "azurerm_storage_management_policy" "this" {
       }
     }
   }
+}
+
+# Defender for Storage
+resource "azurerm_security_center_storage_defender" "this" {
+  for_each           = { for k, v in var.storage : k => v if v.defender_for_storage_enabled }
+  storage_account_id = azurerm_storage_account.this[each.key].id
 }
