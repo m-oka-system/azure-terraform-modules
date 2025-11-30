@@ -152,24 +152,32 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
   if command_exists trivy; then
     # Scan for misconfigurations with severity filter
     # Execute in the environment directory for proper module resolution
-    # Temporarily disable exit-on-error to capture trivy's output and exit code
+    TRIVY_ERR_LOG=$(mktemp)
     set +e
-    TRIVY_OUTPUT=$(trivy config . --severity CRITICAL,HIGH --format json 2>/dev/null)
+    TRIVY_OUTPUT=$(trivy config . --severity CRITICAL,HIGH --format json 2>"$TRIVY_ERR_LOG")
     TRIVY_EXIT=$?
     set -e
+    TRIVY_ERROR_MSG=$(cat "$TRIVY_ERR_LOG")
+    rm -f "$TRIVY_ERR_LOG"
 
-    # Check if there are any results
-    MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0' 2>/dev/null || echo "0")
-
-    if [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
-      echo -e "${GREEN}  ✓ trivy scan passed ($ENV_NAME)${NC}"
-    else
-      echo -e "${RED}  ✗ trivy found $MISCONFIG_COUNT security issue(s) in $ENV_NAME:${NC}" >&2
-      # Show detailed table output (with logs to stderr)
-      set +e
-      trivy config . --severity CRITICAL,HIGH --format table >&2
-      set -e
+    if [[ $TRIVY_EXIT -gt 1 ]]; then
+      echo -e "${RED}  ✗ trivy scan failed to run in $ENV_NAME${NC}" >&2
+      [[ -n "$TRIVY_ERROR_MSG" ]] && echo "$TRIVY_ERROR_MSG" >&2
       VALIDATION_FAILED=1
+    else
+      # Check if there are any results (exit code 0=clean, 1=misconfig)
+      MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0' 2>/dev/null || echo "0")
+
+      if [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
+        echo -e "${GREEN}  ✓ trivy scan passed ($ENV_NAME)${NC}"
+      else
+        echo -e "${RED}  ✗ trivy found $MISCONFIG_COUNT security issue(s) in $ENV_NAME:${NC}" >&2
+        # Show detailed table output (with logs to stderr)
+        set +e
+        trivy config . --severity CRITICAL,HIGH --format table >&2
+        set -e
+        VALIDATION_FAILED=1
+      fi
     fi
   else
     echo -e "${YELLOW}  ⚠ trivy not found, skipping${NC}"
