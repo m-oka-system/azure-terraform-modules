@@ -35,3 +35,9 @@ terraform.rc
 
 # SpecStory explanation file
 .specstory/
+
+# Validation tools cache
+.tflint.d/
+.trivy/
+trivy-db/
+.trivyignore
