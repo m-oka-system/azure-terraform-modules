@@ -2376,6 +2376,29 @@ variable "security_center_subscription_pricing" {
   }
 }
 
+variable "backup_policy_blob_storage" {
+  type = object({
+    operational_default_retention_duration = string
+    vault_default_retention_duration       = string
+    time_zone                              = string
+    backup_repeating_time_intervals = object({
+      time     = string
+      interval = string
+      timezone = string
+    })
+  })
+  default = {
+    operational_default_retention_duration = "P7D"
+    vault_default_retention_duration       = "P7D"
+    time_zone                              = "東京 (標準時)"
+    backup_repeating_time_intervals = {
+      time     = "01:00:00"
+      interval = "P1D"
+      timezone = "+09:00"
+    }
+  }
+}
+
 variable "security_contact" {
   type = object({
     emails     = list(string) # 通知を受け取る電子メールアドレスのリスト（セミコロン区切りの文字列に変換されます）
