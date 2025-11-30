@@ -147,40 +147,40 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
 
   echo ""
 
+  # 3. Trivy Scan (per environment, CRITICAL and HIGH only)
+  echo -e "${YELLOW}  [3/3] Running trivy config scan in $ENV_NAME (CRITICAL,HIGH only)...${NC}"
+  if command_exists trivy; then
+    # Scan for misconfigurations with severity filter
+    # Execute in the environment directory for proper module resolution
+    # Temporarily disable exit-on-error to capture trivy's output and exit code
+    set +e
+    TRIVY_OUTPUT=$(trivy config . --severity CRITICAL,HIGH --format json 2>/dev/null)
+    TRIVY_EXIT=$?
+    set -e
+
+    # Check if there are any results
+    MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0' 2>/dev/null || echo "0")
+
+    if [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
+      echo -e "${GREEN}  ✓ trivy scan passed ($ENV_NAME)${NC}"
+    else
+      echo -e "${RED}  ✗ trivy found $MISCONFIG_COUNT security issue(s) in $ENV_NAME:${NC}" >&2
+      # Show detailed table output (with logs to stderr)
+      set +e
+      trivy config . --severity CRITICAL,HIGH --format table >&2
+      set -e
+      VALIDATION_FAILED=1
+    fi
+  else
+    echo -e "${YELLOW}  ⚠ trivy not found, skipping${NC}"
+    echo "  Install: brew install trivy (macOS) or https://trivy.dev/latest/getting-started/installation/"
+  fi
+
+  echo ""
+
   # Return to project root for next iteration
   cd "$PROJECT_DIR"
 done
-
-# 3. Trivy Scan (project-wide, CRITICAL and HIGH only)
-echo -e "${BLUE}━━━ Security Scan (All Environments) ━━━${NC}"
-echo ""
-echo -e "${YELLOW}[3/3] Running trivy config scan (CRITICAL,HIGH only)...${NC}"
-
-if command_exists trivy; then
-  # Scan for misconfigurations with severity filter
-  # Temporarily disable exit-on-error to capture trivy's output and exit code
-  set +e
-  TRIVY_OUTPUT=$(trivy config "$ENVS_DIR" --severity CRITICAL,HIGH --format json 2>/dev/null)
-  TRIVY_EXIT=$?
-  set -e
-
-  # Check if there are any results
-  MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0' 2>/dev/null || echo "0")
-
-  if [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
-    echo -e "${GREEN}✓ trivy scan passed (no CRITICAL/HIGH issues)${NC}"
-  else
-    echo -e "${RED}✗ trivy found $MISCONFIG_COUNT security issue(s):${NC}" >&2
-    # Show detailed table output (with logs to stderr)
-    set +e
-    trivy config "$ENVS_DIR" --severity CRITICAL,HIGH --format table >&2
-    set -e
-    VALIDATION_FAILED=1
-  fi
-else
-  echo -e "${YELLOW}⚠ trivy not found, skipping${NC}"
-  echo "  Install: brew install trivy (macOS) or https://trivy.dev/latest/getting-started/installation/"
-fi
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
