@@ -12,14 +12,16 @@ GIT_HOOKS_DIR="$REPO_ROOT/.git/hooks"
 echo "🔧 Setting up Git hooks..."
 echo ""
 
-# Install hooks
-for hook in "$HOOKS_DIR"/*; do
-  if [[ -f "$hook" ]] && [[ "$hook" != *.sh ]] && [[ "$hook" != *.md ]]; then
-    hook_name=$(basename "$hook")
-
+# Install hooks from allowlist only to avoid executing untrusted files
+APPROVED_HOOKS=("pre-commit")
+for hook_name in "${APPROVED_HOOKS[@]}"; do
+  src="$HOOKS_DIR/$hook_name"
+  if [[ -f "$src" ]]; then
     echo "Installing $hook_name..."
-    cp "$hook" "$GIT_HOOKS_DIR/$hook_name"
+    cp "$src" "$GIT_HOOKS_DIR/$hook_name"
     chmod +x "$GIT_HOOKS_DIR/$hook_name"
+  else
+    echo "Skipping $hook_name (not found in $HOOKS_DIR)"
   fi
 done
 
