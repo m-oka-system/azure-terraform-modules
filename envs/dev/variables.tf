@@ -726,12 +726,12 @@ variable "storage" {
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
-        change_feed_retention_in_days     = 7
+        change_feed_retention_in_days     = 12
         last_access_time_enabled          = false
-        delete_retention_policy           = 7
+        delete_retention_policy           = 12
         container_delete_retention_policy = 7
         restore_policy = {
-          days = 6
+          days = 7
         }
       }
       network_rules = {
