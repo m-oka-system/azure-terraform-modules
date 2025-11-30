@@ -575,6 +575,17 @@ module "diagnostic_setting" {
   }
 }
 
+module "backup_vault" {
+  count = local.backup_vault_enabled ? 1 : 0
+
+  source                     = "../../modules/backup_vault"
+  common                     = var.common
+  resource_group_name        = azurerm_resource_group.rg.name
+  tags                       = azurerm_resource_group.rg.tags
+  storage_account            = module.storage.storage_account["app"]
+  backup_policy_blob_storage = var.backup_policy_blob_storage
+}
+
 module "defender_for_cloud" {
   count = local.defender_for_cloud_enabled ? 1 : 0
 

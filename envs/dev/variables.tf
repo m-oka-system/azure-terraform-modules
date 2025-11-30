@@ -726,12 +726,12 @@ variable "storage" {
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
-        change_feed_retention_in_days     = 7
+        change_feed_retention_in_days     = 12
         last_access_time_enabled          = false
-        delete_retention_policy           = 7
+        delete_retention_policy           = 12
         container_delete_retention_policy = 7
         restore_policy = {
-          days = 6
+          days = 7
         }
       }
       network_rules = {
@@ -2372,6 +2372,29 @@ variable "security_center_subscription_pricing" {
     sql_databases = {
       tier          = "Standard"
       resource_type = "SqlServers"
+    }
+  }
+}
+
+variable "backup_policy_blob_storage" {
+  type = object({
+    operational_default_retention_duration = string
+    vault_default_retention_duration       = string
+    time_zone                              = string
+    backup_repeating_time_intervals = object({
+      time     = string
+      interval = string
+      timezone = string
+    })
+  })
+  default = {
+    operational_default_retention_duration = "P7D"
+    vault_default_retention_duration       = "P7D"
+    time_zone                              = "東京 (標準時)"
+    backup_repeating_time_intervals = {
+      time     = "01:00:00"
+      interval = "P1D"
+      timezone = "+09:00"
     }
   }
 }

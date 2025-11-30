@@ -31,6 +31,7 @@ locals {
   nat_gateway_enabled           = false
   resource_health_alert_enabled = false
   diagnostic_setting_enabled    = false
+  backup_vault_enabled          = false
   defender_for_cloud_enabled    = false
 
   # 共通の変数
