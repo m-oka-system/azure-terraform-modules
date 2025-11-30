@@ -854,6 +854,22 @@ variable "storage_management_policy" {
     })
   }))
   default = {
+    app = {
+      name                   = "delete-after-7-days"
+      target_storage_account = "app"
+      blob_types             = ["blockBlob", "appendBlob"]
+      actions = {
+        base_blob = {
+          delete_after_days_since_modification_greater_than = 7
+        }
+        snapshot = {
+          delete_after_days_since_creation_greater_than = 7
+        }
+        version = {
+          delete_after_days_since_creation = 7
+        }
+      }
+    }
     # リソースログ (診断設定) は appendBlob として記録される
     # appendBlob はアクセス層をサポートしていない (削除のみ可能)
     log = {
