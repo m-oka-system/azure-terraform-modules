@@ -1952,10 +1952,11 @@ variable "firewall_rules" {
       start_ip_address = "40.112.0.0"
       end_ip_address   = "40.112.255.255"
     }
-    access_azure = {
-      start_ip_address = "0.0.0.0"
-      end_ip_address   = "0.0.0.0"
-    }
+    # Azure サービスおよびリソースにこのサーバーへのアクセスを許可する
+    # access_azure = {
+    #   start_ip_address = "0.0.0.0"
+    #   end_ip_address   = "0.0.0.0"
+    # }
   }
 }
 
