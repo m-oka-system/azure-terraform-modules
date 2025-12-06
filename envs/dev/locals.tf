@@ -1,5 +1,6 @@
 # Terraform を実行するアカウントの情報を取得する
 data "azurerm_client_config" "current" {}
+data "azurerm_subscription" "current" {}
 
 # # クライアントの IP アドレスを取得する
 # data "http" "ipify" {

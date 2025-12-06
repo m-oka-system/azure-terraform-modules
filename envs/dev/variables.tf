@@ -2437,3 +2437,16 @@ variable "security_contact" {
     phone = null
   }
 }
+
+variable "custom_role" {
+  type = map(object({
+    name        = string
+    description = string
+  }))
+  default = {
+    restricted_contributor = {
+      name        = "Contributor Without Log Analytics Access"
+      description = "ContributorロールからLog Analyticsワークスペースのテーブル読み取りを除外したカスタムロール"
+    }
+  }
+}

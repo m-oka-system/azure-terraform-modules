@@ -600,3 +600,11 @@ module "defender_for_cloud_security_contact" {
   subscription_id  = local.common.subscription_id
   security_contact = var.security_contact
 }
+
+module "custom_role" {
+  source = "../../modules/custom_role"
+
+  custom_role       = var.custom_role
+  scope             = data.azurerm_subscription.current.id
+  assignable_scopes = [data.azurerm_subscription.current.id]
+}
