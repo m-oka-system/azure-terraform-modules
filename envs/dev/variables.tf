@@ -2438,7 +2438,7 @@ variable "security_contact" {
   }
 }
 
-variable "custom_role" {
+variable "role_definition" {
   type = map(object({
     name             = string
     description      = string

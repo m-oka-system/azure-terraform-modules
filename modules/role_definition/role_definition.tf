@@ -1,9 +1,9 @@
 ################################
-# Custom Role Definition
+# Role Definition
 ################################
 
 resource "azurerm_role_definition" "this" {
-  for_each = var.custom_role
+  for_each = var.role_definition
 
   name        = each.value.name
   scope       = var.scope
