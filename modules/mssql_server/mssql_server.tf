@@ -1,6 +1,8 @@
 ##########################################
 # Azure SQL Server
 ##########################################
+data "azurerm_client_config" "current" {}
+
 resource "random_password" "admin_password" {
   length           = 16
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -45,10 +47,11 @@ resource "azurerm_mssql_firewall_rule" "this" {
 
 # Audit Policy (監査ログ)
 resource "azurerm_mssql_server_extended_auditing_policy" "this" {
-  server_id              = azurerm_mssql_server.this.id
-  storage_endpoint       = var.storage_endpoint
-  log_monitoring_enabled = true
-  retention_in_days      = 7
+  server_id                       = azurerm_mssql_server.this.id
+  storage_endpoint                = var.storage_endpoint
+  storage_account_subscription_id = data.azurerm_client_config.current.subscription_id
+  log_monitoring_enabled          = true
+  retention_in_days               = 7
 }
 
 # Advanced Threat Protection (脅威保護)
