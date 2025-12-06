@@ -5,3 +5,4 @@ variable "random" {}
 variable "identity_id" {}
 variable "firewall_rules" {}
 variable "storage_endpoint" {}
+variable "defender_for_cloud_enabled" {}

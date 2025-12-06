@@ -378,14 +378,15 @@ module "mysql" {
 module "mssql_server" {
   count = local.mssql_database_enabled ? 1 : 0
 
-  source              = "../../modules/mssql_server"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = azurerm_resource_group.rg.tags
-  random              = local.common.random
-  identity_id         = module.user_assigned_identity.user_assigned_identity["mssql"].id
-  firewall_rules      = var.firewall_rules
-  storage_endpoint    = module.storage.storage_account["log"].primary_blob_endpoint
+  source                     = "../../modules/mssql_server"
+  common                     = var.common
+  resource_group_name        = azurerm_resource_group.rg.name
+  tags                       = azurerm_resource_group.rg.tags
+  random                     = local.common.random
+  identity_id                = module.user_assigned_identity.user_assigned_identity["mssql"].id
+  firewall_rules             = var.firewall_rules
+  storage_endpoint           = module.storage.storage_account["log"].primary_blob_endpoint
+  defender_for_cloud_enabled = local.defender_for_cloud_enabled
 }
 
 module "mssql_database" {

@@ -30,7 +30,7 @@ resource "azurerm_mssql_server" "this" {
   }
 
   # 高速構成を使用して脆弱性評価を有効化 (Microsoft Defender for SQL が必要)
-  express_vulnerability_assessment_enabled = true
+  express_vulnerability_assessment_enabled = var.defender_for_cloud_enabled
 
   tags = var.tags
 }
@@ -58,5 +58,5 @@ resource "azurerm_mssql_server_extended_auditing_policy" "this" {
 resource "azurerm_mssql_server_security_alert_policy" "this" {
   resource_group_name = var.resource_group_name
   server_name         = azurerm_mssql_server.this.name
-  state               = "Enabled"
+  state               = var.defender_for_cloud_enabled ? "Enabled" : "Disabled"
 }
