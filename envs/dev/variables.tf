@@ -926,6 +926,7 @@ variable "log_analytics" {
   type = map(object({
     sku                             = string
     allow_resource_only_permissions = bool
+    local_authentication_enabled    = bool
     retention_in_days               = number
     internet_ingestion_enabled      = bool
     internet_query_enabled          = bool
@@ -934,6 +935,7 @@ variable "log_analytics" {
     logs = {
       sku                             = "PerGB2018"
       allow_resource_only_permissions = false
+      local_authentication_enabled    = false
       retention_in_days               = 30
       internet_ingestion_enabled      = false
       internet_query_enabled          = true

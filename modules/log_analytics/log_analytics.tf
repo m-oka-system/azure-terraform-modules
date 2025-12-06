@@ -8,6 +8,7 @@ resource "azurerm_log_analytics_workspace" "this" {
   location                        = var.common.location
   sku                             = each.value.sku
   allow_resource_only_permissions = each.value.allow_resource_only_permissions
+  local_authentication_enabled    = each.value.local_authentication_enabled
   retention_in_days               = each.value.retention_in_days
   internet_ingestion_enabled      = each.value.internet_ingestion_enabled
   internet_query_enabled          = each.value.internet_query_enabled
