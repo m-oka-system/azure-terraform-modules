@@ -1911,6 +1911,33 @@ variable "mysql_flexible_database" {
   }
 }
 
+variable "mssql_database" {
+  type = map(object({
+    collation            = string
+    max_size_gb          = number
+    sku_name             = string # Basic, S0, S1... , GP_S_Gen5_2 etc.
+    zone_redundant       = bool
+    storage_account_type = string
+    short_term_retention_policy = object({
+      retention_days           = number # 1 - 35 days (Basic は最大 7 日)
+      backup_interval_in_hours = number # 12 or 24 hours
+    })
+  }))
+  default = {
+    app = {
+      collation            = "Japanese_CI_AS"
+      max_size_gb          = 2
+      sku_name             = "Basic"
+      zone_redundant       = false
+      storage_account_type = "Local"
+      short_term_retention_policy = {
+        retention_days           = 7
+        backup_interval_in_hours = 12
+      }
+    }
+  }
+}
+
 variable "firewall_rules" {
   type = map(object({
     start_ip_address = string

@@ -396,6 +396,7 @@ module "mssql_database" {
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
+  mssql_database      = var.mssql_database
   server_id           = module.mssql_server[0].mssql_server.id
 }
 
