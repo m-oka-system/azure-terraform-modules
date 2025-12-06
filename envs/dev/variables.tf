@@ -924,17 +924,21 @@ variable "key_vault" {
 
 variable "log_analytics" {
   type = map(object({
-    sku                        = string
-    retention_in_days          = number
-    internet_ingestion_enabled = bool
-    internet_query_enabled     = bool
+    sku                             = string
+    allow_resource_only_permissions = bool
+    local_authentication_enabled    = bool
+    retention_in_days               = number
+    internet_ingestion_enabled      = bool
+    internet_query_enabled          = bool
   }))
   default = {
     logs = {
-      sku                        = "PerGB2018"
-      retention_in_days          = 30
-      internet_ingestion_enabled = false
-      internet_query_enabled     = true
+      sku                             = "PerGB2018"
+      allow_resource_only_permissions = false
+      local_authentication_enabled    = false
+      retention_in_days               = 30
+      internet_ingestion_enabled      = false
+      internet_query_enabled          = true
     }
   }
 }
@@ -2431,5 +2435,42 @@ variable "security_contact" {
       minimal_risk_level = "Critical"
     }
     phone = null
+  }
+}
+
+variable "custom_role" {
+  type = map(object({
+    name             = string
+    description      = string
+    actions          = list(string)
+    not_actions      = list(string)
+    data_actions     = list(string)
+    not_data_actions = list(string)
+  }))
+  default = {
+    restricted_contributor = {
+      name        = "Contributor Without Log Analytics Access"
+      description = "ContributorロールからLog Analyticsワークスペースのテーブル読み取りを除外したカスタムロール"
+      actions     = ["*"]
+      not_actions = [
+        # Contributorロールの標準的な制限
+        "Microsoft.Authorization/*/Delete",
+        "Microsoft.Authorization/*/Write",
+        "Microsoft.Authorization/elevateAccess/Action",
+        "Microsoft.Blueprint/blueprintAssignments/write",
+        "Microsoft.Blueprint/blueprintAssignments/delete",
+        "Microsoft.Compute/galleries/share/action",
+        "Microsoft.Purview/consents/write",
+        "Microsoft.Purview/consents/delete",
+        "Microsoft.Resources/deploymentStacks/manageDenySetting/action",
+        "Microsoft.Subscription/cancel/action",
+        "Microsoft.Subscription/enable/action",
+        # Log Analyticsワークスペースのテーブルへの読み取りアクセスを禁止
+        "Microsoft.OperationalInsights/workspaces/query/*/read",
+        "Microsoft.Insights/logs/*/read",
+      ]
+      data_actions     = []
+      not_data_actions = []
+    }
   }
 }
