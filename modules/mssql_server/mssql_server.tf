@@ -1,6 +1,8 @@
 ##########################################
 # Azure SQL Server
 ##########################################
+data "azurerm_client_config" "current" {}
+
 resource "random_password" "admin_password" {
   length           = 16
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -28,7 +30,7 @@ resource "azurerm_mssql_server" "this" {
   }
 
   # 高速構成を使用して脆弱性評価を有効化 (Microsoft Defender for SQL が必要)
-  express_vulnerability_assessment_enabled = true
+  express_vulnerability_assessment_enabled = var.defender_for_cloud_enabled
 
   tags = var.tags
 }
@@ -45,15 +47,16 @@ resource "azurerm_mssql_firewall_rule" "this" {
 
 # Audit Policy (監査ログ)
 resource "azurerm_mssql_server_extended_auditing_policy" "this" {
-  server_id              = azurerm_mssql_server.this.id
-  storage_endpoint       = var.storage_endpoint
-  log_monitoring_enabled = true
-  retention_in_days      = 7
+  server_id                       = azurerm_mssql_server.this.id
+  storage_endpoint                = var.storage_endpoint
+  storage_account_subscription_id = data.azurerm_client_config.current.subscription_id
+  log_monitoring_enabled          = true
+  retention_in_days               = 7
 }
 
 # Advanced Threat Protection (脅威保護)
 resource "azurerm_mssql_server_security_alert_policy" "this" {
   resource_group_name = var.resource_group_name
   server_name         = azurerm_mssql_server.this.name
-  state               = "Enabled"
+  state               = var.defender_for_cloud_enabled ? "Enabled" : "Disabled"
 }

@@ -2,20 +2,21 @@
 # Azure SQL Database
 ##########################################
 resource "azurerm_mssql_database" "this" {
-  name                                = "sqldb-${var.common.project}-${var.common.env}"
+  for_each                            = var.mssql_database
+  name                                = "sqldb-${each.key}-${var.common.project}-${var.common.env}"
   server_id                           = var.server_id
-  collation                           = "Japanese_CI_AS"
+  collation                           = each.value.collation
   license_type                        = "LicenseIncluded"
-  max_size_gb                         = 2
-  sku_name                            = "Basic"
-  zone_redundant                      = var.common.env == "prod" ? true : false
-  storage_account_type                = "Local"
+  max_size_gb                         = each.value.max_size_gb
+  sku_name                            = each.value.sku_name
+  zone_redundant                      = each.value.zone_redundant
+  storage_account_type                = each.value.storage_account_type
   transparent_data_encryption_enabled = true
 
   # Backup settings
   short_term_retention_policy {
-    retention_days           = 35 # 1 - 35 days (Basic は最大 7 日)
-    backup_interval_in_hours = 12 # 12 or 24 hours
+    retention_days           = each.value.short_term_retention_policy.retention_days
+    backup_interval_in_hours = each.value.short_term_retention_policy.backup_interval_in_hours
   }
 
   tags = var.tags
