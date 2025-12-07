@@ -6,3 +6,8 @@ variable "identity_id" {}
 variable "firewall_rules" {}
 variable "storage_endpoint" {}
 variable "defender_for_cloud_enabled" {}
+variable "azuread_authentication_only" {
+  type        = bool
+  description = "Microsoft Entra 認証のみとするかどうか"
+  default     = true
+}
