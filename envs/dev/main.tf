@@ -278,12 +278,13 @@ module "app_service" {
     }
   }
   allowed_origins = {
-    # null の場合は compact 関数で除外
-    api = compact([
-      try("https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}", null),
-      try("https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}", null),
-      "https://localhost:3000",
-    ])
+    api = concat(
+      local.frontdoor_enabled ? [
+        "https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}",
+        "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
+      ] : [],
+      ["https://localhost:3000"]
+    )
     web = []
   }
 }
