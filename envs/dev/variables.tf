@@ -1445,23 +1445,16 @@ variable "app_service_plan" {
 
 variable "app_service" {
   type = map(object({
-    name                                           = string
-    target_service_plan                            = string
-    target_subnet                                  = string
-    target_user_assigned_identity                  = string
-    ftp_publish_basic_authentication_enabled       = bool
-    webdeploy_publish_basic_authentication_enabled = bool
-    https_only                                     = bool
-    public_network_access_enabled                  = bool
+    name                          = string
+    target_service_plan           = string
+    target_subnet                 = string
+    target_user_assigned_identity = string
+    public_network_access_enabled = bool
     site_config = object({
-      always_on                               = bool
-      ftps_state                              = string
-      vnet_route_all_enabled                  = bool
-      scm_use_main_ip_restriction             = bool
       container_registry_use_managed_identity = bool
-      cors = object({
+      cors = optional(object({
         support_credentials = bool
-      })
+      }))
     })
     ip_restriction = map(object({
       name        = string
@@ -1479,24 +1472,60 @@ variable "app_service" {
     }))
   }))
   default = {
-    app = {
-      name                                           = "app"
-      target_service_plan                            = "app"
-      target_subnet                                  = "app"
-      target_user_assigned_identity                  = "app"
-      ftp_publish_basic_authentication_enabled       = false
-      webdeploy_publish_basic_authentication_enabled = false
-      https_only                                     = true
-      public_network_access_enabled                  = true
+    api = {
+      name                          = "api"
+      target_service_plan           = "app"
+      target_subnet                 = "app"
+      target_user_assigned_identity = "app"
+      public_network_access_enabled = true
       site_config = {
-        always_on                               = true
-        ftps_state                              = "Disabled"
-        vnet_route_all_enabled                  = true
-        scm_use_main_ip_restriction             = false
         container_registry_use_managed_identity = true
         cors = {
           support_credentials = true
         }
+      }
+      ip_restriction = {
+        frontdoor = {
+          name        = "AllowFrontDoor"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureFrontDoor.Backend"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+    }
+    web = {
+      name                          = "web"
+      target_service_plan           = "app"
+      target_subnet                 = "app"
+      target_user_assigned_identity = "app"
+      public_network_access_enabled = true
+      site_config = {
+        container_registry_use_managed_identity = true
+        cors                                    = null
       }
       ip_restriction = {
         frontdoor = {
@@ -1536,23 +1565,16 @@ variable "app_service" {
 
 variable "function" {
   type = map(object({
-    name                                           = string
-    target_service_plan                            = string
-    target_subnet                                  = string
-    target_key_vault_secret                        = string
-    target_user_assigned_identity                  = string
-    target_application_insights                    = string
-    functions_extension_version                    = string
-    ftp_publish_basic_authentication_enabled       = bool
-    webdeploy_publish_basic_authentication_enabled = bool
-    https_only                                     = bool
-    public_network_access_enabled                  = bool
-    builtin_logging_enabled                        = bool
+    name                          = string
+    target_service_plan           = string
+    target_subnet                 = string
+    target_key_vault_secret       = string
+    target_user_assigned_identity = string
+    target_application_insights   = string
+    functions_extension_version   = string
+    public_network_access_enabled = bool
+    builtin_logging_enabled       = bool
     site_config = object({
-      always_on                               = bool
-      ftps_state                              = string
-      vnet_route_all_enabled                  = bool
-      scm_use_main_ip_restriction             = bool
       container_registry_use_managed_identity = bool
     })
     ip_restriction = map(object({
@@ -1576,23 +1598,16 @@ variable "function" {
   }))
   default = {
     func = {
-      name                                           = "func"
-      target_service_plan                            = "func"
-      target_subnet                                  = "func"
-      target_key_vault_secret                        = "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING"
-      target_user_assigned_identity                  = "func"
-      target_application_insights                    = "func"
-      functions_extension_version                    = "~4"
-      ftp_publish_basic_authentication_enabled       = false
-      webdeploy_publish_basic_authentication_enabled = false
-      https_only                                     = true
-      public_network_access_enabled                  = true
-      builtin_logging_enabled                        = false
+      name                          = "func"
+      target_service_plan           = "func"
+      target_subnet                 = "func"
+      target_key_vault_secret       = "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING"
+      target_user_assigned_identity = "func"
+      target_application_insights   = "func"
+      functions_extension_version   = "~4"
+      public_network_access_enabled = true
+      builtin_logging_enabled       = false
       site_config = {
-        always_on                               = true
-        ftps_state                              = "Disabled"
-        vnet_route_all_enabled                  = true
-        scm_use_main_ip_restriction             = false
         container_registry_use_managed_identity = true
       }
       ip_restriction = {

@@ -58,5 +58,7 @@ Based on the provided option, perform one of the following actions:
 - Show before/after states if applicable
 - Highlight new or modified components
 - Add the diagram in a dedicated section of the PR description
+- **Do not use colors or styling**: Avoid `style`, `classDef`, `fill`, `stroke`, or any color/design directives
+- Keep diagrams simple and structure-focused without visual customization
 
 **Generate the PR description and create the pull request automatically.**

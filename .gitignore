@@ -41,3 +41,9 @@ terraform.rc
 .trivy/
 trivy-db/
 .trivyignore
+
+# Serena MCP
+.serena/
+
+# Docs
+claudedocs/
