@@ -40,7 +40,7 @@ resource "azurerm_linux_function_app" "this" {
     application_insights_connection_string = var.application_insights[each.value.target_application_insights].connection_string
 
     container_registry_use_managed_identity       = true # ACR 認証にマネージド ID を使用
-    container_registry_managed_identity_client_id = each.value.site_config.container_registry_use_managed_identity ? var.identity[each.value.target_user_assigned_identity].client_id : null
+    container_registry_managed_identity_client_id = var.identity[each.value.target_user_assigned_identity].client_id
 
     dynamic "ip_restriction" {
       for_each = each.value.ip_restriction
