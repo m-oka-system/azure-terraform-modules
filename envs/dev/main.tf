@@ -267,20 +267,24 @@ module "app_service" {
   app_service_plan    = module.app_service_plan[0].app_service_plan
   subnet              = module.vnet.subnet
   identity            = module.user_assigned_identity.user_assigned_identity
-  frontdoor_profile   = module.frontdoor[0].frontdoor_profile
+  frontdoor_profile   = try(module.frontdoor[0].frontdoor_profile, null)
 
   app_settings = {
-    app = {
-      WEBSITE_PULL_IMAGE_OVER_VNET          = true
+    web = {
+      APPLICATIONINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
+    }
+    api = {
       APPLICATIONINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
     }
   }
   allowed_origins = {
-    app = [
-      "https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}",
-      "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
+    # null の場合は compact 関数で除外
+    api = compact([
+      try("https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}", null),
+      try("https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}", null),
       "https://localhost:3000",
-    ]
+    ])
+    web = []
   }
 }
 
