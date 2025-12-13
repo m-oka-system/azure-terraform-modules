@@ -1452,9 +1452,9 @@ variable "app_service" {
     public_network_access_enabled = bool
     site_config = object({
       container_registry_use_managed_identity = bool
-      cors = object({
+      cors = optional(object({
         support_credentials = bool
-      })
+      }))
     })
     ip_restriction = map(object({
       name        = string
