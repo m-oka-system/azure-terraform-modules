@@ -136,7 +136,7 @@ module "dns_zone" {
 }
 
 data "azurerm_dns_zone" "this" {
-  count = local.dns_zone_enabled ? 0 : 1
+  count = local.custom_domain_enabled ? 1 : 0
 
   name                = "az-learn.com"
   resource_group_name = "rg-share"

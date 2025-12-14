@@ -13,6 +13,7 @@ locals {
   dns_zone_enabled              = false
   private_dns_zone_enabled      = false
   private_endpoint_enabled      = false
+  custom_domain_enabled         = false
   frontdoor_enabled             = false
   frontdoor_waf_enabled         = false
   container_registry_enabled    = false
