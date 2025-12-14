@@ -135,6 +135,13 @@ module "dns_zone" {
   custom_domain       = var.custom_domain
 }
 
+data "azurerm_dns_zone" "this" {
+  count = local.dns_zone_enabled ? 0 : 1
+
+  name                = "az-learn.com"
+  resource_group_name = "rg-share"
+}
+
 module "private_dns_zone" {
   count = local.private_dns_zone_enabled ? 1 : 0
 
@@ -178,7 +185,7 @@ module "frontdoor" {
   frontdoor_origin_group = var.frontdoor_origin_group
   frontdoor_origin       = var.frontdoor_origin
   frontdoor_route        = var.frontdoor_route
-  dns_zone               = module.dns_zone[0].dns_zone
+  dns_zone               = data.azurerm_dns_zone.this[0]
   custom_domain          = var.custom_domain
 
   backend_origins = {
