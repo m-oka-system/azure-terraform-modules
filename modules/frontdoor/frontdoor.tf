@@ -68,7 +68,8 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   patterns_to_match      = each.value.patterns_to_match
   supported_protocols    = ["Http", "Https"]
 
-  cdn_frontdoor_custom_domain_ids = try([azurerm_cdn_frontdoor_custom_domain.this[each.value.target_custom_domain].id], [])
+  # ルートにカスタムドメインを関連付ける
+  cdn_frontdoor_custom_domain_ids = try([azurerm_cdn_frontdoor_custom_domain.this[each.key].id], [])
   link_to_default_domain          = true
 
   dynamic "cache" {
@@ -84,31 +85,22 @@ resource "azurerm_cdn_frontdoor_route" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "this" {
-  for_each                 = var.custom_domain
-  name                     = replace("${var.custom_domain[each.key].subdomain}.${var.custom_domain[each.key].dns_zone_name}", ".", "-")
+  for_each                 = var.frontdoor_custom_domains
+  name                     = replace("${each.value.subdomain}.${var.dns_zone.name}", ".", "-")
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  dns_zone_id              = var.dns_zone[each.key].id
-  host_name                = "${var.custom_domain[each.key].subdomain}.${var.custom_domain[each.key].dns_zone_name}"
+  dns_zone_id              = var.dns_zone.id
+  host_name                = "${each.value.subdomain}.${var.dns_zone.name}"
 
   tls {
     certificate_type = "ManagedCertificate"
   }
 }
 
-resource "azurerm_cdn_frontdoor_custom_domain_association" "this" {
-  for_each                       = var.custom_domain
-  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.this[each.key].id
-  cdn_frontdoor_route_ids = [
-    # カスタムドメイン の key と ルートの target_custom_domain をマッピングして、関連付けるルート ID を取得
-    for k, v in var.frontdoor_route : azurerm_cdn_frontdoor_route.this[k].id if v.target_custom_domain == each.key
-  ]
-}
-
 resource "azurerm_dns_txt_record" "afd_validation" {
-  for_each            = var.custom_domain
+  for_each            = var.frontdoor_custom_domains
   name                = "_dnsauth.${each.value.subdomain}"
-  zone_name           = var.dns_zone[each.key].name
-  resource_group_name = var.resource_group_name
+  zone_name           = var.dns_zone.name
+  resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
 
   record {
@@ -117,10 +109,15 @@ resource "azurerm_dns_txt_record" "afd_validation" {
 }
 
 resource "azurerm_dns_cname_record" "afd_cname" {
-  for_each            = var.custom_domain
+  for_each            = var.frontdoor_custom_domains
   name                = each.value.subdomain
-  zone_name           = var.dns_zone[each.key].name
-  resource_group_name = var.resource_group_name
+  zone_name           = var.dns_zone.name
+  resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
-  record              = azurerm_cdn_frontdoor_endpoint.this[each.value.target_frontdoor_endpoint].host_name
+  record              = azurerm_cdn_frontdoor_endpoint.this[each.key].host_name
 }
+
+# azurerm_cdn_frontdoor_custom_domain_association は不要
+# ルートにカスタムドメインを関連付けるためのものではない
+# ルートにカスタムドメインが関連付けられている前提で、関連付けを解除したり、再登録するときに使用する模様
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cdn_frontdoor_custom_domain_association

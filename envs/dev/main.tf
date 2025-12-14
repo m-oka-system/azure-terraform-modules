@@ -176,24 +176,15 @@ module "private_link_scope" {
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 
-  source                 = "../../modules/frontdoor"
-  common                 = var.common
-  resource_group_name    = azurerm_resource_group.rg.name
-  tags                   = azurerm_resource_group.rg.tags
-  frontdoor_profile      = var.frontdoor_profile
-  frontdoor_endpoint     = var.frontdoor_endpoint
-  frontdoor_origin_group = var.frontdoor_origin_group
-  frontdoor_origin       = var.frontdoor_origin
-  frontdoor_route        = var.frontdoor_route
-  dns_zone               = data.azurerm_dns_zone.this[0]
-  custom_domain          = var.custom_domain
-
-  backend_origins = {
-    blob = {
-      host_name          = module.storage.storage_account["app"].primary_blob_host
-      origin_host_header = module.storage.storage_account["app"].primary_blob_host
-    }
-  }
+  source                   = "../../modules/frontdoor"
+  common                   = var.common
+  resource_group_name      = azurerm_resource_group.rg.name
+  tags                     = azurerm_resource_group.rg.tags
+  frontdoor_profile        = var.frontdoor_profile
+  frontdoor_origins        = local.frontdoor_origins
+  frontdoor_routes         = local.frontdoor_routes
+  dns_zone                 = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
+  frontdoor_custom_domains = local.custom_domain_enabled ? local.frontdoor_custom_domains : {}
 }
 
 module "frontdoor_waf" {
