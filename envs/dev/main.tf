@@ -277,9 +277,8 @@ module "app_service" {
   }
   allowed_origins = {
     api = concat(
-      local.frontdoor_enabled ? [
-        "https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}",
-        "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
+      local.custom_domain_enabled ? [
+        for v in local.frontdoor_custom_domains : "https://${v.subdomain}.${data.azurerm_dns_zone.this[0].name}"
       ] : [],
       ["https://localhost:3000"]
     )

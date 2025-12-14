@@ -174,11 +174,11 @@ locals {
 
   # サブドメインのマッピングを指定 (例: api-dev, web-dev)
   frontdoor_custom_domains = {
-    for k, v in module.app_service[0].app_service : k => {
-      subdomain = lookup({
-        api = "${k}-${var.common.env}"
-        web = "${k}-${var.common.env}"
-      }, k, "${k}-${var.common.env}")
+    api = {
+      subdomain = "api-${var.common.env}"
+    }
+    web = {
+      subdomain = "web-${var.common.env}"
     }
   }
 
