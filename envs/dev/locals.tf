@@ -109,15 +109,15 @@ locals {
   )
 
   # Front Door の変数を動的に生成
-  frontdoor_origins = {
+  frontdoor_origins = local.app_service_enabled ? {
     # App Service
     for k, v in module.app_service[0].app_service : k => {
       host_name          = v.default_hostname
       origin_host_header = v.default_hostname
     }
-  }
+  } : {}
 
-  frontdoor_routes = {
+  frontdoor_routes = local.app_service_enabled ? {
     for k, v in module.app_service[0].app_service : k => {
       patterns_to_match = ["/*"]
       # web のみキャッシュを有効化する
@@ -170,7 +170,7 @@ locals {
         ]
       } : null
     }
-  }
+  } : {}
 
   # サブドメインのマッピングを指定 (例: api-dev, web-dev)
   frontdoor_custom_domains = {
