@@ -70,7 +70,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
 
   # ルートにカスタムドメインを関連付ける
   cdn_frontdoor_custom_domain_ids = try([azurerm_cdn_frontdoor_custom_domain.this[each.key].id], [])
-  link_to_default_domain          = true
+  link_to_default_domain          = false
 
   dynamic "cache" {
     for_each = lookup(each.value, "cache", null) != null ? [each.value.cache] : []
