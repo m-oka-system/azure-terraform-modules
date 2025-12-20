@@ -119,19 +119,19 @@ locals {
   frontdoor_origins = merge(
     # App Service
     local.app_service_enabled ? {
-    for k, v in module.app_service[0].app_service : k => {
-      host_name          = v.default_hostname
-      origin_host_header = v.default_hostname
-      subdomain          = lookup(local.subdomain_config, k, "${k}-${var.common.env}")
-    }
+      for k, v in module.app_service[0].app_service : k => {
+        host_name          = v.default_hostname
+        origin_host_header = v.default_hostname
+        subdomain          = lookup(local.subdomain_config, k, "${k}-${var.common.env}")
+      }
     } : {},
     # Storage (静的 Web サイト)
     {
-    for k, v in module.storage.storage_account : k => {
-      host_name          = v.primary_web_host
-      origin_host_header = v.primary_web_host
-      subdomain          = lookup(local.subdomain_config, k, "${k}-${var.common.env}")
-    } if k == "web"
+      for k, v in module.storage.storage_account : k => {
+        host_name          = v.primary_web_host
+        origin_host_header = v.primary_web_host
+        subdomain          = lookup(local.subdomain_config, k, "${k}-${var.common.env}")
+      } if k == "web"
     }
   )
 
