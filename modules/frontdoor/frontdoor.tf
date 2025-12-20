@@ -133,7 +133,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "this" {
-  for_each                 = var.frontdoor_origins
+  for_each                 = var.dns_zone != null ? var.frontdoor_origins : {}
   name                     = replace("${each.value.subdomain}.${var.dns_zone.name}", ".", "-")
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
   dns_zone_id              = var.dns_zone.id
@@ -145,7 +145,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "this" {
 }
 
 resource "azurerm_dns_txt_record" "afd_validation" {
-  for_each            = var.frontdoor_origins
+  for_each            = var.dns_zone != null ? var.frontdoor_origins : {}
   name                = "_dnsauth.${each.value.subdomain}"
   zone_name           = var.dns_zone.name
   resource_group_name = var.dns_zone.resource_group_name
@@ -157,7 +157,7 @@ resource "azurerm_dns_txt_record" "afd_validation" {
 }
 
 resource "azurerm_dns_cname_record" "afd_cname" {
-  for_each            = var.frontdoor_origins
+  for_each            = var.dns_zone != null ? var.frontdoor_origins : {}
   name                = each.value.subdomain
   zone_name           = var.dns_zone.name
   resource_group_name = var.dns_zone.resource_group_name
