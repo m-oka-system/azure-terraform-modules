@@ -200,10 +200,7 @@ module "frontdoor_waf" {
   frontdoor_profile              = module.frontdoor[0].frontdoor_profile
   allowed_cidr                   = split(",", var.allowed_cidr)
 
-  frontdoor_domain = concat(
-    [for v in module.frontdoor[0].frontdoor_endpoint : v.id],
-    [for v in module.frontdoor[0].frontdoor_custom_domain : v.id]
-  )
+  frontdoor_domain = []
 }
 
 module "container_registry" {
