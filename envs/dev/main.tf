@@ -135,6 +135,13 @@ module "dns_zone" {
   custom_domain       = var.custom_domain
 }
 
+data "azurerm_dns_zone" "this" {
+  count = local.custom_domain_enabled ? 1 : 0
+
+  name                = "az-learn.com"
+  resource_group_name = "rg-share"
+}
+
 module "private_dns_zone" {
   count = local.private_dns_zone_enabled ? 1 : 0
 
@@ -169,24 +176,14 @@ module "private_link_scope" {
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 
-  source                 = "../../modules/frontdoor"
-  common                 = var.common
-  resource_group_name    = azurerm_resource_group.rg.name
-  tags                   = azurerm_resource_group.rg.tags
-  frontdoor_profile      = var.frontdoor_profile
-  frontdoor_endpoint     = var.frontdoor_endpoint
-  frontdoor_origin_group = var.frontdoor_origin_group
-  frontdoor_origin       = var.frontdoor_origin
-  frontdoor_route        = var.frontdoor_route
-  dns_zone               = module.dns_zone[0].dns_zone
-  custom_domain          = var.custom_domain
-
-  backend_origins = {
-    blob = {
-      host_name          = module.storage.storage_account["app"].primary_blob_host
-      origin_host_header = module.storage.storage_account["app"].primary_blob_host
-    }
-  }
+  source              = "../../modules/frontdoor"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  frontdoor_profile   = var.frontdoor_profile
+  frontdoor_origins   = local.frontdoor_origins
+  cached_origin_keys  = local.cached_origin_keys
+  dns_zone            = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
 }
 
 module "frontdoor_waf" {
@@ -202,10 +199,7 @@ module "frontdoor_waf" {
   frontdoor_profile              = module.frontdoor[0].frontdoor_profile
   allowed_cidr                   = split(",", var.allowed_cidr)
 
-  frontdoor_domain = concat(
-    [for v in module.frontdoor[0].frontdoor_endpoint : v.id],
-    [for v in module.frontdoor[0].frontdoor_custom_domain : v.id]
-  )
+  frontdoor_domain = []
 }
 
 module "container_registry" {
@@ -270,7 +264,7 @@ module "app_service" {
   frontdoor_profile   = try(module.frontdoor[0].frontdoor_profile, null)
 
   app_settings = {
-    web = {
+    front = {
       APPLICATIONINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
     }
     api = {
@@ -279,13 +273,12 @@ module "app_service" {
   }
   allowed_origins = {
     api = concat(
-      local.frontdoor_enabled ? [
-        "https://${module.frontdoor[0].frontdoor_endpoint["app"].host_name}",
-        "https://${module.frontdoor[0].frontdoor_custom_domain["app"].host_name}",
+      local.custom_domain_enabled ? [
+        for k, v in local.subdomain_config : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
       ] : [],
       ["https://localhost:3000"]
     )
-    web = []
+    front = []
   }
 }
 

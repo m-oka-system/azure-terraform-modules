@@ -700,16 +700,21 @@ variable "storage" {
         days = number                            # ポイントインタイムリストアの最大復元ポイント (経過日数)
       }))
     })
-    network_rules = object({
+    network_rules = optional(object({
       default_action             = string
       bypass                     = list(string)
       ip_rules                   = list(string)
       virtual_network_subnet_ids = list(string)
-    })
+    }))
     immutability_policy = optional(object({
       allow_protected_append_writes = bool   # 保護された追加書き込みを許可するかどうか
       period_since_creation_in_days = number # 不変期間（日数）- 1から146000 (400年) の範囲
       state                         = string # 不変性ポリシーの状態: "Unlocked"（編集可能）または "Locked"（ロック済み）
+    }))
+    static_website_enabled = optional(bool, false)
+    static_website_config = optional(object({
+      index_document     = string
+      error_404_document = string
     }))
   }))
   default = {
@@ -739,6 +744,34 @@ variable "storage" {
         bypass                     = ["AzureServices"]
         ip_rules                   = ["MyIP"]
         virtual_network_subnet_ids = []
+      }
+    }
+    web = {
+      name                          = "web"
+      account_tier                  = "Standard"
+      account_kind                  = "StorageV2"
+      account_replication_type      = "LRS"
+      access_tier                   = "Hot"
+      https_traffic_only_enabled    = true
+      public_network_access_enabled = true
+      is_hns_enabled                = false
+      defender_for_storage_enabled  = false
+      blob_properties = {
+        versioning_enabled                = true
+        change_feed_enabled               = true
+        change_feed_retention_in_days     = 12
+        last_access_time_enabled          = false
+        delete_retention_policy           = 12
+        container_delete_retention_policy = 7
+        restore_policy = {
+          days = 7
+        }
+      }
+      network_rules          = null
+      static_website_enabled = true
+      static_website_config = {
+        index_document     = "index.html"
+        error_404_document = "404.html"
       }
     }
     func = {
@@ -1083,159 +1116,6 @@ variable "frontdoor_profile" {
   }
 }
 
-variable "frontdoor_endpoint" {
-  type = map(object({
-    name = string
-  }))
-  default = {
-    app = {
-      name = "app"
-    }
-  }
-}
-
-variable "frontdoor_origin_group" {
-  type = map(object({
-    name                                                      = string
-    session_affinity_enabled                                  = bool
-    restore_traffic_time_to_healed_or_new_endpoint_in_minutes = number
-    health_probe = object({
-      interval_in_seconds = number
-      path                = string
-      protocol            = string
-      request_type        = string
-    })
-    load_balancing = object({
-      additional_latency_in_milliseconds = number
-      sample_size                        = number
-      successful_samples_required        = number
-    })
-  }))
-  default = {
-    app = {
-      name                                                      = "app"
-      session_affinity_enabled                                  = false
-      restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 0
-      health_probe = {
-        interval_in_seconds = 100
-        path                = "/"
-        protocol            = "Https"
-        request_type        = "HEAD"
-      }
-      load_balancing = {
-        additional_latency_in_milliseconds = 50
-        sample_size                        = 4
-        successful_samples_required        = 3
-      }
-    }
-    blob = {
-      name                                                      = "blob"
-      session_affinity_enabled                                  = false
-      restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 0
-      health_probe = {
-        interval_in_seconds = 100
-        path                = "/"
-        protocol            = "Https"
-        request_type        = "HEAD"
-      }
-      load_balancing = {
-        additional_latency_in_milliseconds = 50
-        sample_size                        = 4
-        successful_samples_required        = 3
-      }
-    }
-  }
-}
-
-variable "frontdoor_origin" {
-  type = map(object({
-    name                           = string
-    target_frontdoor_origin_group  = string
-    target_backend_origin          = string
-    certificate_name_check_enabled = bool
-    http_port                      = number
-    https_port                     = number
-    priority                       = number
-    weight                         = number
-  }))
-  default = {
-    # app = {
-    #   name                           = "app"
-    #   target_frontdoor_origin_group  = "app"
-    #   target_backend_origin          = "app"
-    #   certificate_name_check_enabled = true
-    #   http_port                      = 80
-    #   https_port                     = 443
-    #   priority                       = 1
-    #   weight                         = 1000
-    # }
-    blob = {
-      name                           = "blob"
-      target_frontdoor_origin_group  = "blob"
-      target_backend_origin          = "blob"
-      certificate_name_check_enabled = true
-      http_port                      = 80
-      https_port                     = 443
-      priority                       = 1
-      weight                         = 1000
-    }
-  }
-}
-
-variable "frontdoor_route" {
-  type = map(object({
-    name                          = string
-    target_frontdoor_endpoint     = string
-    target_frontdoor_origin_group = string
-    target_frontdoor_origin       = string
-    target_custom_domain          = string
-    forwarding_protocol           = string
-    https_redirect_enabled        = bool
-    patterns_to_match             = list(string)
-    supported_protocols           = list(string)
-    link_to_default_domain        = bool
-    cache = object({
-      compression_enabled           = bool
-      query_string_caching_behavior = string
-      query_strings                 = list(string)
-      content_types_to_compress     = list(string)
-    })
-  }))
-  default = {
-    # app = {
-    #   name                          = "app"
-    #   target_frontdoor_endpoint     = "app"
-    #   target_frontdoor_origin_group = "app"
-    #   target_frontdoor_origin       = "app"
-    #   target_custom_domain          = "app"
-    #   forwarding_protocol           = "HttpsOnly"
-    #   https_redirect_enabled        = true
-    #   patterns_to_match             = ["/*"]
-    #   supported_protocols           = ["Http", "Https"]
-    #   link_to_default_domain        = true
-    #   cache                         = null
-    # }
-    blob = {
-      name                          = "blob"
-      target_frontdoor_endpoint     = "app"
-      target_frontdoor_origin_group = "blob"
-      target_frontdoor_origin       = "blob"
-      target_custom_domain          = "app"
-      forwarding_protocol           = "HttpsOnly"
-      https_redirect_enabled        = true
-      patterns_to_match             = ["/media/*", "/static/*"]
-      supported_protocols           = ["Http", "Https"]
-      link_to_default_domain        = true
-      cache = {
-        compression_enabled           = true
-        query_string_caching_behavior = "IgnoreQueryString"
-        query_strings                 = []
-        content_types_to_compress     = ["text/html", "text/css", "text/javascript"]
-      }
-    }
-  }
-}
-
 variable "frontdoor_security_policy" {
   type = map(object({
     name                   = string
@@ -1517,8 +1397,8 @@ variable "app_service" {
         }
       }
     }
-    web = {
-      name                          = "web"
+    front = {
+      name                          = "front"
       target_service_plan           = "app"
       target_subnet                 = "app"
       target_user_assigned_identity = "app"

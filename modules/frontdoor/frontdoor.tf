@@ -1,6 +1,54 @@
 ################################
 # Front Door
 ################################
+
+locals {
+  # キャッシュで圧縮するコンテンツタイプの標準リスト
+  cache_compression_content_types = [
+    "application/eot",
+    "application/font",
+    "application/font-sfnt",
+    "application/javascript",
+    "application/json",
+    "application/opentype",
+    "application/otf",
+    "application/pkcs7-mime",
+    "application/truetype",
+    "application/ttf",
+    "application/vnd.ms-fontobject",
+    "application/xhtml+xml",
+    "application/xml",
+    "application/xml+rss",
+    "application/x-font-opentype",
+    "application/x-font-truetype",
+    "application/x-font-ttf",
+    "application/x-httpd-cgi",
+    "application/x-javascript",
+    "application/x-mpegurl",
+    "application/x-opentype",
+    "application/x-otf",
+    "application/x-perl",
+    "application/x-ttf",
+    "font/eot",
+    "font/ttf",
+    "font/otf",
+    "font/opentype",
+    "image/svg+xml",
+    "text/css",
+    "text/csv",
+    "text/html",
+    "text/javascript",
+    "text/js",
+    "text/plain",
+    "text/richtext",
+    "text/tab-separated-values",
+    "text/xml",
+    "text/x-script",
+    "text/x-component",
+    "text/x-java-source",
+  ]
+}
+
 resource "azurerm_cdn_frontdoor_profile" "this" {
   name                     = "afd-${var.common.project}-${var.common.env}"
   resource_group_name      = var.resource_group_name
@@ -11,104 +59,96 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
-  for_each                 = var.frontdoor_endpoint
-  name                     = "afd-ep-${each.value.name}-${var.common.project}-${var.common.env}"
+  name                     = "afd-ep-${var.common.project}-${var.common.env}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "this" {
-  for_each                 = var.frontdoor_origin_group
-  name                     = "afd-origin-group-${each.value.name}-${var.common.project}-${var.common.env}"
+  for_each                 = var.frontdoor_origins
+  name                     = "afd-origin-group-${each.key}-${var.common.project}-${var.common.env}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  session_affinity_enabled = each.value.session_affinity_enabled
+  session_affinity_enabled = false # セッションアフィニティを無効にする
 
-  restore_traffic_time_to_healed_or_new_endpoint_in_minutes = each.value.restore_traffic_time_to_healed_or_new_endpoint_in_minutes
+  restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 10 # トラフィックを別のエンドポイントに切り替えるまでの経過時間 (現在は使用されていない)
 
   health_probe {
-    interval_in_seconds = each.value.health_probe.interval_in_seconds
-    path                = each.value.health_probe.path
-    protocol            = each.value.health_probe.protocol
-    request_type        = each.value.health_probe.request_type
+    interval_in_seconds = 100     # 正常性プローブの間隔 (秒)
+    path                = "/"     # 正常性プローブのパス
+    protocol            = "Https" # 正常性プローブのプロトコル
+    request_type        = "HEAD"  # 正常性プローブのリクエストタイプ
   }
 
   load_balancing {
-    additional_latency_in_milliseconds = each.value.load_balancing.additional_latency_in_milliseconds
-    sample_size                        = each.value.load_balancing.sample_size
-    successful_samples_required        = each.value.load_balancing.successful_samples_required
+    additional_latency_in_milliseconds = 50 # 待機時間感度 (ミリ秒)
+    sample_size                        = 4  # サンプルサイズ
+    successful_samples_required        = 3  # 成功したサンプル数
   }
 }
 
 resource "azurerm_cdn_frontdoor_origin" "this" {
-  for_each                      = var.frontdoor_origin
-  name                          = "afd-origin-${each.value.name}-${var.common.project}-${var.common.env}"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.value.target_frontdoor_origin_group].id
+  for_each                      = var.frontdoor_origins
+  name                          = "afd-origin-${each.key}-${var.common.project}-${var.common.env}"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.key].id
   enabled                       = true
 
-  certificate_name_check_enabled = true
+  certificate_name_check_enabled = true # 証明書のサブジェクト名の検証を有効にする
 
-  host_name          = var.backend_origins[each.value.target_backend_origin].host_name
-  http_port          = each.value.http_port
-  https_port         = each.value.https_port
-  origin_host_header = var.backend_origins[each.value.target_backend_origin].origin_host_header
-  priority           = each.value.priority
-  weight             = each.value.weight
+  host_name          = each.value.host_name
+  http_port          = 80
+  https_port         = 443
+  origin_host_header = each.value.origin_host_header
+  priority           = 1
+  weight             = 1000
 }
 
 resource "azurerm_cdn_frontdoor_route" "this" {
-  for_each                      = var.frontdoor_route
-  name                          = "afd-route-${each.value.name}-${var.common.project}-${var.common.env}"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this[each.value.target_frontdoor_endpoint].id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.value.target_frontdoor_origin_group].id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this[each.value.target_frontdoor_origin].id]
+  for_each                      = var.frontdoor_origins
+  name                          = "afd-route-${each.key}-${var.common.project}-${var.common.env}"
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.key].id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this[each.key].id]
   cdn_frontdoor_rule_set_ids    = []
   enabled                       = true
 
-  forwarding_protocol    = each.value.forwarding_protocol
-  https_redirect_enabled = each.value.https_redirect_enabled
-  patterns_to_match      = each.value.patterns_to_match
-  supported_protocols    = each.value.supported_protocols
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  patterns_to_match      = ["/*"]
+  supported_protocols    = ["Http", "Https"]
 
-  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.this[each.value.target_custom_domain].id]
-  link_to_default_domain          = each.value.link_to_default_domain
+  # ルートにカスタムドメインを関連付ける
+  cdn_frontdoor_custom_domain_ids = try([azurerm_cdn_frontdoor_custom_domain.this[each.key].id], [])
+  link_to_default_domain          = false
 
+  # キャッシュ設定：cached_origin_keys に含まれるオリジンのルートでキャッシュを有効化
   dynamic "cache" {
-    for_each = lookup(each.value, "cache", null) != null ? [each.value.cache] : []
+    for_each = contains(var.cached_origin_keys, each.key) ? [true] : []
 
     content {
-      compression_enabled           = cache.value.compression_enabled
-      query_string_caching_behavior = cache.value.query_string_caching_behavior
-      query_strings                 = cache.value.query_strings
-      content_types_to_compress     = cache.value.content_types_to_compress
+      compression_enabled           = true
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      content_types_to_compress     = local.cache_compression_content_types
     }
   }
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "this" {
-  for_each                 = var.custom_domain
-  name                     = replace("${var.custom_domain[each.key].subdomain}.${var.custom_domain[each.key].dns_zone_name}", ".", "-")
+  for_each                 = var.dns_zone != null ? var.frontdoor_origins : {}
+  name                     = replace("${each.value.subdomain}.${var.dns_zone.name}", ".", "-")
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
-  dns_zone_id              = var.dns_zone[each.key].id
-  host_name                = "${var.custom_domain[each.key].subdomain}.${var.custom_domain[each.key].dns_zone_name}"
+  dns_zone_id              = var.dns_zone.id
+  host_name                = "${each.value.subdomain}.${var.dns_zone.name}"
 
   tls {
     certificate_type = "ManagedCertificate"
   }
 }
 
-resource "azurerm_cdn_frontdoor_custom_domain_association" "this" {
-  for_each                       = var.custom_domain
-  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.this[each.key].id
-  cdn_frontdoor_route_ids = [
-    # カスタムドメイン の key と ルートの target_custom_domain をマッピングして、関連付けるルート ID を取得
-    for k, v in var.frontdoor_route : azurerm_cdn_frontdoor_route.this[k].id if v.target_custom_domain == each.key
-  ]
-}
-
 resource "azurerm_dns_txt_record" "afd_validation" {
-  for_each            = var.custom_domain
+  for_each            = var.dns_zone != null ? var.frontdoor_origins : {}
   name                = "_dnsauth.${each.value.subdomain}"
-  zone_name           = var.dns_zone[each.key].name
-  resource_group_name = var.resource_group_name
+  zone_name           = var.dns_zone.name
+  resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
 
   record {
@@ -117,10 +157,15 @@ resource "azurerm_dns_txt_record" "afd_validation" {
 }
 
 resource "azurerm_dns_cname_record" "afd_cname" {
-  for_each            = var.custom_domain
+  for_each            = var.dns_zone != null ? var.frontdoor_origins : {}
   name                = each.value.subdomain
-  zone_name           = var.dns_zone[each.key].name
-  resource_group_name = var.resource_group_name
+  zone_name           = var.dns_zone.name
+  resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
-  record              = azurerm_cdn_frontdoor_endpoint.this[each.value.target_frontdoor_endpoint].host_name
+  record              = azurerm_cdn_frontdoor_endpoint.this.host_name
 }
+
+# azurerm_cdn_frontdoor_custom_domain_association は不要
+# ルートにカスタムドメインを関連付けるためのものではない
+# ルートにカスタムドメインが関連付けられている前提で、関連付けを解除したり、再登録するときに使用する模様
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cdn_frontdoor_custom_domain_association
