@@ -64,7 +64,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
 
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  patterns_to_match      = each.value.patterns_to_match
+  patterns_to_match      = ["/*"]
   supported_protocols    = ["Http", "Https"]
 
   # ルートにカスタムドメインを関連付ける

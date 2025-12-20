@@ -119,7 +119,6 @@ locals {
 
   frontdoor_routes = local.app_service_enabled ? {
     for k, v in module.app_service[0].app_service : k => {
-      patterns_to_match = ["/*"]
       # web のみキャッシュを有効化する
       cache = k == "web" ? {
         compression_enabled           = true
