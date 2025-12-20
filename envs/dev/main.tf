@@ -176,15 +176,14 @@ module "private_link_scope" {
 module "frontdoor" {
   count = local.frontdoor_enabled ? 1 : 0
 
-  source                   = "../../modules/frontdoor"
-  common                   = var.common
-  resource_group_name      = azurerm_resource_group.rg.name
-  tags                     = azurerm_resource_group.rg.tags
-  frontdoor_profile        = var.frontdoor_profile
-  frontdoor_origins        = local.frontdoor_origins
-  cached_origin_keys       = local.cached_origin_keys
-  dns_zone                 = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
-  frontdoor_custom_domains = local.custom_domain_enabled ? local.frontdoor_custom_domains : {}
+  source              = "../../modules/frontdoor"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  frontdoor_profile   = var.frontdoor_profile
+  frontdoor_origins   = local.frontdoor_origins
+  cached_origin_keys  = local.cached_origin_keys
+  dns_zone            = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
 }
 
 module "frontdoor_waf" {
@@ -275,7 +274,7 @@ module "app_service" {
   allowed_origins = {
     api = concat(
       local.custom_domain_enabled ? [
-        for v in local.frontdoor_custom_domains : "https://${v.subdomain}.${data.azurerm_dns_zone.this[0].name}"
+        for k, v in local.subdomain_config : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
       ] : [],
       ["https://localhost:3000"]
     )

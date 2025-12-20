@@ -108,36 +108,32 @@ locals {
     }
   )
 
+  # Front Door に割り当てるカスタムドメインのマッピング
+  subdomain_config = {
+    api   = "api-${var.common.env}"
+    front = "www-${var.common.env}"
+    web   = "static-${var.common.env}"
+  }
+
   # Front Door の変数を動的に生成
   frontdoor_origins = merge(local.app_service_enabled ? {
     # App Service
     for k, v in module.app_service[0].app_service : k => {
       host_name          = v.default_hostname
       origin_host_header = v.default_hostname
+      subdomain          = local.subdomain_config[k]
     }
     } : {}, {
     # Storage (静的 Web サイト)
     for k, v in module.storage.storage_account : k => {
       host_name          = v.primary_web_host
       origin_host_header = v.primary_web_host
+      subdomain          = local.subdomain_config[k]
     } if k == "web"
   })
 
   # キャッシュを有効化するオリジンの key 一覧
   cached_origin_keys = ["front", "web"]
-
-  # サブドメインのマッピングを指定 (例: api-dev, www-dev)
-  frontdoor_custom_domains = {
-    api = {
-      subdomain = "api-${var.common.env}"
-    }
-    front = {
-      subdomain = "www-${var.common.env}"
-    }
-    web = {
-      subdomain = "static-${var.common.env}"
-    }
-  }
 
   # アクティビティログのカテゴリ
   activity_log_categories = [
