@@ -1,3 +1,3 @@
 # AVD-AZU-0012 (CRITICAL): Network rules allow access by default.
-# 静的 Web サイトを有効化するストレージアカウントでパブリックアクセスが必要なため
+# 抑制理由: ストレージアカウント "web" で静的 Web サイト機能を使用するためパブリックアクセスが必須
 AVD-AZU-0012
