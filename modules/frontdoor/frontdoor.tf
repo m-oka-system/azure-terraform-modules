@@ -1,6 +1,54 @@
 ################################
 # Front Door
 ################################
+
+locals {
+  # キャッシュで圧縮するコンテンツタイプの標準リスト
+  cache_compression_content_types = [
+    "application/eot",
+    "application/font",
+    "application/font-sfnt",
+    "application/javascript",
+    "application/json",
+    "application/opentype",
+    "application/otf",
+    "application/pkcs7-mime",
+    "application/truetype",
+    "application/ttf",
+    "application/vnd.ms-fontobject",
+    "application/xhtml+xml",
+    "application/xml",
+    "application/xml+rss",
+    "application/x-font-opentype",
+    "application/x-font-truetype",
+    "application/x-font-ttf",
+    "application/x-httpd-cgi",
+    "application/x-javascript",
+    "application/x-mpegurl",
+    "application/x-opentype",
+    "application/x-otf",
+    "application/x-perl",
+    "application/x-ttf",
+    "font/eot",
+    "font/ttf",
+    "font/otf",
+    "font/opentype",
+    "image/svg+xml",
+    "text/css",
+    "text/csv",
+    "text/html",
+    "text/javascript",
+    "text/js",
+    "text/plain",
+    "text/richtext",
+    "text/tab-separated-values",
+    "text/xml",
+    "text/x-script",
+    "text/x-component",
+    "text/x-java-source",
+  ]
+}
+
 resource "azurerm_cdn_frontdoor_profile" "this" {
   name                     = "afd-${var.common.project}-${var.common.env}"
   resource_group_name      = var.resource_group_name
@@ -54,7 +102,7 @@ resource "azurerm_cdn_frontdoor_origin" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_route" "this" {
-  for_each                      = var.frontdoor_routes
+  for_each                      = var.frontdoor_origins
   name                          = "afd-route-${each.key}-${var.common.project}-${var.common.env}"
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.key].id
@@ -71,14 +119,15 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   cdn_frontdoor_custom_domain_ids = try([azurerm_cdn_frontdoor_custom_domain.this[each.key].id], [])
   link_to_default_domain          = false
 
+  # キャッシュ設定：cached_origin_keys に含まれるオリジンのルートでキャッシュを有効化
   dynamic "cache" {
-    for_each = lookup(each.value, "cache", null) != null ? [each.value.cache] : []
+    for_each = contains(var.cached_origin_keys, each.key) ? [true] : []
 
     content {
-      compression_enabled           = cache.value.compression_enabled
-      query_string_caching_behavior = cache.value.query_string_caching_behavior
-      query_strings                 = cache.value.query_strings
-      content_types_to_compress     = cache.value.content_types_to_compress
+      compression_enabled           = true
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      content_types_to_compress     = local.cache_compression_content_types
     }
   }
 }

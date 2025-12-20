@@ -182,7 +182,7 @@ module "frontdoor" {
   tags                     = azurerm_resource_group.rg.tags
   frontdoor_profile        = var.frontdoor_profile
   frontdoor_origins        = local.frontdoor_origins
-  frontdoor_routes         = local.frontdoor_routes
+  cached_origin_keys       = local.cached_origin_keys
   dns_zone                 = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
   frontdoor_custom_domains = local.custom_domain_enabled ? local.frontdoor_custom_domains : {}
 }
