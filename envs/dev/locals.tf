@@ -118,15 +118,15 @@ locals {
   } : {}
 
   # キャッシュを有効化するオリジンの key 一覧
-  cached_origin_keys = ["web"]
+  cached_origin_keys = ["front"]
 
-  # サブドメインのマッピングを指定 (例: api-dev, web-dev)
+  # サブドメインのマッピングを指定 (例: api-dev, www-dev)
   frontdoor_custom_domains = {
     api = {
       subdomain = "api-${var.common.env}"
     }
-    web = {
-      subdomain = "web-${var.common.env}"
+    front = {
+      subdomain = "www-${var.common.env}"
     }
   }
 

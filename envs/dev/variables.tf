@@ -1364,8 +1364,8 @@ variable "app_service" {
         }
       }
     }
-    web = {
-      name                          = "web"
+    front = {
+      name                          = "front"
       target_service_plan           = "app"
       target_subnet                 = "app"
       target_user_assigned_identity = "app"

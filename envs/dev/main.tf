@@ -265,7 +265,7 @@ module "app_service" {
   frontdoor_profile   = try(module.frontdoor[0].frontdoor_profile, null)
 
   app_settings = {
-    web = {
+    front = {
       APPLICATIONINSIGHTS_CONNECTION_STRING = module.application_insights.application_insights["app"].connection_string
     }
     api = {
@@ -279,7 +279,7 @@ module "app_service" {
       ] : [],
       ["https://localhost:3000"]
     )
-    web = []
+    front = []
   }
 }
 
