@@ -11,8 +11,7 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
-  for_each                 = var.frontdoor_origins
-  name                     = "afd-ep-${each.key}-${var.common.project}-${var.common.env}"
+  name                     = "afd-ep-${var.common.project}-${var.common.env}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
 }
 
@@ -57,7 +56,7 @@ resource "azurerm_cdn_frontdoor_origin" "this" {
 resource "azurerm_cdn_frontdoor_route" "this" {
   for_each                      = var.frontdoor_routes
   name                          = "afd-route-${each.key}-${var.common.project}-${var.common.env}"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this[each.key].id
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.key].id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this[each.key].id]
   cdn_frontdoor_rule_set_ids    = []
@@ -114,7 +113,7 @@ resource "azurerm_dns_cname_record" "afd_cname" {
   zone_name           = var.dns_zone.name
   resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
-  record              = azurerm_cdn_frontdoor_endpoint.this[each.key].host_name
+  record              = azurerm_cdn_frontdoor_endpoint.this.host_name
 }
 
 # azurerm_cdn_frontdoor_custom_domain_association は不要
