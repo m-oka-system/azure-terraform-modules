@@ -64,6 +64,13 @@ resource "azurerm_storage_account" "this" {
   tags = var.tags
 }
 
+resource "azurerm_storage_account_static_website" "this" {
+  for_each           = { for k, v in var.storage : k => v if v.static_website_enabled }
+  storage_account_id = azurerm_storage_account.this[each.key].id
+  index_document     = each.value.static_website_config.index_document
+  error_404_document = each.value.static_website_config.error_404_document
+}
+
 resource "azurerm_storage_container" "this" {
   for_each              = var.blob_container
   name                  = each.value.container_name
