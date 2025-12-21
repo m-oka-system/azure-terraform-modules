@@ -197,9 +197,8 @@ module "frontdoor_waf" {
   frontdoor_firewall_policy      = var.frontdoor_firewall_policy
   frontdoor_firewall_custom_rule = var.frontdoor_firewall_custom_rule
   frontdoor_profile              = module.frontdoor[0].frontdoor_profile
+  frontdoor_custom_domain        = module.frontdoor[0].frontdoor_custom_domain
   allowed_cidr                   = split(",", var.allowed_cidr)
-
-  frontdoor_domain = []
 }
 
 module "container_registry" {
