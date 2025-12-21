@@ -7,6 +7,39 @@ variable "common" {
   }
 }
 
+# 特定の Azure リソースを作成する/しないフラグ
+variable "resource_enabled" {
+  type = object({
+    activity_log          = optional(bool, false)
+    dns_zone              = optional(bool, false)
+    private_dns_zone      = optional(bool, false)
+    private_endpoint      = optional(bool, false)
+    custom_domain         = optional(bool, false)
+    frontdoor             = optional(bool, false)
+    frontdoor_waf         = optional(bool, false)
+    container_registry    = optional(bool, false)
+    container_app         = optional(bool, false)
+    app_service_plan      = optional(bool, false)
+    app_service           = optional(bool, false)
+    function              = optional(bool, false)
+    aisearch              = optional(bool, false)
+    cosmosdb              = optional(bool, false)
+    mysql                 = optional(bool, false)
+    mssql_database        = optional(bool, false)
+    redis                 = optional(bool, false)
+    vm                    = optional(bool, false)
+    vmss                  = optional(bool, false)
+    loadbalancer          = optional(bool, false)
+    bastion               = optional(bool, false)
+    nat_gateway           = optional(bool, false)
+    resource_health_alert = optional(bool, false)
+    diagnostic_setting    = optional(bool, false)
+    backup_vault          = optional(bool, false)
+    defender_for_cloud    = optional(bool, false)
+  })
+  default = {}
+}
+
 variable "allowed_cidr" {
   type    = string
   default = "203.0.113.10,203.0.113.11"
