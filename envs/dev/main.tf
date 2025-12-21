@@ -119,7 +119,7 @@ module "user_assigned_identity" {
 }
 
 module "activity_log" {
-  count = local.activity_log_enabled ? 1 : 0
+  count = var.resource_enabled.activity_log ? 1 : 0
 
   source                     = "../../modules/activity_log"
   log_analytics_workspace_id = module.log_analytics.log_analytics["logs"].id
@@ -127,7 +127,7 @@ module "activity_log" {
 }
 
 module "dns_zone" {
-  count = local.dns_zone_enabled ? 1 : 0
+  count = var.resource_enabled.dns_zone ? 1 : 0
 
   source              = "../../modules/dns_zone"
   resource_group_name = azurerm_resource_group.rg.name
@@ -136,14 +136,14 @@ module "dns_zone" {
 }
 
 data "azurerm_dns_zone" "this" {
-  count = local.custom_domain_enabled ? 1 : 0
+  count = var.resource_enabled.custom_domain ? 1 : 0
 
   name                = "az-learn.com"
   resource_group_name = "rg-share"
 }
 
 module "private_dns_zone" {
-  count = local.private_dns_zone_enabled ? 1 : 0
+  count = var.resource_enabled.private_dns_zone ? 1 : 0
 
   source              = "../../modules/private_dns_zone"
   common              = var.common
@@ -155,7 +155,7 @@ module "private_dns_zone" {
 }
 
 module "private_endpoint" {
-  count = local.private_endpoint_enabled ? 1 : 0
+  count = var.resource_enabled.private_endpoint ? 1 : 0
 
   source              = "../../modules/private_endpoint"
   common              = var.common
@@ -174,7 +174,7 @@ module "private_link_scope" {
 }
 
 module "frontdoor" {
-  count = local.frontdoor_enabled ? 1 : 0
+  count = var.resource_enabled.frontdoor ? 1 : 0
 
   source              = "../../modules/frontdoor"
   common              = var.common
@@ -183,11 +183,11 @@ module "frontdoor" {
   frontdoor_profile   = var.frontdoor_profile
   frontdoor_origins   = local.frontdoor_origins
   cached_origin_keys  = local.cached_origin_keys
-  dns_zone            = local.custom_domain_enabled ? data.azurerm_dns_zone.this[0] : null
+  dns_zone            = var.resource_enabled.custom_domain ? data.azurerm_dns_zone.this[0] : null
 }
 
 module "frontdoor_waf" {
-  count = local.frontdoor_waf_enabled ? 1 : 0
+  count = var.resource_enabled.frontdoor_waf ? 1 : 0
 
   source                         = "../../modules/frontdoor_waf"
   common                         = var.common
@@ -203,7 +203,7 @@ module "frontdoor_waf" {
 }
 
 module "container_registry" {
-  count = local.container_registry_enabled ? 1 : 0
+  count = var.resource_enabled.container_registry ? 1 : 0
 
   source              = "../../modules/container_registry"
   common              = var.common
@@ -214,7 +214,7 @@ module "container_registry" {
 }
 
 module "container_app_environment" {
-  count = local.container_app_enabled ? 1 : 0
+  count = var.resource_enabled.container_app ? 1 : 0
 
   source                    = "../../modules/container_app_environment"
   common                    = var.common
@@ -226,7 +226,7 @@ module "container_app_environment" {
 }
 
 module "container_app" {
-  count = local.container_app_enabled ? 1 : 0
+  count = var.resource_enabled.container_app ? 1 : 0
 
   source                    = "../../modules/container_app"
   common                    = var.common
@@ -240,7 +240,7 @@ module "container_app" {
 }
 
 module "app_service_plan" {
-  count = local.app_service_plan_enabled ? 1 : 0
+  count = var.resource_enabled.app_service_plan ? 1 : 0
 
   source              = "../../modules/app_service_plan"
   common              = var.common
@@ -250,7 +250,7 @@ module "app_service_plan" {
 }
 
 module "app_service" {
-  count = local.app_service_enabled ? 1 : 0
+  count = var.resource_enabled.app_service ? 1 : 0
 
   source              = "../../modules/app_service"
   common              = var.common
@@ -273,7 +273,7 @@ module "app_service" {
   }
   allowed_origins = {
     api = concat(
-      local.custom_domain_enabled ? [
+      var.resource_enabled.custom_domain ? [
         for k, v in local.subdomain_config : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
       ] : [],
       ["https://localhost:3000"]
@@ -283,7 +283,7 @@ module "app_service" {
 }
 
 module "function" {
-  count = local.function_enabled ? 1 : 0
+  count = var.resource_enabled.function ? 1 : 0
 
   source               = "../../modules/function"
   common               = var.common
@@ -329,7 +329,7 @@ module "document_intelligence" {
 }
 
 module "aisearch" {
-  count = local.aisearch_enabled ? 1 : 0
+  count = var.resource_enabled.aisearch ? 1 : 0
 
   source              = "../../modules/aisearch"
   common              = var.common
@@ -343,7 +343,7 @@ module "aisearch" {
 }
 
 module "cosmosdb" {
-  count = local.cosmosdb_enabled ? 1 : 0
+  count = var.resource_enabled.cosmosdb ? 1 : 0
 
   source                 = "../../modules/cosmosdb"
   common                 = var.common
@@ -359,7 +359,7 @@ module "cosmosdb" {
 }
 
 module "mysql" {
-  count = local.mysql_enabled ? 1 : 0
+  count = var.resource_enabled.mysql ? 1 : 0
 
   source                  = "../../modules/mysql"
   common                  = var.common
@@ -374,7 +374,7 @@ module "mysql" {
 }
 
 module "mssql_server" {
-  count = local.mssql_database_enabled ? 1 : 0
+  count = var.resource_enabled.mssql_database ? 1 : 0
 
   source                     = "../../modules/mssql_server"
   common                     = var.common
@@ -384,11 +384,11 @@ module "mssql_server" {
   identity_id                = module.user_assigned_identity.user_assigned_identity["mssql"].id
   firewall_rules             = var.firewall_rules
   storage_endpoint           = module.storage.storage_account["log"].primary_blob_endpoint
-  defender_for_cloud_enabled = local.defender_for_cloud_enabled
+  defender_for_cloud_enabled = var.resource_enabled.defender_for_cloud
 }
 
 module "mssql_database" {
-  count = local.mssql_database_enabled ? 1 : 0
+  count = var.resource_enabled.mssql_database ? 1 : 0
 
   source              = "../../modules/mssql_database"
   common              = var.common
@@ -399,7 +399,7 @@ module "mssql_database" {
 }
 
 module "redis" {
-  count = local.redis_enabled ? 1 : 0
+  count = var.resource_enabled.redis ? 1 : 0
 
   source              = "../../modules/redis"
   common              = var.common
@@ -417,7 +417,7 @@ module "ssh_public_key" {
 }
 
 module "vm" {
-  count = local.vm_enabled ? 1 : 0
+  count = var.resource_enabled.vm ? 1 : 0
 
   source              = "../../modules/vm"
   common              = var.common
@@ -431,7 +431,7 @@ module "vm" {
 }
 
 module "vmss" {
-  count = local.vmss_enabled ? 1 : 0
+  count = var.resource_enabled.vmss ? 1 : 0
 
   source                                       = "../../modules/vmss"
   common                                       = var.common
@@ -445,7 +445,7 @@ module "vmss" {
 }
 
 module "loadbalancer" {
-  count = local.loadbalancer_enabled ? 1 : 0
+  count = var.resource_enabled.loadbalancer ? 1 : 0
 
   source              = "../../modules/loadbalancer"
   common              = var.common
@@ -456,7 +456,7 @@ module "loadbalancer" {
 }
 
 module "application_gateway" {
-  count = local.vmss_enabled ? 1 : 0
+  count = var.resource_enabled.vmss ? 1 : 0
 
   source               = "../../modules/application_gateway"
   common               = var.common
@@ -470,7 +470,7 @@ module "application_gateway" {
 }
 
 module "bastion" {
-  count = local.bastion_enabled ? 1 : 0
+  count = var.resource_enabled.bastion ? 1 : 0
 
   source              = "../../modules/bastion"
   common              = var.common
@@ -481,7 +481,7 @@ module "bastion" {
 }
 
 module "nat_gateway" {
-  count = local.nat_gateway_enabled ? 1 : 0
+  count = var.resource_enabled.nat_gateway ? 1 : 0
 
   source              = "../../modules/nat_gateway"
   common              = var.common
@@ -500,7 +500,7 @@ module "action_group" {
 }
 
 module "resource_health_alert" {
-  count = local.resource_health_alert_enabled ? 1 : 0
+  count = var.resource_enabled.resource_health_alert ? 1 : 0
 
   source              = "../../modules/monitor_resource_health_alert"
   common              = var.common
@@ -555,7 +555,7 @@ module "log_query_alert" {
 }
 
 module "diagnostic_setting" {
-  count = local.diagnostic_setting_enabled ? 1 : 0
+  count = var.resource_enabled.diagnostic_setting ? 1 : 0
 
   source                  = "../../modules/diagnostic_setting"
   common                  = var.common
@@ -569,14 +569,14 @@ module "diagnostic_setting" {
       { for k, v in module.storage.storage_account : format("storage_account_%s", k) => v.id },
       { for k, v in module.storage.storage_account : format("blob_%s", k) => format("%s/blobServices/default", v.id) },
       { for k, v in module.key_vault.key_vault : format("key_vault_%s", k) => v.id },
-      (local.mssql_database_enabled ? { "sqldb" = module.mssql_database[0].mssql_database.id } : {}),
+      (var.resource_enabled.mssql_database ? { "sqldb" = module.mssql_database[0].mssql_database.id } : {}),
       # And more...
     )
   }
 }
 
 module "backup_vault" {
-  count = local.backup_vault_enabled ? 1 : 0
+  count = var.resource_enabled.backup_vault ? 1 : 0
 
   source                     = "../../modules/backup_vault"
   common                     = var.common
@@ -587,14 +587,14 @@ module "backup_vault" {
 }
 
 module "defender_for_cloud" {
-  count = local.defender_for_cloud_enabled ? 1 : 0
+  count = var.resource_enabled.defender_for_cloud ? 1 : 0
 
   source                               = "../../modules/defender_for_cloud"
   security_center_subscription_pricing = var.security_center_subscription_pricing
 }
 
 module "defender_for_cloud_security_contact" {
-  count = local.defender_for_cloud_enabled ? 1 : 0
+  count = var.resource_enabled.defender_for_cloud ? 1 : 0
 
   source           = "../../modules/defender_for_cloud_security_contact"
   subscription_id  = local.common.subscription_id

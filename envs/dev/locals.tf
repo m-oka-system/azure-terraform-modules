@@ -8,34 +8,6 @@ data "azurerm_subscription" "current" {}
 # }
 
 locals {
-  # 特定の Azure リソースを作成する/しない
-  activity_log_enabled          = false
-  dns_zone_enabled              = false
-  private_dns_zone_enabled      = false
-  private_endpoint_enabled      = false
-  custom_domain_enabled         = false
-  frontdoor_enabled             = false
-  frontdoor_waf_enabled         = false
-  container_registry_enabled    = false
-  container_app_enabled         = false
-  app_service_plan_enabled      = false
-  app_service_enabled           = false
-  function_enabled              = false
-  aisearch_enabled              = false
-  cosmosdb_enabled              = false
-  mysql_enabled                 = false
-  mssql_database_enabled        = false
-  redis_enabled                 = false
-  vm_enabled                    = false
-  vmss_enabled                  = false
-  loadbalancer_enabled          = false
-  bastion_enabled               = false
-  nat_gateway_enabled           = false
-  resource_health_alert_enabled = false
-  diagnostic_setting_enabled    = false
-  backup_vault_enabled          = false
-  defender_for_cloud_enabled    = false
-
   # 共通の変数
   common = {
     subscription_id = data.azurerm_client_config.current.subscription_id
@@ -118,7 +90,7 @@ locals {
   # Front Door の変数を動的に生成
   frontdoor_origins = merge(
     # App Service
-    local.app_service_enabled ? {
+    var.resource_enabled.app_service ? {
       for k, v in module.app_service[0].app_service : k => {
         host_name          = v.default_hostname
         origin_host_header = v.default_hostname
