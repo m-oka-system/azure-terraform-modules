@@ -685,7 +685,7 @@ variable "storage" {
     account_kind                  = string
     account_replication_type      = string
     access_tier                   = string
-    https_traffic_only_enabled    = bool
+    https_traffic_only_enabled    = optional(bool, true)
     public_network_access_enabled = bool
     is_hns_enabled                = bool
     defender_for_storage_enabled  = bool # Defender for Storageを有効にするかどうか
@@ -724,7 +724,6 @@ variable "storage" {
       account_kind                  = "StorageV2"
       account_replication_type      = "LRS"
       access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
       defender_for_storage_enabled  = false
@@ -752,7 +751,6 @@ variable "storage" {
       account_kind                  = "StorageV2"
       account_replication_type      = "LRS"
       access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
       defender_for_storage_enabled  = false
@@ -780,7 +778,6 @@ variable "storage" {
       account_kind                  = "StorageV2"
       account_replication_type      = "LRS"
       access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
       defender_for_storage_enabled  = false
@@ -805,7 +802,6 @@ variable "storage" {
       account_kind                  = "StorageV2"
       account_replication_type      = "LRS"
       access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
       public_network_access_enabled = true
       is_hns_enabled                = false
       defender_for_storage_enabled  = false
