@@ -1146,7 +1146,7 @@ variable "private_link_scope" {
 
 variable "frontdoor_profile" {
   type = object({
-    sku_name                 = string
+    sku_name                 = string # Standard_AzureFrontDoor, Premium_AzureFrontDoor
     response_timeout_seconds = number
   })
   default = {
@@ -1155,63 +1155,82 @@ variable "frontdoor_profile" {
   }
 }
 
-variable "frontdoor_security_policy" {
-  type = map(object({
-    name                   = string
-    target_firewall_policy = string
-    patterns_to_match      = list(string)
-  }))
-  default = {
-    app = {
-      name                   = "app"
-      target_firewall_policy = "app"
-      patterns_to_match      = ["/*"]
-    }
-  }
-}
-
 variable "frontdoor_firewall_policy" {
   type = map(object({
-    name                              = string
-    sku_name                          = string
-    mode                              = string
-    custom_block_response_status_code = number
+    mode = string # Detection（検出のみ） または Prevention（防御）
+    custom_rules = list(object({
+      name                           = string
+      type                           = string
+      priority                       = number
+      action                         = string
+      rate_limit_duration_in_minutes = optional(number)
+      rate_limit_threshold           = optional(number)
+      match_conditions = list(object({
+        match_variable     = string
+        match_values       = list(string)
+        operator           = string
+        selector           = optional(string)
+        negation_condition = optional(bool)
+        transforms         = optional(list(string))
+      }))
+    }))
+    managed_rules = optional(list(object({
+      type    = string
+      version = string
+      action  = string
+    })))
   }))
   default = {
-    app = {
-      name                              = "IPRestrictionPolicy"
-      sku_name                          = "Standard_AzureFrontDoor"
-      mode                              = "Prevention"
-      custom_block_response_status_code = 403
+    api = {
+      mode = "Prevention"
+      custom_rules = [
+        {
+          name     = "AllowMyIP"
+          type     = "MatchRule"
+          priority = 100
+          action   = "Allow"
+          match_conditions = [
+            {
+              match_variable = "RemoteAddr"
+              match_values   = ["203.0.113.10/32"]
+              operator       = "IPMatch"
+            }
+          ]
+        },
+        {
+          name                           = "RateLimitRule"
+          type                           = "RateLimitRule"
+          priority                       = 200
+          action                         = "Block"
+          rate_limit_duration_in_minutes = 1
+          rate_limit_threshold           = 100
+          match_conditions = [
+            {
+              match_variable = "RequestHeader"
+              match_values   = ["0"]
+              operator       = "GreaterThanOrEqual"
+              selector       = "Host"
+            }
+          ]
+        },
+      ]
+      managed_rules = [
+        {
+          type    = "Microsoft_DefaultRuleSet"
+          version = "2.1"
+          action  = "Block"
+        }
+      ]
+    },
+    front = {
+      mode          = "Prevention"
+      custom_rules  = []
+      managed_rules = []
     }
-  }
-}
-
-variable "frontdoor_firewall_custom_rule" {
-  type = map(object({
-    target_firewall_policy = string
-    priority               = number
-    type                   = string
-    action                 = string
-    match_condition = object({
-      match_variable     = string
-      operator           = string
-      negation_condition = bool
-      match_values       = list(string)
-    })
-  }))
-  default = {
-    AllowClientIP = {
-      target_firewall_policy = "app"
-      priority               = 100
-      type                   = "MatchRule"
-      action                 = "Block"
-      match_condition = {
-        match_variable     = "RemoteAddr"
-        operator           = "IPMatch"
-        negation_condition = true # 含まない場合
-        match_values       = ["MyIP"]
-      }
+    web = {
+      mode          = "Prevention"
+      custom_rules  = []
+      managed_rules = []
     }
   }
 }

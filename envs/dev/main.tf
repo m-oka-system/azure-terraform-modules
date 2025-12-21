@@ -189,16 +189,13 @@ module "frontdoor" {
 module "frontdoor_waf" {
   count = var.resource_enabled.frontdoor_waf ? 1 : 0
 
-  source                         = "../../modules/frontdoor_waf"
-  common                         = var.common
-  resource_group_name            = azurerm_resource_group.rg.name
-  tags                           = azurerm_resource_group.rg.tags
-  frontdoor_security_policy      = var.frontdoor_security_policy
-  frontdoor_firewall_policy      = var.frontdoor_firewall_policy
-  frontdoor_firewall_custom_rule = var.frontdoor_firewall_custom_rule
-  frontdoor_profile              = module.frontdoor[0].frontdoor_profile
-  frontdoor_custom_domain        = module.frontdoor[0].frontdoor_custom_domain
-  allowed_cidr                   = split(",", var.allowed_cidr)
+  source                    = "../../modules/frontdoor_waf"
+  common                    = var.common
+  resource_group_name       = azurerm_resource_group.rg.name
+  tags                      = azurerm_resource_group.rg.tags
+  frontdoor_firewall_policy = var.frontdoor_firewall_policy
+  frontdoor_profile         = module.frontdoor[0].frontdoor_profile
+  frontdoor_custom_domain   = module.frontdoor[0].frontdoor_custom_domain
 }
 
 module "container_registry" {
