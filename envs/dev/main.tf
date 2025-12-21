@@ -274,7 +274,7 @@ module "app_service" {
   allowed_origins = {
     api = concat(
       var.resource_enabled.custom_domain ? [
-        for k, v in local.subdomain_config : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
+        for k, v in local.frontdoor_custom_domain_mappping : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
       ] : [],
       ["https://localhost:3000"]
     )
