@@ -26,6 +26,9 @@ provider "azurerm" {
   # リソースプロバイダーの登録モード (core, extended, all, none, legacy)
   resource_provider_registrations = "none"
 
+  # Entra 認証を使用してストレージアカウントにアクセス
+  storage_use_azuread = true
+
   # サブスクリプションに明示的に登録するリソースプロバイダー
   resource_providers_to_register = [
     "Microsoft.Advisor",

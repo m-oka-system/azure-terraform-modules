@@ -680,15 +680,17 @@ variable "network_security_rule" {
 
 variable "storage" {
   type = map(object({
-    name                          = string
-    account_tier                  = string
-    account_kind                  = string
-    account_replication_type      = string
-    access_tier                   = string
-    https_traffic_only_enabled    = bool
-    public_network_access_enabled = bool
-    is_hns_enabled                = bool
-    defender_for_storage_enabled  = bool # Defender for Storageを有効にするかどうか
+    name                            = string
+    account_tier                    = string
+    account_kind                    = string
+    account_replication_type        = string
+    access_tier                     = string
+    https_traffic_only_enabled      = optional(bool, true) # 安全な転送が必須
+    public_network_access_enabled   = bool
+    shared_access_key_enabled       = bool # ストレージ アカウント キーへのアクセスを許可する
+    default_to_oauth_authentication = bool # Azure portal で Microsoft Entra 認可を既定にする
+    is_hns_enabled                  = bool
+    defender_for_storage_enabled    = bool # Defender for Storageを有効にするかどうか
     blob_properties = object({
       versioning_enabled                = bool
       change_feed_enabled               = bool
@@ -719,15 +721,16 @@ variable "storage" {
   }))
   default = {
     app = {
-      name                          = "app"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "app"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
@@ -747,15 +750,16 @@ variable "storage" {
       }
     }
     web = {
-      name                          = "web"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "web"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
@@ -775,15 +779,16 @@ variable "storage" {
       }
     }
     func = {
-      name                          = "func"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "func"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = false
         change_feed_enabled               = false
@@ -800,15 +805,16 @@ variable "storage" {
       }
     }
     log = {
-      name                          = "log"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "log"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = false
