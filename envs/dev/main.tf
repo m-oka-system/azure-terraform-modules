@@ -189,17 +189,13 @@ module "frontdoor" {
 module "frontdoor_waf" {
   count = var.resource_enabled.frontdoor_waf ? 1 : 0
 
-  source                         = "../../modules/frontdoor_waf"
-  common                         = var.common
-  resource_group_name            = azurerm_resource_group.rg.name
-  tags                           = azurerm_resource_group.rg.tags
-  frontdoor_security_policy      = var.frontdoor_security_policy
-  frontdoor_firewall_policy      = var.frontdoor_firewall_policy
-  frontdoor_firewall_custom_rule = var.frontdoor_firewall_custom_rule
-  frontdoor_profile              = module.frontdoor[0].frontdoor_profile
-  allowed_cidr                   = split(",", var.allowed_cidr)
-
-  frontdoor_domain = []
+  source                    = "../../modules/frontdoor_waf"
+  common                    = var.common
+  resource_group_name       = azurerm_resource_group.rg.name
+  tags                      = azurerm_resource_group.rg.tags
+  frontdoor_firewall_policy = var.frontdoor_firewall_policy
+  frontdoor_profile         = module.frontdoor[0].frontdoor_profile
+  frontdoor_custom_domain   = module.frontdoor[0].frontdoor_custom_domain
 }
 
 module "container_registry" {
@@ -274,7 +270,7 @@ module "app_service" {
   allowed_origins = {
     api = concat(
       var.resource_enabled.custom_domain ? [
-        for k, v in local.subdomain_config : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
+        for k, v in local.frontdoor_custom_domain_mapping : "https://${v}.${data.azurerm_dns_zone.this[0].name}" if contains(["front", "web"], k)
       ] : [],
       ["https://localhost:3000"]
     )
