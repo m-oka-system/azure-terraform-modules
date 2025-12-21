@@ -1192,7 +1192,7 @@ variable "frontdoor_firewall_policy" {
           match_conditions = [
             {
               match_variable = "RemoteAddr"
-              match_values   = ["203.0.113.10/32"]
+              match_values   = ["203.0.113.10/32"] # 例: 実際の環境では許可する IP アドレスに変更すること
               operator       = "IPMatch"
             }
           ]

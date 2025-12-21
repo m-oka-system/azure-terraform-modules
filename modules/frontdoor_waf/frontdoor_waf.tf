@@ -2,6 +2,7 @@
 # Web Application Firewall (WAF)
 ################################
 locals {
+  # Front Door Profile の SKU を判定 （Premium のみマネージドルールをサポート）
   is_premium_sku = var.frontdoor_profile.sku_name == "Premium_AzureFrontDoor"
 }
 
@@ -15,7 +16,8 @@ resource "azurerm_cdn_frontdoor_security_policy" "this" {
       cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.this[each.key].id
 
       association {
-        # 各セキュリティポリシーに対応して 1 つのカスタムドメインを関連付ける
+        # 各セキュリティポリシーに対して 1 つのカスタムドメインを関連付ける
+        # アーキテクチャ: セキュリティポリシーとカスタムドメインを 1 対 1 でマッピングし、ドメインごとに異なる WAF 設定（カスタムルール、マネージドルール）を適用可能にする
         domain {
           cdn_frontdoor_domain_id = var.frontdoor_custom_domain[each.key].id
         }
