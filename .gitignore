@@ -47,3 +47,6 @@ trivy-db/
 
 # Docs
 claudedocs/
+
+# Claude Code Skills - exclude built .skill files (keep source in .claude/skills/)
+*.skill
