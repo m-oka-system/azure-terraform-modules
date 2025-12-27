@@ -162,7 +162,8 @@ jobs:
         run: |
           uvx terraform-compliance \
             -f ../../tests/compliance/features \
-            -p tfplan.json
+            -p tfplan.json \
+            -S
 
       - name: Cleanup Plan Files
         if: always()

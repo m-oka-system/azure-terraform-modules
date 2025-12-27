@@ -23,7 +23,8 @@ ENV := $(word 2,$(MAKECMDGOALS))
 TERRAFORM_DIR := ../../envs/$(ENV)
 
 # uvx で terraform-compliance を実行（インストール不要）
-TC := uvx terraform-compliance
+# -S: Silent モード（成功時はサマリーのみ表示、失敗時は詳細なエラー情報を表示）
+TC := uvx terraform-compliance -S
 
 # カラー出力
 GREEN := \033[0;32m
