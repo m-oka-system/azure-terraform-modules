@@ -30,6 +30,7 @@ terraform.rc
 # 環境変数
 .env
 .env.*
+.secrets
 
 # バックアップファイル
 *.backup
