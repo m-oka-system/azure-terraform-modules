@@ -145,8 +145,10 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Terraform Init
-        run: terraform init -backend=false
+      - name: Terraform Init (without backend)
+        run: |
+          mv backend.tf backend.tf.disabled
+          terraform init
 
       - name: Generate Terraform Plan
         id: plan
