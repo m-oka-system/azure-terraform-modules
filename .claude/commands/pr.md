@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(gh:*), Bash(git:*)
+allowed-tools: Bash(gh:*), Bash(git:*), Skill(pr-review-toolkit:review-pr)
 description: Generate PR description and automatically create pull request on GitHub
 ---
 
@@ -19,6 +19,7 @@ Based on the provided option, perform one of the following actions:
 - **No option or default**: Generate PR description and create pull request
 - **-p**: Push current branch and create pull request
 - **-u**: Update existing pull request description only
+- **-r**: Create pull request and automatically review it
 
 ### Default behavior (no option):
 
@@ -38,6 +39,13 @@ Based on the provided option, perform one of the following actions:
 1. Create a PR description following the **exact format** of the PR template in Japanese
 2. **Add a Mermaid diagram** that visualizes the changes made in this PR
 3. Update existing pull request description using `gh pr edit --body <description>`
+
+### With -r option:
+
+1. Create a PR description following the **exact format** of the PR template in Japanese
+2. **Add a Mermaid diagram** that visualizes the changes made in this PR
+3. Execute `gh pr create --draft` with the generated title and description
+4. After PR creation succeeds, execute `/pr-review-toolkit:review-pr` skill to automatically review the created pull request
 
 ### Requirements:
 
