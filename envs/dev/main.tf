@@ -118,6 +118,15 @@ module "user_assigned_identity" {
   role_assignment        = var.role_assignment
 }
 
+module "federated_identity_credential" {
+  source              = "../../modules/federated_identity_credential"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  subject             = "repo:m-oka-system/azure-terraform-modules:environment:${var.common.env}"
+  parent_id           = module.user_assigned_identity.user_assigned_identity["gha"].id
+}
+
+
 module "activity_log" {
   count = var.resource_enabled.activity_log ? 1 : 0
 

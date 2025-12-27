@@ -1061,6 +1061,9 @@ variable "user_assigned_identity" {
     mssql = {
       name = "mssql"
     }
+    gha = {
+      name = "gha"
+    }
   }
 }
 
@@ -1096,6 +1099,18 @@ variable "role_assignment" {
     }
     mssql_blob_data_contributor = {
       target_identity      = "mssql"
+      role_definition_name = "Storage Blob Data Contributor"
+    }
+    gha_contributor = {
+      target_identity      = "gha"
+      role_definition_name = "Contributor"
+    }
+    gha_key_vault_secrets_user = {
+      target_identity      = "gha"
+      role_definition_name = "Key Vault Secrets User"
+    }
+    gha_storage_blob_data_contributor = {
+      target_identity      = "gha"
       role_definition_name = "Storage Blob Data Contributor"
     }
   }
