@@ -5,50 +5,14 @@
 # 参考:
 #   - https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview
 #   - https://learn.microsoft.com/azure/security/fundamentals/network-best-practices
+#
+# 注: Terraform の必須項目（resource_group_name, direction, priority 等）は
+#     terraform plan が通る時点で存在が保証されるため、テスト対象外としています。
 # =============================================================================
 
 @network @security
 Feature: Azure Network Security
   Azure ネットワークリソースはセキュリティベストプラクティスに準拠する必要があります
-
-  # ===========================================================================
-  # Network Security Group (NSG)
-  # ===========================================================================
-
-  # ---------------------------------------------------------------------------
-  # NSG 基本設定
-  # ---------------------------------------------------------------------------
-  # なぜ: NSG はリソースグループを設定する必要があります
-  Scenario: NSG はリソースグループを設定する
-    Given I have azurerm_network_security_group defined
-    Then it must contain resource_group_name
-
-  # なぜ: NSG ルールは direction（Inbound/Outbound）を設定する必要があります
-  Scenario: NSG ルールは direction を設定する
-    Given I have azurerm_network_security_rule defined
-    Then it must contain direction
-
-  # なぜ: NSG ルールは priority を設定してルールの優先順位を決める必要があります
-  Scenario: NSG ルールは priority を設定する
-    Given I have azurerm_network_security_rule defined
-    Then it must contain priority
-
-  # ===========================================================================
-  # Virtual Network
-  # ===========================================================================
-
-  # ---------------------------------------------------------------------------
-  # VNet 設計
-  # ---------------------------------------------------------------------------
-  # なぜ: VNet は適切なアドレス空間を持つ必要があります
-  Scenario: VNet はアドレス空間を設定する
-    Given I have azurerm_virtual_network defined
-    Then it must contain address_space
-
-  # なぜ: サブネットを使用することで、ネットワークをセグメント化できます
-  Scenario: VNet はサブネットを持つ
-    Given I have azurerm_subnet defined
-    Then it must contain address_prefixes
 
   # ===========================================================================
   # Public IP
@@ -59,6 +23,7 @@ Feature: Azure Network Security
   # ---------------------------------------------------------------------------
   # なぜ: Standard SKU の Public IP は、より多くのセキュリティ機能を提供します
   # Basic SKU はセキュリティの観点から非推奨です
+  @critical
   Scenario: Public IP は Standard SKU を使用する
     Given I have azurerm_public_ip defined
     Then it must contain sku
@@ -74,32 +39,19 @@ Feature: Azure Network Security
   # Application Gateway
   # ===========================================================================
 
-  # なぜ: WAF を有効にすることで、Web アプリケーションを保護できます
-  Scenario: Application Gateway は WAF を設定できる SKU を使用する
+  # なぜ: WAF_v2 SKU を使用することで、WAF 機能を利用できます
+  Scenario: Application Gateway は WAF_v2 SKU を使用する
     Given I have azurerm_application_gateway defined
     Then it must contain sku
+    And it must contain name
+    And its value must match the "WAF_v2|Standard_v2" regex
 
   # ===========================================================================
   # Azure Front Door
   # ===========================================================================
 
-  # なぜ: Front Door を使用する場合、適切なプロファイルを設定する必要があります
-  Scenario: Front Door はプロファイルを設定する
+  # なぜ: Premium SKU では WAF 機能が利用可能です
+  Scenario: Front Door は適切な SKU を使用する
     Given I have azurerm_cdn_frontdoor_profile defined
     Then it must contain sku_name
-
-  # ===========================================================================
-  # Private Endpoint
-  # ===========================================================================
-
-  # なぜ: Private Endpoint を使用することで、Azure PaaS サービスへの
-  # プライベートアクセスが可能になります
-  Scenario: Private Endpoint はサブネットを指定する
-    Given I have azurerm_private_endpoint defined
-    Then it must contain subnet_id
-
-  # なぜ: Private Service Connection を設定することで、
-  # 対象リソースへの接続を確立します
-  Scenario: Private Endpoint は Service Connection を設定する
-    Given I have azurerm_private_endpoint defined
-    Then it must contain private_service_connection
+    And its value must match the "Standard_AzureFrontDoor|Premium_AzureFrontDoor" regex
