@@ -166,7 +166,9 @@ jobs:
 
       - name: Terraform Init & Plan
         run: |
-          terraform init -backend=false
+          # バックエンド設定を一時的に無効化
+          mv backend.tf backend.tf.disabled
+          terraform init
           terraform plan -out=tfplan.binary
           terraform show -json tfplan.binary > tfplan.json
         working-directory: envs/dev
@@ -175,7 +177,7 @@ jobs:
         run: uvx terraform-compliance -f tests/compliance/features -p envs/dev/tfplan.json
 ```
 
-詳細な例は `.github-actions-example.yml` を参照してください。
+実際のワークフロー実装は `.github/workflows/terraform-check-dev.yml` を参照してください。
 
 ### Azure DevOps
 
@@ -198,7 +200,9 @@ steps:
 
   - script: |
       cd envs/dev
-      terraform init -backend=false
+      # バックエンド設定を一時的に無効化
+      mv backend.tf backend.tf.disabled
+      terraform init
       terraform plan -out=tfplan.binary
       terraform show -json tfplan.binary > tfplan.json
     displayName: "Generate Terraform Plan"
