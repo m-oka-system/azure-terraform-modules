@@ -11,53 +11,22 @@ Feature: Azure Resource Tagging
   すべての Azure リソースは適切なタグを持つ必要があります
 
   # ---------------------------------------------------------------------------
-  # リソースグループ（タグポリシーの基本）
+  # すべてのタグ対応リソース（一括チェック）
   # ---------------------------------------------------------------------------
-  # なぜ: リソースグループにタグを付けることで、グループ内のリソースに
-  # 一貫したタグを継承させることができます
+  # なぜ: タグは、コスト管理、運用、セキュリティ、ガバナンスのために重要です
+  # "resource that supports tags" はタグをサポートするすべてのリソースを対象にします
+  #
+  # 注: Key Vault Secret/Certificate は terraform-compliance では「タグ対応」と
+  # 認識されますが、Azure API では実際にはタグをサポートしていないため除外します
   @critical
-  Scenario: リソースグループは project タグを持つ
-    Given I have azurerm_resource_group defined
+  Scenario Outline: すべてのリソースは <tag> タグを持つ
+    Given I have resource that supports tags defined
+    When its type is not azurerm_key_vault_secret
+    When its type is not azurerm_key_vault_certificate
     Then it must contain tags
-    And it must contain "project"
+    And it must contain "<tag>"
 
-  Scenario: リソースグループは env タグを持つ
-    Given I have azurerm_resource_group defined
-    Then it must contain tags
-    And it must contain "env"
-
-  # ---------------------------------------------------------------------------
-  # 主要なリソース（個別チェック）
-  # ---------------------------------------------------------------------------
-  # なぜ: 主要なリソースには個別にタグを確認します
-  # Key Vault Secret/Certificate はタグをサポートしないため除外
-
-  Scenario: Storage Account は project タグを持つ
-    Given I have azurerm_storage_account defined
-    Then it must contain tags
-    And it must contain "project"
-
-  Scenario: Storage Account は env タグを持つ
-    Given I have azurerm_storage_account defined
-    Then it must contain tags
-    And it must contain "env"
-
-  Scenario: Key Vault は project タグを持つ
-    Given I have azurerm_key_vault defined
-    Then it must contain tags
-    And it must contain "project"
-
-  Scenario: Key Vault は env タグを持つ
-    Given I have azurerm_key_vault defined
-    Then it must contain tags
-    And it must contain "env"
-
-  Scenario: Virtual Network は project タグを持つ
-    Given I have azurerm_virtual_network defined
-    Then it must contain tags
-    And it must contain "project"
-
-  Scenario: Virtual Network は env タグを持つ
-    Given I have azurerm_virtual_network defined
-    Then it must contain tags
-    And it must contain "env"
+    Examples:
+      | tag     |
+      | project |
+      | env     |
