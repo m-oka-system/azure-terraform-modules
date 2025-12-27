@@ -5,22 +5,21 @@
 ## 📁 ディレクトリ構造
 
 ```
-compliance/
-├── README.md                    # このファイル
-├── Makefile                     # コマンドショートカット
-├── features/
-│   ├── security/               # セキュリティポリシー
-│   │   ├── storage.feature     # Storage Account セキュリティ
-│   │   ├── keyvault.feature    # Key Vault セキュリティ
-│   │   ├── database.feature    # データベースセキュリティ
-│   │   └── container.feature   # コンテナサービスセキュリティ
-│   ├── network/                # ネットワークポリシー
-│   │   └── network.feature     # NSG、VNet、Private Endpoint
-│   ├── tagging/                # タグポリシー
-│   │   └── tagging.feature     # 必須タグの検証
-│   └── data-protection/        # データ保護ポリシー
-│       └── data-protection.feature
-└── steps/                      # カスタムステップ定義（将来の拡張用）
+azure-terraform-modules/
+├── envs/
+│   └── dev/
+│       ├── *.tf
+│       └── tests/              # terraform test (環境固有)
+│           └── *.tftest.hcl
+└── tests/
+    └── compliance/             # terraform-compliance (全環境共通) ← このディレクトリ
+        ├── README.md
+        ├── Makefile
+        └── features/
+            ├── security/       # セキュリティポリシー
+            ├── network/        # ネットワークポリシー
+            ├── tagging/        # タグポリシー
+            └── data-protection/# データ保護ポリシー
 ```
 
 ## 🚀 クイックスタート
@@ -28,7 +27,7 @@ compliance/
 ### 方法 1: Makefile を使用（推奨）
 
 ```bash
-cd compliance
+cd tests/compliance
 
 # Plan を生成してテストを実行
 make plan dev      # dev 環境の Plan を生成
@@ -53,7 +52,7 @@ terraform plan -out=tfplan.binary
 terraform show -json tfplan.binary > tfplan.json
 
 # uvx で直接実行（自動でダウンロード・実行）
-uvx terraform-compliance -f ../../compliance/features -p tfplan.json
+uvx terraform-compliance -f ../../tests/compliance/features -p tfplan.json
 ```
 
 ### 方法 3: Docker を使用
@@ -62,7 +61,7 @@ uvx terraform-compliance -f ../../compliance/features -p tfplan.json
 docker run --rm \
   -v $(pwd):/target \
   eerkunt/terraform-compliance \
-  -f /target/compliance/features \
+  -f /target/tests/compliance/features \
   -p /target/envs/dev/tfplan.json
 ```
 
@@ -128,7 +127,7 @@ make clean dev            # 生成ファイルを削除
 make test-critical dev
 
 # または直接実行
-uvx terraform-compliance -f features -p ../envs/dev/tfplan.json --tags @critical
+uvx terraform-compliance -f features -p ../../envs/dev/tfplan.json --tags @critical
 ```
 
 ### 利用可能なタグ
@@ -173,7 +172,7 @@ jobs:
         working-directory: envs/dev
 
       - name: Run Compliance Tests
-        run: uvx terraform-compliance -f compliance/features -p envs/dev/tfplan.json
+        run: uvx terraform-compliance -f tests/compliance/features -p envs/dev/tfplan.json
 ```
 
 詳細な例は `.github-actions-example.yml` を参照してください。
@@ -205,7 +204,7 @@ steps:
     displayName: "Generate Terraform Plan"
 
   - script: |
-      uvx terraform-compliance -f compliance/features -p envs/dev/tfplan.json
+      uvx terraform-compliance -f tests/compliance/features -p envs/dev/tfplan.json
     displayName: "Run Compliance Tests"
 ```
 

@@ -19,14 +19,14 @@ on:
     paths:
       - 'envs/**'
       - 'modules/**'
-      - 'compliance/**'
+      - 'tests/compliance/**'
   pull_request:
     branches:
       - main
     paths:
       - 'envs/**'
       - 'modules/**'
-      - 'compliance/**'
+      - 'tests/compliance/**'
   # 手動実行を許可
   workflow_dispatch:
 
@@ -145,7 +145,7 @@ jobs:
       - name: Run Compliance Tests
         run: |
           uvx terraform-compliance \
-            -f compliance/features \
+            -f tests/compliance/features \
             -p ${{ env.WORKING_DIR }}/tfplan.json
         continue-on-error: true
 
@@ -153,7 +153,7 @@ jobs:
       - name: Run Critical Compliance Tests
         run: |
           uvx terraform-compliance \
-            -f compliance/features \
+            -f tests/compliance/features \
             -p ${{ env.WORKING_DIR }}/tfplan.json \
             --tags @critical
 

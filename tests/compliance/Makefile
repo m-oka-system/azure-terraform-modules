@@ -20,7 +20,7 @@ FEATURES_DIR := features
 ENV := $(word 2,$(MAKECMDGOALS))
 
 # 環境ディレクトリ
-TERRAFORM_DIR := ../envs/$(ENV)
+TERRAFORM_DIR := ../../envs/$(ENV)
 
 # uvx で terraform-compliance を実行（インストール不要）
 TC := uvx terraform-compliance
