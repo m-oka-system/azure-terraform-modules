@@ -39,9 +39,38 @@ Feature: Azure Data Protection
   # ---------------------------------------------------------------------------
   # なぜ: ライフサイクルポリシーにより、古いデータを自動的にアーカイブまたは削除し、
   # コストを最適化できます
-  Scenario: Storage Management Policy はルールを設定する
+
+  # なぜ: ルールが無効化されていると、ライフサイクルポリシーが機能しません
+  Scenario: ライフサイクルルールは有効化されている
     Given I have azurerm_storage_management_policy defined
     Then it must contain rule
+    And it must contain enabled
+    And its value must be true
+
+  # なぜ: base_blob アクションがないと、通常の Blob にポリシーが適用されません
+  Scenario: ライフサイクルポリシーは base_blob アクションを設定する
+    Given I have azurerm_storage_management_policy defined
+    Then it must contain rule
+    And it must contain actions
+    And it must contain base_blob
+
+  # なぜ: スナップショットの削除ポリシーがないと、古いスナップショットが蓄積し
+  # ストレージコストが増大します
+  Scenario: ライフサイクルポリシーはスナップショット削除を設定する
+    Given I have azurerm_storage_management_policy defined
+    Then it must contain rule
+    And it must contain actions
+    And it must contain snapshot
+    And it must contain delete_after_days_since_creation_greater_than
+
+  # なぜ: バージョンの削除ポリシーがないと、変更履歴が無制限に蓄積し
+  # ストレージコストが増大します（versioning_enabled = true の場合）
+  Scenario: ライフサイクルポリシーはバージョン削除を設定する
+    Given I have azurerm_storage_management_policy defined
+    Then it must contain rule
+    And it must contain actions
+    And it must contain version
+    And it must contain delete_after_days_since_creation
 
   # ===========================================================================
   # Key Vault データ保護
@@ -70,12 +99,14 @@ Feature: Azure Data Protection
   # ---------------------------------------------------------------------------
   # Cosmos DB バックアップ
   # ---------------------------------------------------------------------------
-  # なぜ: バックアップを設定することで、データ損失に備えることができます
-  # Continuous または Periodic バックアップを選択できます
+  # なぜ: Continuous バックアップにより、任意の時点への復元が可能になります
+  # Periodic は定期バックアップのみで、復元ポイントが限定されます
   @critical
-  Scenario: Cosmos DB はバックアップを設定する
+  Scenario: Cosmos DB は Continuous バックアップを設定する
     Given I have azurerm_cosmosdb_account defined
     Then it must contain backup
+    And it must contain type
+    And its value must match the "Continuous" regex
 
   # ---------------------------------------------------------------------------
   # SQL Server 監査
@@ -100,9 +131,14 @@ Feature: Azure Data Protection
   # バックアップポリシー
   # ---------------------------------------------------------------------------
   # なぜ: バックアップポリシーを定義することで、自動バックアップが可能になります
-  Scenario: Backup Policy は保持期間を設定する
+  # 運用層とコンテナー層の両方で保持期間を設定することが推奨されます
+  Scenario: Backup Policy は運用層の保持期間を設定する
     Given I have azurerm_data_protection_backup_policy_blob_storage defined
-    Then it must contain retention_duration
+    Then it must contain operational_default_retention_duration
+
+  Scenario: Backup Policy はコンテナー層の保持期間を設定する
+    Given I have azurerm_data_protection_backup_policy_blob_storage defined
+    Then it must contain vault_default_retention_duration
 
   # ===========================================================================
   # 診断設定
