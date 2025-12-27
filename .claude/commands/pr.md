@@ -10,55 +10,59 @@ description: Generate PR description and automatically create pull request on Gi
 - Commits in this PR: !`git log --oneline main..HEAD`
 - PR template: @.github/pull_request_template.md
 
-## Your task
+## Options
 
-Based on the provided option, perform one of the following actions:
+| Option | Action |
+|--------|--------|
+| (none) | Create draft PR |
+| `-p` | Push branch, then create draft PR |
+| `-u` | Update existing PR description |
+| `-r` | Create draft PR, then run automatic review (requires pr-review-toolkit plugin) |
 
-### Options:
+Options can be combined: `/pr -p -r` pushes and creates a PR with automatic review.
 
-- **No option or default**: Generate PR description and create pull request
-- **-p**: Push current branch and create pull request
-- **-u**: Update existing pull request description only
+## Workflow
 
-### Default behavior (no option):
+### Common Steps (all options)
 
-1. Create a PR description following the **exact format** of the PR template in Japanese
-2. **Add a Mermaid diagram** that visualizes the changes made in this PR
-3. Execute `gh pr create --draft` with the generated title and description
+1. Generate PR description following the template format in Japanese
+2. Include a Mermaid diagram visualizing the changes
 
-### With -p option:
+### Option-Specific Steps
 
-1. Push current branch to remote repository using `git push -u origin <current-branch>`
-2. Create a PR description following the **exact format** of the PR template in Japanese
-3. **Add a Mermaid diagram** that visualizes the changes made in this PR
-4. Execute `gh pr create --draft` with the generated title and description
+| Option | Command |
+|--------|---------|
+| (none) | `gh pr create --draft` |
+| `-p` | `git push -u origin <branch>` then `gh pr create --draft` |
+| `-u` | `gh pr edit --body <description>` |
+| `-r` | `gh pr create --draft` (exit code 0), then execute `/pr-review-toolkit:review-pr` |
 
-### With -u option:
+## Requirements
 
-1. Create a PR description following the **exact format** of the PR template in Japanese
-2. **Add a Mermaid diagram** that visualizes the changes made in this PR
-3. Update existing pull request description using `gh pr edit --body <description>`
+### PR Description
 
-### Requirements:
+- Follow template structure exactly
+- Write all content in Japanese
+- Include specific implementation details and testing steps
+- Be comprehensive but concise
 
-1. Follow the template structure exactly
-2. Use Japanese for all content
-3. Include specific implementation details
-4. List concrete testing steps
-5. Always include a Mermaid diagram that shows:
-   - Architecture changes (if any)
-   - Data flow modifications
-   - Component relationships
-   - Process flows affected by the changes
-6. Be comprehensive but concise
+### Mermaid Diagram
 
-### Mermaid Diagram Guidelines:
+Include a diagram showing relevant aspects:
+- Architecture or data flow changes
+- Component relationships
+- Process flows affected
 
+Guidelines:
 - Use appropriate diagram types (flowchart, sequence, class, etc.)
-- Show before/after states if applicable
+- Show before/after states when applicable
 - Highlight new or modified components
-- Add the diagram in a dedicated section of the PR description
-- **Do not use colors or styling**: Avoid `style`, `classDef`, `fill`, `stroke`, or any color/design directives
-- Keep diagrams simple and structure-focused without visual customization
+- **No colors or styling**: Avoid `style`, `classDef`, `fill`, `stroke`, or color directives
 
-**Generate the PR description and create the pull request automatically.**
+## Error Handling
+
+- If `gh pr create --draft` fails, abort the workflow and report the error
+- For `-r` option: If PR creation succeeds but `/pr-review-toolkit:review-pr` is unavailable, warn the user but consider PR creation successful
+- For `-r` option: If review execution fails, report the error but preserve the created PR
+
+**Generate the PR description and execute the appropriate command based on the option.**
