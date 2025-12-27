@@ -7,12 +7,16 @@ on:
       - main
     paths:
       - "envs/dev/**/*.tf"
+      - "modules/**/*.tf"
+      - "tests/compliance/**"
       - .github/workflows/terraform-check-dev.yml
   pull_request:
     branches:
       - main
     paths:
       - "envs/dev/**/*.tf"
+      - "modules/**/*.tf"
+      - "tests/compliance/**"
       - .github/workflows/terraform-check-dev.yml
 
 permissions:
@@ -23,6 +27,7 @@ permissions:
 defaults:
   run:
     shell: bash
+    working-directory: envs/dev
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -37,9 +42,6 @@ jobs:
   terraform-validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    defaults:
-      run:
-        working-directory: envs/dev
 
     steps:
       - uses: actions/checkout@v4
@@ -62,9 +64,6 @@ jobs:
   tflint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    defaults:
-      run:
-        working-directory: envs/dev
 
     steps:
     - uses: actions/checkout@v4
@@ -88,9 +87,6 @@ jobs:
   trivy:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    defaults:
-      run:
-        working-directory: envs/dev
 
     steps:
     - uses: actions/checkout@v4
@@ -113,3 +109,62 @@ jobs:
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
+
+  terraform-compliance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [terraform-validate, tflint, trivy]
+    environment: dev
+
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_USE_OIDC: true
+      TF_VAR_allowed_cidr: ${{ secrets.ALLOWED_CIDR }}
+      TF_VAR_vm_admin_password: ${{ secrets.VM_ADMIN_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout source code
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          # false にしないと terraform show -json の出力が壊れて terraform-compliance が動作しない
+          terraform_wrapper: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init (without backend)
+        run: |
+          mv backend.tf backend.tf.disabled
+          terraform init
+
+      - name: Generate Terraform Plan
+        id: plan
+        run: |
+          terraform plan -out=tfplan.binary -input=false
+          terraform show -json tfplan.binary > tfplan.json
+
+      - name: Run Compliance Tests
+        run: |
+          uvx terraform-compliance \
+            -f ../../tests/compliance/features \
+            -p tfplan.json \
+            -S
+
+      - name: Cleanup Plan Files
+        if: always()
+        run: rm -f tfplan.binary tfplan.json
