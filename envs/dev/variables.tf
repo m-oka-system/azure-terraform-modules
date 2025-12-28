@@ -1174,6 +1174,41 @@ variable "frontdoor_profile" {
   }
 }
 
+variable "frontdoor_security_headers" {
+  description = <<-EOT
+    Front Door で追加するセキュリティヘッダーの設定。
+    キーにヘッダー名、値に action (Overwrite/Append/Delete) と value を指定。
+
+    推奨値 (OWASP/Chrome):
+    - Strict-Transport-Security: "max-age=31536000; includeSubDomains" (1年間 HTTPS を強制)
+    - X-Frame-Options: "DENY" (すべての iframe 埋め込みを禁止)
+    - X-Content-Type-Options: "nosniff" (MIME スニッフィング防止)
+    - Referrer-Policy: "strict-origin-when-cross-origin" (クロスオリジン時はオリジンのみ送信)
+  EOT
+  type = map(object({
+    action = string
+    value  = string
+  }))
+  default = {
+    "Strict-Transport-Security" = {
+      action = "Overwrite"
+      value  = "max-age=31536000; includeSubDomains"
+    }
+    "X-Frame-Options" = {
+      action = "Overwrite"
+      value  = "DENY"
+    }
+    "X-Content-Type-Options" = {
+      action = "Overwrite"
+      value  = "nosniff"
+    }
+    "Referrer-Policy" = {
+      action = "Overwrite"
+      value  = "strict-origin-when-cross-origin"
+    }
+  }
+}
+
 variable "frontdoor_firewall_policy" {
   type = map(object({
     mode = string # Detection（検出のみ） または Prevention（防御）

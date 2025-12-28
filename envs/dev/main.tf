@@ -185,14 +185,15 @@ module "private_link_scope" {
 module "frontdoor" {
   count = var.resource_enabled.frontdoor ? 1 : 0
 
-  source              = "../../modules/frontdoor"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = azurerm_resource_group.rg.tags
-  frontdoor_profile   = var.frontdoor_profile
-  frontdoor_origins   = local.frontdoor_origins
-  cached_origin_keys  = local.cached_origin_keys
-  dns_zone            = var.resource_enabled.custom_domain ? data.azurerm_dns_zone.this[0] : null
+  source                     = "../../modules/frontdoor"
+  common                     = var.common
+  resource_group_name        = azurerm_resource_group.rg.name
+  tags                       = azurerm_resource_group.rg.tags
+  frontdoor_profile          = var.frontdoor_profile
+  frontdoor_origins          = local.frontdoor_origins
+  cached_origin_keys         = local.cached_origin_keys
+  dns_zone                   = var.resource_enabled.custom_domain ? data.azurerm_dns_zone.this[0] : null
+  frontdoor_security_headers = var.frontdoor_security_headers
 }
 
 module "frontdoor_waf" {
