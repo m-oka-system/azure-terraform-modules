@@ -230,25 +230,25 @@ variable "example" {
 
 ## Task Completion Checklist
 
-After ANY code changes:
+After ANY code changes, run the validation pipeline:
 
 ```bash
-# 1. Format
-terraform fmt -recursive
+# Run pre-commit validation (includes fmt, validate, tflint, trivy)
+bash .claude/scripts/terraform-pre-commit-validation.sh
 
-# 2. Validate
-terraform validate
-
-# 3. Lint
-tflint
-
-# 4. Security scan
-trivy config envs/dev/ --severity HIGH,CRITICAL
-
-# 5. Plan
+# Additional steps
 cd envs/dev && terraform plan
+terraform test  # If applicable
+```
 
-# 6. Test
+Or run each step manually:
+
+```bash
+terraform fmt -recursive
+terraform validate
+tflint
+trivy config envs/dev/ --severity HIGH,CRITICAL
+cd envs/dev && terraform plan
 terraform test  # If applicable
 ```
 
