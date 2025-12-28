@@ -55,16 +55,16 @@ locals {
 
 check "frontdoor_api_security_headers" {
   data "http" "api" {
-    url = local.frontdoor_custom_domain_urls["api"]
+    url = try(local.frontdoor_custom_domain_urls["api"], "https://example.com")
   }
 
   assert {
-    condition     = data.http.api.status_code == 200
-    error_message = "api (${local.frontdoor_custom_domain_urls["api"]}): status=${data.http.api.status_code}"
+    condition     = !var.resource_enabled.custom_domain || data.http.api.status_code == 200
+    error_message = "api (${try(local.frontdoor_custom_domain_urls["api"], "N/A")}): status=${data.http.api.status_code}"
   }
 
   assert {
-    condition = alltrue([
+    condition = !var.resource_enabled.custom_domain || alltrue([
       for k in local.frontdoor_expected_security_headers :
       contains(keys(data.http.api.response_headers), k)
     ])
@@ -77,16 +77,16 @@ check "frontdoor_api_security_headers" {
 
 check "frontdoor_front_security_headers" {
   data "http" "front" {
-    url = local.frontdoor_custom_domain_urls["front"]
+    url = try(local.frontdoor_custom_domain_urls["front"], "https://example.com")
   }
 
   assert {
-    condition     = data.http.front.status_code == 200
-    error_message = "front (${local.frontdoor_custom_domain_urls["front"]}): status=${data.http.front.status_code}"
+    condition     = !var.resource_enabled.custom_domain || data.http.front.status_code == 200
+    error_message = "front (${try(local.frontdoor_custom_domain_urls["front"], "N/A")}): status=${data.http.front.status_code}"
   }
 
   assert {
-    condition = alltrue([
+    condition = !var.resource_enabled.custom_domain || alltrue([
       for k in local.frontdoor_expected_security_headers :
       contains(keys(data.http.front.response_headers), k)
     ])
@@ -99,16 +99,16 @@ check "frontdoor_front_security_headers" {
 
 check "frontdoor_web_security_headers" {
   data "http" "web" {
-    url = local.frontdoor_custom_domain_urls["web"]
+    url = try(local.frontdoor_custom_domain_urls["web"], "https://example.com")
   }
 
   assert {
-    condition     = data.http.web.status_code == 200
-    error_message = "web (${local.frontdoor_custom_domain_urls["web"]}): status=${data.http.web.status_code}"
+    condition     = !var.resource_enabled.custom_domain || data.http.web.status_code == 200
+    error_message = "web (${try(local.frontdoor_custom_domain_urls["web"], "N/A")}): status=${data.http.web.status_code}"
   }
 
   assert {
-    condition = alltrue([
+    condition = !var.resource_enabled.custom_domain || alltrue([
       for k in local.frontdoor_expected_security_headers :
       contains(keys(data.http.web.response_headers), k)
     ])
