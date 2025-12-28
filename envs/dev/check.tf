@@ -14,6 +14,7 @@ locals {
     vm      = 6  # 仮想マシン用
     appgw   = 5  # Application Gateway 用
     cae     = 0  # Container Apps Environment 用
+    vm2     = 1  # 仮想マシン2 用 (未設定)
   }
 }
 
