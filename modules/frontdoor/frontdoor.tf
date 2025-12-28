@@ -61,6 +61,8 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
   name                     = "afd-ep-${var.common.project}-${var.common.env}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+
+  tags = var.tags
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "this" {
@@ -107,7 +109,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[each.key].id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this[each.key].id]
-  cdn_frontdoor_rule_set_ids    = []
+  cdn_frontdoor_rule_set_ids    = [azurerm_cdn_frontdoor_rule_set.this.id]
   enabled                       = true
 
   forwarding_protocol    = "HttpsOnly"
@@ -154,6 +156,8 @@ resource "azurerm_dns_txt_record" "afd_validation" {
   record {
     value = azurerm_cdn_frontdoor_custom_domain.this[each.key].validation_token
   }
+
+  tags = var.tags
 }
 
 resource "azurerm_dns_cname_record" "afd_cname" {
@@ -163,9 +167,41 @@ resource "azurerm_dns_cname_record" "afd_cname" {
   resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
   record              = azurerm_cdn_frontdoor_endpoint.this.host_name
+
+  tags = var.tags
 }
 
 # azurerm_cdn_frontdoor_custom_domain_association は不要
 # ルートにカスタムドメインを関連付けるためのものではない
 # ルートにカスタムドメインが関連付けられている前提で、関連付けを解除したり、再登録するときに使用する模様
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cdn_frontdoor_custom_domain_association
+
+# セキュリティヘッダーを追加するためのルールセット
+resource "azurerm_cdn_frontdoor_rule_set" "this" {
+  name                     = "SecurityHeaders"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+}
+
+resource "azurerm_cdn_frontdoor_rule" "this" {
+  name                      = "AddSecurityHeaders"
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.this.id
+  order                     = 1
+  behavior_on_match         = "Continue"
+
+  actions {
+    dynamic "response_header_action" {
+      for_each = var.frontdoor_security_headers
+
+      content {
+        header_action = response_header_action.value.action
+        header_name   = response_header_action.key
+        value         = response_header_action.value.action != "Delete" ? response_header_action.value.value : null
+      }
+    }
+  }
+
+  depends_on = [
+    azurerm_cdn_frontdoor_origin_group.this,
+    azurerm_cdn_frontdoor_origin.this
+  ]
+}
