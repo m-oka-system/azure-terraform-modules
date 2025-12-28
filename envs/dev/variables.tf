@@ -1,5 +1,9 @@
 variable "common" {
-  type = map(string)
+  type = object({
+    project  = string
+    env      = string
+    location = string
+  })
   default = {
     project  = "terraform"
     env      = "dev"
