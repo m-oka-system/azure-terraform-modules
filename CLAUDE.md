@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Azure Terraform Modules - Reusable Terraform module library for managing infrastructure on Azure with 45+ modules focused on security, availability, and scalability.
+Azure Terraform Modules - Reusable Terraform module library for managing infrastructure on Azure focused on security, availability, and scalability.
 
 **Tech Stack:**
 
