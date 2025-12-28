@@ -61,6 +61,8 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
   name                     = "afd-ep-${var.common.project}-${var.common.env}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+
+  tags = var.tags
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "this" {
@@ -154,6 +156,8 @@ resource "azurerm_dns_txt_record" "afd_validation" {
   record {
     value = azurerm_cdn_frontdoor_custom_domain.this[each.key].validation_token
   }
+
+  tags = var.tags
 }
 
 resource "azurerm_dns_cname_record" "afd_cname" {
@@ -163,6 +167,8 @@ resource "azurerm_dns_cname_record" "afd_cname" {
   resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
   record              = azurerm_cdn_frontdoor_endpoint.this.host_name
+
+  tags = var.tags
 }
 
 # azurerm_cdn_frontdoor_custom_domain_association は不要
