@@ -23,6 +23,7 @@ variable "resource_enabled" {
     frontdoor_waf         = optional(bool, false)
     container_registry    = optional(bool, false)
     container_app         = optional(bool, false)
+    kubernetes_cluster    = optional(bool, false)
     app_service_plan      = optional(bool, false)
     app_service           = optional(bool, false)
     function              = optional(bool, false)

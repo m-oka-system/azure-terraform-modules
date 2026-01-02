@@ -245,6 +245,15 @@ module "container_app" {
   container_registry        = module.container_registry[0].container_registry
 }
 
+module "kubernetes_cluster" {
+  count = var.resource_enabled.kubernetes_cluster ? 1 : 0
+
+  source              = "../../modules/kubernetes_cluster"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = local.common.tags
+}
+
 module "app_service_plan" {
   count = var.resource_enabled.app_service_plan ? 1 : 0
 
