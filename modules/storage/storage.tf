@@ -2,17 +2,19 @@
 # Storage Account
 ################################
 resource "azurerm_storage_account" "this" {
-  for_each                      = var.storage
-  name                          = replace("st-${each.value.name}-${var.common.project}-${var.common.env}-${var.random}", "-", "")
-  resource_group_name           = var.resource_group_name
-  location                      = var.common.location
-  account_tier                  = each.value.account_tier
-  account_kind                  = each.value.account_kind
-  account_replication_type      = each.value.account_replication_type
-  access_tier                   = each.value.access_tier
-  https_traffic_only_enabled    = each.value.https_traffic_only_enabled
-  public_network_access_enabled = each.value.public_network_access_enabled
-  is_hns_enabled                = each.value.is_hns_enabled
+  for_each                        = var.storage
+  name                            = replace("st-${each.value.name}-${var.common.project}-${var.common.env}-${var.random}", "-", "")
+  resource_group_name             = var.resource_group_name
+  location                        = var.common.location
+  account_tier                    = each.value.account_tier
+  account_kind                    = each.value.account_kind
+  account_replication_type        = each.value.account_replication_type
+  access_tier                     = each.value.access_tier
+  https_traffic_only_enabled      = each.value.https_traffic_only_enabled
+  public_network_access_enabled   = each.value.public_network_access_enabled
+  shared_access_key_enabled       = each.value.shared_access_key_enabled
+  default_to_oauth_authentication = each.value.default_to_oauth_authentication
+  is_hns_enabled                  = each.value.is_hns_enabled
 
   blob_properties {
     versioning_enabled            = each.value.blob_properties.versioning_enabled
@@ -62,6 +64,13 @@ resource "azurerm_storage_account" "this" {
   }
 
   tags = var.tags
+}
+
+resource "azurerm_storage_account_static_website" "this" {
+  for_each           = { for k, v in var.storage : k => v if v.static_website_enabled }
+  storage_account_id = azurerm_storage_account.this[each.key].id
+  index_document     = each.value.static_website_config.index_document
+  error_404_document = each.value.static_website_config.error_404_document
 }
 
 resource "azurerm_storage_container" "this" {

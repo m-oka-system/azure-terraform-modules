@@ -8,34 +8,6 @@ data "azurerm_subscription" "current" {}
 # }
 
 locals {
-  # 特定の Azure リソースを作成する/しない
-  activity_log_enabled          = false
-  dns_zone_enabled              = false
-  private_dns_zone_enabled      = false
-  private_endpoint_enabled      = false
-  frontdoor_enabled             = false
-  frontdoor_waf_enabled         = false
-  container_registry_enabled    = false
-  container_app_enabled         = false
-  kubernetes_cluster_enabled    = false
-  app_service_plan_enabled      = false
-  app_service_enabled           = false
-  function_enabled              = false
-  aisearch_enabled              = false
-  cosmosdb_enabled              = false
-  mysql_enabled                 = false
-  mssql_database_enabled        = false
-  redis_enabled                 = false
-  vm_enabled                    = false
-  vmss_enabled                  = false
-  loadbalancer_enabled          = false
-  bastion_enabled               = false
-  nat_gateway_enabled           = false
-  resource_health_alert_enabled = false
-  diagnostic_setting_enabled    = false
-  backup_vault_enabled          = false
-  defender_for_cloud_enabled    = false
-
   # 共通の変数
   common = {
     subscription_id = data.azurerm_client_config.current.subscription_id
@@ -107,6 +79,36 @@ locals {
       }
     }
   )
+
+  # Front Door に割り当てるカスタムドメインのマッピング
+  frontdoor_custom_domain_mapping = {
+    api   = "api-${var.common.env}"
+    front = "www-${var.common.env}"
+    web   = "static-${var.common.env}"
+  }
+
+  # Front Door の変数を動的に生成
+  frontdoor_origins = merge(
+    # App Service
+    var.resource_enabled.app_service ? {
+      for k, v in module.app_service[0].app_service : k => {
+        host_name          = v.default_hostname
+        origin_host_header = v.default_hostname
+        subdomain          = lookup(local.frontdoor_custom_domain_mapping, k, "${k}-${var.common.env}")
+      }
+    } : {},
+    # Storage (静的 Web サイト)
+    {
+      for k, v in module.storage.storage_account : k => {
+        host_name          = v.primary_web_host
+        origin_host_header = v.primary_web_host
+        subdomain          = lookup(local.frontdoor_custom_domain_mapping, k, "${k}-${var.common.env}")
+      } if k == "web"
+    }
+  )
+
+  # キャッシュを有効化するオリジンの key 一覧
+  cached_origin_keys = ["front", "web"]
 
   # アクティビティログのカテゴリ
   activity_log_categories = [

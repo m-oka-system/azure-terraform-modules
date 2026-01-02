@@ -1,10 +1,48 @@
 variable "common" {
-  type = map(string)
+  type = object({
+    project  = string
+    env      = string
+    location = string
+  })
   default = {
     project  = "terraform"
     env      = "dev"
     location = "japaneast"
   }
+}
+
+# 特定の Azure リソースを作成する/しないフラグ
+variable "resource_enabled" {
+  type = object({
+    activity_log          = optional(bool, false)
+    dns_zone              = optional(bool, false)
+    private_dns_zone      = optional(bool, false)
+    private_endpoint      = optional(bool, false)
+    custom_domain         = optional(bool, false)
+    frontdoor             = optional(bool, false)
+    frontdoor_waf         = optional(bool, false)
+    container_registry    = optional(bool, false)
+    container_app         = optional(bool, false)
+    kubernetes_cluster    = optional(bool, false)
+    app_service_plan      = optional(bool, false)
+    app_service           = optional(bool, false)
+    function              = optional(bool, false)
+    aisearch              = optional(bool, false)
+    cosmosdb              = optional(bool, false)
+    mysql                 = optional(bool, false)
+    mssql_database        = optional(bool, false)
+    redis                 = optional(bool, false)
+    vm                    = optional(bool, false)
+    vmss                  = optional(bool, false)
+    loadbalancer          = optional(bool, false)
+    bastion               = optional(bool, false)
+    nat_gateway           = optional(bool, false)
+    resource_health_alert = optional(bool, false)
+    diagnostic_setting    = optional(bool, false)
+    backup_vault          = optional(bool, false)
+    defender_for_cloud    = optional(bool, false)
+  })
+  default = {}
 }
 
 variable "allowed_cidr" {
@@ -680,15 +718,17 @@ variable "network_security_rule" {
 
 variable "storage" {
   type = map(object({
-    name                          = string
-    account_tier                  = string
-    account_kind                  = string
-    account_replication_type      = string
-    access_tier                   = string
-    https_traffic_only_enabled    = bool
-    public_network_access_enabled = bool
-    is_hns_enabled                = bool
-    defender_for_storage_enabled  = bool # Defender for Storageを有効にするかどうか
+    name                            = string
+    account_tier                    = string
+    account_kind                    = string
+    account_replication_type        = string
+    access_tier                     = string
+    https_traffic_only_enabled      = optional(bool, true) # 安全な転送が必須
+    public_network_access_enabled   = bool
+    shared_access_key_enabled       = bool # ストレージ アカウント キーへのアクセスを許可する
+    default_to_oauth_authentication = bool # Azure portal で Microsoft Entra 認可を既定にする
+    is_hns_enabled                  = bool
+    defender_for_storage_enabled    = bool # Defender for Storageを有効にするかどうか
     blob_properties = object({
       versioning_enabled                = bool
       change_feed_enabled               = bool
@@ -700,29 +740,35 @@ variable "storage" {
         days = number                            # ポイントインタイムリストアの最大復元ポイント (経過日数)
       }))
     })
-    network_rules = object({
+    network_rules = optional(object({
       default_action             = string
       bypass                     = list(string)
       ip_rules                   = list(string)
       virtual_network_subnet_ids = list(string)
-    })
+    }))
     immutability_policy = optional(object({
       allow_protected_append_writes = bool   # 保護された追加書き込みを許可するかどうか
       period_since_creation_in_days = number # 不変期間（日数）- 1から146000 (400年) の範囲
       state                         = string # 不変性ポリシーの状態: "Unlocked"（編集可能）または "Locked"（ロック済み）
     }))
+    static_website_enabled = optional(bool, false)
+    static_website_config = optional(object({
+      index_document     = string
+      error_404_document = string
+    }))
   }))
   default = {
     app = {
-      name                          = "app"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "app"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = true
@@ -741,16 +787,46 @@ variable "storage" {
         virtual_network_subnet_ids = []
       }
     }
+    web = {
+      name                            = "web"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
+      blob_properties = {
+        versioning_enabled                = true
+        change_feed_enabled               = true
+        change_feed_retention_in_days     = 12
+        last_access_time_enabled          = false
+        delete_retention_policy           = 12
+        container_delete_retention_policy = 7
+        restore_policy = {
+          days = 7
+        }
+      }
+      network_rules          = null
+      static_website_enabled = true
+      static_website_config = {
+        index_document     = "index.html"
+        error_404_document = "404.html"
+      }
+    }
     func = {
-      name                          = "func"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "func"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = false
         change_feed_enabled               = false
@@ -767,15 +843,16 @@ variable "storage" {
       }
     }
     log = {
-      name                          = "log"
-      account_tier                  = "Standard"
-      account_kind                  = "StorageV2"
-      account_replication_type      = "LRS"
-      access_tier                   = "Hot"
-      https_traffic_only_enabled    = true
-      public_network_access_enabled = true
-      is_hns_enabled                = false
-      defender_for_storage_enabled  = false
+      name                            = "log"
+      account_tier                    = "Standard"
+      account_kind                    = "StorageV2"
+      account_replication_type        = "LRS"
+      access_tier                     = "Hot"
+      public_network_access_enabled   = true
+      shared_access_key_enabled       = false
+      default_to_oauth_authentication = true
+      is_hns_enabled                  = false
+      defender_for_storage_enabled    = false
       blob_properties = {
         versioning_enabled                = true
         change_feed_enabled               = false
@@ -989,6 +1066,9 @@ variable "user_assigned_identity" {
     mssql = {
       name = "mssql"
     }
+    gha = {
+      name = "gha"
+    }
   }
 }
 
@@ -1024,6 +1104,18 @@ variable "role_assignment" {
     }
     mssql_blob_data_contributor = {
       target_identity      = "mssql"
+      role_definition_name = "Storage Blob Data Contributor"
+    }
+    gha_contributor = {
+      target_identity      = "gha"
+      role_definition_name = "Contributor"
+    }
+    gha_key_vault_secrets_user = {
+      target_identity      = "gha"
+      role_definition_name = "Key Vault Secrets User"
+    }
+    gha_storage_blob_data_contributor = {
+      target_identity      = "gha"
       role_definition_name = "Storage Blob Data Contributor"
     }
   }
@@ -1074,7 +1166,7 @@ variable "private_link_scope" {
 
 variable "frontdoor_profile" {
   type = object({
-    sku_name                 = string
+    sku_name                 = string # Standard_AzureFrontDoor, Premium_AzureFrontDoor
     response_timeout_seconds = number
   })
   default = {
@@ -1083,216 +1175,117 @@ variable "frontdoor_profile" {
   }
 }
 
-variable "frontdoor_endpoint" {
-  type = map(object({
-    name = string
-  }))
-  default = {
-    app = {
-      name = "app"
-    }
-  }
-}
+variable "frontdoor_security_headers" {
+  description = <<-EOT
+    Front Door で追加するセキュリティヘッダーの設定。
+    キーにヘッダー名、値に action (Overwrite/Append/Delete) と value を指定。
 
-variable "frontdoor_origin_group" {
+    推奨値 (OWASP/Chrome):
+    - Strict-Transport-Security: "max-age=31536000; includeSubDomains" (1年間 HTTPS を強制)
+    - X-Frame-Options: "DENY" (すべての iframe 埋め込みを禁止)
+    - X-Content-Type-Options: "nosniff" (MIME スニッフィング防止)
+    - Referrer-Policy: "strict-origin-when-cross-origin" (クロスオリジン時はオリジンのみ送信)
+  EOT
   type = map(object({
-    name                                                      = string
-    session_affinity_enabled                                  = bool
-    restore_traffic_time_to_healed_or_new_endpoint_in_minutes = number
-    health_probe = object({
-      interval_in_seconds = number
-      path                = string
-      protocol            = string
-      request_type        = string
-    })
-    load_balancing = object({
-      additional_latency_in_milliseconds = number
-      sample_size                        = number
-      successful_samples_required        = number
-    })
+    action = string
+    value  = string
   }))
   default = {
-    app = {
-      name                                                      = "app"
-      session_affinity_enabled                                  = false
-      restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 0
-      health_probe = {
-        interval_in_seconds = 100
-        path                = "/"
-        protocol            = "Https"
-        request_type        = "HEAD"
-      }
-      load_balancing = {
-        additional_latency_in_milliseconds = 50
-        sample_size                        = 4
-        successful_samples_required        = 3
-      }
+    "Strict-Transport-Security" = {
+      action = "Overwrite"
+      value  = "max-age=31536000; includeSubDomains"
     }
-    blob = {
-      name                                                      = "blob"
-      session_affinity_enabled                                  = false
-      restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 0
-      health_probe = {
-        interval_in_seconds = 100
-        path                = "/"
-        protocol            = "Https"
-        request_type        = "HEAD"
-      }
-      load_balancing = {
-        additional_latency_in_milliseconds = 50
-        sample_size                        = 4
-        successful_samples_required        = 3
-      }
+    "X-Frame-Options" = {
+      action = "Overwrite"
+      value  = "DENY"
     }
-  }
-}
-
-variable "frontdoor_origin" {
-  type = map(object({
-    name                           = string
-    target_frontdoor_origin_group  = string
-    target_backend_origin          = string
-    certificate_name_check_enabled = bool
-    http_port                      = number
-    https_port                     = number
-    priority                       = number
-    weight                         = number
-  }))
-  default = {
-    # app = {
-    #   name                           = "app"
-    #   target_frontdoor_origin_group  = "app"
-    #   target_backend_origin          = "app"
-    #   certificate_name_check_enabled = true
-    #   http_port                      = 80
-    #   https_port                     = 443
-    #   priority                       = 1
-    #   weight                         = 1000
-    # }
-    blob = {
-      name                           = "blob"
-      target_frontdoor_origin_group  = "blob"
-      target_backend_origin          = "blob"
-      certificate_name_check_enabled = true
-      http_port                      = 80
-      https_port                     = 443
-      priority                       = 1
-      weight                         = 1000
+    "X-Content-Type-Options" = {
+      action = "Overwrite"
+      value  = "nosniff"
     }
-  }
-}
-
-variable "frontdoor_route" {
-  type = map(object({
-    name                          = string
-    target_frontdoor_endpoint     = string
-    target_frontdoor_origin_group = string
-    target_frontdoor_origin       = string
-    target_custom_domain          = string
-    forwarding_protocol           = string
-    https_redirect_enabled        = bool
-    patterns_to_match             = list(string)
-    supported_protocols           = list(string)
-    link_to_default_domain        = bool
-    cache = object({
-      compression_enabled           = bool
-      query_string_caching_behavior = string
-      query_strings                 = list(string)
-      content_types_to_compress     = list(string)
-    })
-  }))
-  default = {
-    # app = {
-    #   name                          = "app"
-    #   target_frontdoor_endpoint     = "app"
-    #   target_frontdoor_origin_group = "app"
-    #   target_frontdoor_origin       = "app"
-    #   target_custom_domain          = "app"
-    #   forwarding_protocol           = "HttpsOnly"
-    #   https_redirect_enabled        = true
-    #   patterns_to_match             = ["/*"]
-    #   supported_protocols           = ["Http", "Https"]
-    #   link_to_default_domain        = true
-    #   cache                         = null
-    # }
-    blob = {
-      name                          = "blob"
-      target_frontdoor_endpoint     = "app"
-      target_frontdoor_origin_group = "blob"
-      target_frontdoor_origin       = "blob"
-      target_custom_domain          = "app"
-      forwarding_protocol           = "HttpsOnly"
-      https_redirect_enabled        = true
-      patterns_to_match             = ["/media/*", "/static/*"]
-      supported_protocols           = ["Http", "Https"]
-      link_to_default_domain        = true
-      cache = {
-        compression_enabled           = true
-        query_string_caching_behavior = "IgnoreQueryString"
-        query_strings                 = []
-        content_types_to_compress     = ["text/html", "text/css", "text/javascript"]
-      }
-    }
-  }
-}
-
-variable "frontdoor_security_policy" {
-  type = map(object({
-    name                   = string
-    target_firewall_policy = string
-    patterns_to_match      = list(string)
-  }))
-  default = {
-    app = {
-      name                   = "app"
-      target_firewall_policy = "app"
-      patterns_to_match      = ["/*"]
+    "Referrer-Policy" = {
+      action = "Overwrite"
+      value  = "strict-origin-when-cross-origin"
     }
   }
 }
 
 variable "frontdoor_firewall_policy" {
   type = map(object({
-    name                              = string
-    sku_name                          = string
-    mode                              = string
-    custom_block_response_status_code = number
+    mode = string # Detection（検出のみ） または Prevention（防御）
+    custom_rules = list(object({
+      name                           = string
+      type                           = string
+      priority                       = number
+      action                         = string
+      rate_limit_duration_in_minutes = optional(number)
+      rate_limit_threshold           = optional(number)
+      match_conditions = list(object({
+        match_variable     = string
+        match_values       = list(string)
+        operator           = string
+        selector           = optional(string)
+        negation_condition = optional(bool)
+        transforms         = optional(list(string))
+      }))
+    }))
+    managed_rules = optional(list(object({
+      type    = string
+      version = string
+      action  = string
+    })))
   }))
   default = {
-    app = {
-      name                              = "IPRestrictionPolicy"
-      sku_name                          = "Standard_AzureFrontDoor"
-      mode                              = "Prevention"
-      custom_block_response_status_code = 403
+    api = {
+      mode = "Prevention"
+      custom_rules = [
+        {
+          name     = "AllowMyIP"
+          type     = "MatchRule"
+          priority = 100
+          action   = "Allow"
+          match_conditions = [
+            {
+              match_variable = "RemoteAddr"
+              match_values   = ["203.0.113.10/32"] # 例: 実際の環境では許可する IP アドレスに変更すること
+              operator       = "IPMatch"
+            }
+          ]
+        },
+        {
+          name                           = "RateLimitRule"
+          type                           = "RateLimitRule"
+          priority                       = 200
+          action                         = "Block"
+          rate_limit_duration_in_minutes = 1
+          rate_limit_threshold           = 100
+          match_conditions = [
+            {
+              match_variable = "RequestHeader"
+              match_values   = ["0"]
+              operator       = "GreaterThanOrEqual"
+              selector       = "Host"
+            }
+          ]
+        },
+      ]
+      managed_rules = [
+        {
+          type    = "Microsoft_DefaultRuleSet"
+          version = "2.1"
+          action  = "Block"
+        }
+      ]
+    },
+    front = {
+      mode          = "Prevention"
+      custom_rules  = []
+      managed_rules = []
     }
-  }
-}
-
-variable "frontdoor_firewall_custom_rule" {
-  type = map(object({
-    target_firewall_policy = string
-    priority               = number
-    type                   = string
-    action                 = string
-    match_condition = object({
-      match_variable     = string
-      operator           = string
-      negation_condition = bool
-      match_values       = list(string)
-    })
-  }))
-  default = {
-    AllowClientIP = {
-      target_firewall_policy = "app"
-      priority               = 100
-      type                   = "MatchRule"
-      action                 = "Block"
-      match_condition = {
-        match_variable     = "RemoteAddr"
-        operator           = "IPMatch"
-        negation_condition = true # 含まない場合
-        match_values       = ["MyIP"]
-      }
+    web = {
+      mode          = "Prevention"
+      custom_rules  = []
+      managed_rules = []
     }
   }
 }
@@ -1445,23 +1438,16 @@ variable "app_service_plan" {
 
 variable "app_service" {
   type = map(object({
-    name                                           = string
-    target_service_plan                            = string
-    target_subnet                                  = string
-    target_user_assigned_identity                  = string
-    ftp_publish_basic_authentication_enabled       = bool
-    webdeploy_publish_basic_authentication_enabled = bool
-    https_only                                     = bool
-    public_network_access_enabled                  = bool
+    name                          = string
+    target_service_plan           = string
+    target_subnet                 = string
+    target_user_assigned_identity = string
+    public_network_access_enabled = bool
     site_config = object({
-      always_on                               = bool
-      ftps_state                              = string
-      vnet_route_all_enabled                  = bool
-      scm_use_main_ip_restriction             = bool
       container_registry_use_managed_identity = bool
-      cors = object({
+      cors = optional(object({
         support_credentials = bool
-      })
+      }))
     })
     ip_restriction = map(object({
       name        = string
@@ -1479,24 +1465,60 @@ variable "app_service" {
     }))
   }))
   default = {
-    app = {
-      name                                           = "app"
-      target_service_plan                            = "app"
-      target_subnet                                  = "app"
-      target_user_assigned_identity                  = "app"
-      ftp_publish_basic_authentication_enabled       = false
-      webdeploy_publish_basic_authentication_enabled = false
-      https_only                                     = true
-      public_network_access_enabled                  = true
+    api = {
+      name                          = "api"
+      target_service_plan           = "app"
+      target_subnet                 = "app"
+      target_user_assigned_identity = "app"
+      public_network_access_enabled = true
       site_config = {
-        always_on                               = true
-        ftps_state                              = "Disabled"
-        vnet_route_all_enabled                  = true
-        scm_use_main_ip_restriction             = false
         container_registry_use_managed_identity = true
         cors = {
           support_credentials = true
         }
+      }
+      ip_restriction = {
+        frontdoor = {
+          name        = "AllowFrontDoor"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureFrontDoor.Backend"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+    }
+    front = {
+      name                          = "front"
+      target_service_plan           = "app"
+      target_subnet                 = "app"
+      target_user_assigned_identity = "app"
+      public_network_access_enabled = true
+      site_config = {
+        container_registry_use_managed_identity = true
+        cors                                    = null
       }
       ip_restriction = {
         frontdoor = {
@@ -1536,23 +1558,16 @@ variable "app_service" {
 
 variable "function" {
   type = map(object({
-    name                                           = string
-    target_service_plan                            = string
-    target_subnet                                  = string
-    target_key_vault_secret                        = string
-    target_user_assigned_identity                  = string
-    target_application_insights                    = string
-    functions_extension_version                    = string
-    ftp_publish_basic_authentication_enabled       = bool
-    webdeploy_publish_basic_authentication_enabled = bool
-    https_only                                     = bool
-    public_network_access_enabled                  = bool
-    builtin_logging_enabled                        = bool
+    name                          = string
+    target_service_plan           = string
+    target_subnet                 = string
+    target_key_vault_secret       = string
+    target_user_assigned_identity = string
+    target_application_insights   = string
+    functions_extension_version   = string
+    public_network_access_enabled = bool
+    builtin_logging_enabled       = bool
     site_config = object({
-      always_on                               = bool
-      ftps_state                              = string
-      vnet_route_all_enabled                  = bool
-      scm_use_main_ip_restriction             = bool
       container_registry_use_managed_identity = bool
     })
     ip_restriction = map(object({
@@ -1576,23 +1591,16 @@ variable "function" {
   }))
   default = {
     func = {
-      name                                           = "func"
-      target_service_plan                            = "func"
-      target_subnet                                  = "func"
-      target_key_vault_secret                        = "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING"
-      target_user_assigned_identity                  = "func"
-      target_application_insights                    = "func"
-      functions_extension_version                    = "~4"
-      ftp_publish_basic_authentication_enabled       = false
-      webdeploy_publish_basic_authentication_enabled = false
-      https_only                                     = true
-      public_network_access_enabled                  = true
-      builtin_logging_enabled                        = false
+      name                          = "func"
+      target_service_plan           = "func"
+      target_subnet                 = "func"
+      target_key_vault_secret       = "FUNCTION_STORAGE_ACCOUNT_CONNECTION_STRING"
+      target_user_assigned_identity = "func"
+      target_application_insights   = "func"
+      functions_extension_version   = "~4"
+      public_network_access_enabled = true
+      builtin_logging_enabled       = false
       site_config = {
-        always_on                               = true
-        ftps_state                              = "Disabled"
-        vnet_route_all_enabled                  = true
-        scm_use_main_ip_restriction             = false
         container_registry_use_managed_identity = true
       }
       ip_restriction = {

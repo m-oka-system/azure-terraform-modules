@@ -8,9 +8,10 @@ resource "azurerm_linux_web_app" "this" {
   location                                       = var.common.location
   service_plan_id                                = var.app_service_plan[each.value.target_service_plan].id
   virtual_network_subnet_id                      = var.subnet[each.value.target_subnet].id
-  ftp_publish_basic_authentication_enabled       = each.value.ftp_publish_basic_authentication_enabled
-  webdeploy_publish_basic_authentication_enabled = each.value.webdeploy_publish_basic_authentication_enabled
-  https_only                                     = each.value.https_only
+  ftp_publish_basic_authentication_enabled       = false # FTP 基本認証を無効化
+  webdeploy_publish_basic_authentication_enabled = false # SCM 基本認証を無効化
+  https_only                                     = true  # HTTPS のみ
+  vnet_image_pull_enabled                        = true  # VNet 統合を経由してコンテナーイメージをプル
   public_network_access_enabled                  = each.value.public_network_access_enabled
   key_vault_reference_identity_id                = var.identity[each.value.target_user_assigned_identity].id
 
@@ -24,11 +25,17 @@ resource "azurerm_linux_web_app" "this" {
   app_settings = var.app_settings[each.key]
 
   site_config {
-    always_on                                     = each.value.site_config.always_on
-    ftps_state                                    = each.value.site_config.ftps_state
-    vnet_route_all_enabled                        = each.value.site_config.vnet_route_all_enabled
-    scm_use_main_ip_restriction                   = each.value.site_config.scm_use_main_ip_restriction
-    container_registry_use_managed_identity       = each.value.site_config.container_registry_use_managed_identity
+    always_on                         = true       # Always On を有効化
+    ftps_state                        = "Disabled" # FTP の状態を無効化
+    http2_enabled                     = true       # HTTP/2 を有効化
+    vnet_route_all_enabled            = true       # VNet 経由でルーティング
+    scm_use_main_ip_restriction       = false      # メインサイトのルールを使用しない
+    ip_restriction_default_action     = "Deny"     # メインサイトの一致しないルールのデフォルトアクション
+    scm_ip_restriction_default_action = "Deny"     # 高度なツールサイト(SCM)の一致しないルールのデフォルトアクション
+    minimum_tls_version               = "1.2"      # メインサイトの最小 TLS バージョン
+    scm_minimum_tls_version           = "1.2"      # 高度なツールサイト(SCM)の最小 TLS バージョン
+
+    container_registry_use_managed_identity       = true # ACR 認証にマネージド ID を使用
     container_registry_managed_identity_client_id = var.identity[each.value.target_user_assigned_identity].client_id
 
 
@@ -52,7 +59,7 @@ resource "azurerm_linux_web_app" "this" {
         service_tag = ip_restriction.value.service_tag
 
         dynamic "headers" {
-          for_each = ip_restriction.key == "frontdoor" ? [true] : []
+          for_each = var.frontdoor_profile != null && ip_restriction.key == "frontdoor" ? [true] : []
 
           content {
             x_azure_fdid = [

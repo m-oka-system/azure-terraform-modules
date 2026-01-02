@@ -9,6 +9,8 @@ Thumbs.db
 crash.log
 crash.*.log
 .terraform.lock.hcl
+tfplan.binary
+tfplan.json
 
 # 変数ファイル
 *.tfvars
@@ -28,6 +30,7 @@ terraform.rc
 # 環境変数
 .env
 .env.*
+.secrets
 
 # バックアップファイル
 *.backup
@@ -41,3 +44,19 @@ terraform.rc
 .trivy/
 trivy-db/
 .trivyignore
+
+# Serena MCP
+.serena/
+
+# Docs
+claudedocs/
+
+# Claude Code Skills - exclude built .skill files (keep source in .claude/skills/)
+*.skill
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+.python-version

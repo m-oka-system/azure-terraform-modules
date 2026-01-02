@@ -2,10 +2,7 @@ variable "common" {}
 variable "resource_group_name" {}
 variable "tags" {}
 variable "frontdoor_profile" {}
-variable "frontdoor_endpoint" {}
-variable "frontdoor_origin_group" {}
-variable "frontdoor_origin" {}
-variable "frontdoor_route" {}
-variable "backend_origins" {}
+variable "frontdoor_origins" {}
+variable "cached_origin_keys" {}
 variable "dns_zone" {}
-variable "custom_domain" {}
+variable "frontdoor_security_headers" {}

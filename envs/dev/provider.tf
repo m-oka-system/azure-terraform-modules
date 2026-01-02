@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.1.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.5.0"
+    }
   }
 }
 
@@ -25,6 +29,9 @@ provider "azurerm" {
 
   # リソースプロバイダーの登録モード (core, extended, all, none, legacy)
   resource_provider_registrations = "none"
+
+  # Entra 認証を使用してストレージアカウントにアクセス
+  storage_use_azuread = true
 
   # サブスクリプションに明示的に登録するリソースプロバイダー
   resource_providers_to_register = [
@@ -46,4 +53,4 @@ provider "azurerm" {
   }
 }
 
-# provider "http" {}
+provider "http" {}
