@@ -277,6 +277,7 @@ module "app_service" {
   subnet              = module.vnet.subnet
   identity            = module.user_assigned_identity.user_assigned_identity
   frontdoor_profile   = try(module.frontdoor[0].frontdoor_profile, null)
+  container_registry  = try(module.container_registry[0].container_registry["app"], null)
 
   app_settings = {
     front = {
