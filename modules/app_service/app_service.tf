@@ -104,3 +104,23 @@ resource "azurerm_linux_web_app" "this" {
 
   tags = var.tags
 }
+
+# DOCKER_REGISTRY_SERVER_URL を ACR の URL に更新
+resource "terraform_data" "update_acr_url" {
+  for_each = var.app_service
+
+  triggers_replace = {
+    app_id = azurerm_linux_web_app.this[each.key].id
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      az webapp config appsettings set \
+        --name ${azurerm_linux_web_app.this[each.key].name} \
+        --resource-group ${var.resource_group_name} \
+        --settings DOCKER_REGISTRY_SERVER_URL="https://${var.container_registry.login_server}"
+    EOT
+  }
+
+  depends_on = [azurerm_linux_web_app.this]
+}

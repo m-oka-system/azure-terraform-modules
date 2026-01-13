@@ -7,5 +7,6 @@ variable "app_service_plan" {}
 variable "subnet" {}
 variable "identity" {}
 variable "frontdoor_profile" {}
+variable "container_registry" {}
 variable "app_settings" {}
 variable "allowed_origins" {}
