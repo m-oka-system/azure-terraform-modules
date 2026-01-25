@@ -251,6 +251,7 @@ module "kubernetes_cluster" {
   resource_group_name   = azurerm_resource_group.rg.name
   tags                  = local.common.tags
   kubernetes_cluster    = var.kubernetes_cluster
+  allowed_cidr          = split(",", var.allowed_cidr)
   vnet_subnet_id        = module.vnet.subnet["aks"].id
   container_registry_id = try(module.container_registry[0].container_registry["app"].id, null)
 }

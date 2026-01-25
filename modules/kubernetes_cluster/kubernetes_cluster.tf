@@ -19,6 +19,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     type = "SystemAssigned"
   }
 
+  api_server_access_profile {
+    authorized_ip_ranges = var.allowed_cidr
+  }
+
   default_node_pool {
     name                 = "default"
     type                 = "VirtualMachineScaleSets"
