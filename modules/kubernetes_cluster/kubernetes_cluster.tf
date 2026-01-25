@@ -48,6 +48,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   network_profile {
     network_plugin      = "azure"        # ネットワークプラグインに Azure CNI を指定
     network_plugin_mode = "overlay"      # Azure CNI Overlay モードを有効化
+    network_policy      = "calico"       # ネットワークポリシーに Calico を指定
     load_balancer_sku   = "standard"     # ロードバランサーの SKU
     outbound_type       = "loadBalancer" # アウトバウンドのルーティング方式 (loadBalancer, userDefinedRouting, managedNATGateway, userAssignedNATGateway, none)
   }
