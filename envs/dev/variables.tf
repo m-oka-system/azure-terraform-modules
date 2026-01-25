@@ -160,6 +160,14 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    aks = {
+      name                              = "aks"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.12.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
     # Spoke2
     vm2 = {
       name                              = "vm2"
@@ -209,6 +217,10 @@ variable "network_security_group" {
     cae = {
       name          = "cae"
       target_subnet = "cae"
+    }
+    aks = {
+      name          = "aks"
+      target_subnet = "aks"
     }
     # Spoke2
     vm2 = {
