@@ -160,6 +160,14 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    aks = {
+      name                              = "aks"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.12.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+    }
     # Spoke2
     vm2 = {
       name                              = "vm2"
@@ -209,6 +217,10 @@ variable "network_security_group" {
     cae = {
       name          = "cae"
       target_subnet = "cae"
+    }
+    aks = {
+      name          = "aks"
+      target_subnet = "aks"
     }
     # Spoke2
     vm2 = {
@@ -418,6 +430,18 @@ variable "network_security_rule" {
       source_port_range          = "*"
       destination_port_range     = "443"
       source_address_prefix      = "10.10.2.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
+      name                       = "AllowAksSubnetHTTPSInbound"
+      priority                   = 1200
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "10.10.12.0/24"
       destination_address_prefix = "*"
     },
     {
@@ -1069,6 +1093,9 @@ variable "user_assigned_identity" {
     gha = {
       name = "gha"
     }
+    k8s = {
+      name = "k8s"
+    }
   }
 }
 
@@ -1117,6 +1144,10 @@ variable "role_assignment" {
     gha_storage_blob_data_contributor = {
       target_identity      = "gha"
       role_definition_name = "Storage Blob Data Contributor"
+    }
+    k8s_key_vault_secrets_user = {
+      target_identity      = "k8s"
+      role_definition_name = "Key Vault Secrets User"
     }
   }
 }
@@ -1412,6 +1443,41 @@ variable "container_app" {
           percentage      = 100
         }
       }
+    }
+  }
+}
+
+variable "kubernetes_cluster" {
+  type = object({
+    sku_tier                     = string
+    kubernetes_version           = string
+    local_account_disabled       = bool
+    oidc_issuer_enabled          = bool
+    workload_identity_enabled    = bool
+    image_cleaner_enabled        = bool
+    image_cleaner_interval_hours = number
+    default_node_pool = object({
+      node_count           = number
+      vm_size              = string
+      auto_scaling_enabled = bool
+      min_count            = number
+      max_count            = number
+    })
+  })
+  default = {
+    sku_tier                     = "Standard"
+    kubernetes_version           = "1.33"
+    local_account_disabled       = false # Kubernetes RBAC を使用したローカルアカウントを使用する
+    oidc_issuer_enabled          = true  # OIDC を有効にする
+    workload_identity_enabled    = true  # ワークロード ID を有効にする
+    image_cleaner_enabled        = true  # イメージクリーナーを有効にする
+    image_cleaner_interval_hours = 168   # イメージクリーナーの間隔 （時間） (7日)
+    default_node_pool = {
+      node_count           = 1
+      vm_size              = "Standard_D2ps_v6" # Arm64
+      auto_scaling_enabled = true
+      min_count            = 1
+      max_count            = 3
     }
   }
 }

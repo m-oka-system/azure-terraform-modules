@@ -119,13 +119,11 @@ module "user_assigned_identity" {
 }
 
 module "federated_identity_credential" {
-  source              = "../../modules/federated_identity_credential"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  subject             = "repo:m-oka-system/azure-terraform-modules:environment:${var.common.env}"
-  parent_id           = module.user_assigned_identity.user_assigned_identity["gha"].id
+  source                        = "../../modules/federated_identity_credential"
+  common                        = var.common
+  resource_group_name           = azurerm_resource_group.rg.name
+  federated_identity_credential = local.federated_identity_credential
 }
-
 
 module "activity_log" {
   count = var.resource_enabled.activity_log ? 1 : 0
@@ -248,10 +246,14 @@ module "container_app" {
 module "kubernetes_cluster" {
   count = var.resource_enabled.kubernetes_cluster ? 1 : 0
 
-  source              = "../../modules/kubernetes_cluster"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = local.common.tags
+  source                = "../../modules/kubernetes_cluster"
+  common                = var.common
+  resource_group_name   = azurerm_resource_group.rg.name
+  tags                  = local.common.tags
+  kubernetes_cluster    = var.kubernetes_cluster
+  allowed_cidr          = [for ip in split(",", var.allowed_cidr) : (strcontains(trimspace(ip), "/") ? trimspace(ip) : "${trimspace(ip)}/32")]
+  vnet_subnet_id        = module.vnet.subnet["aks"].id
+  container_registry_id = try(module.container_registry[0].container_registry["app"].id, null)
 }
 
 module "app_service_plan" {
