@@ -252,6 +252,8 @@ module "kubernetes_cluster" {
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = local.common.tags
+  kubernetes_cluster  = var.kubernetes_cluster
+  vnet_subnet_id      = module.vnet.subnet["aks"].id
 }
 
 module "app_service_plan" {

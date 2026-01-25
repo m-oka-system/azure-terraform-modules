@@ -1428,6 +1428,43 @@ variable "container_app" {
   }
 }
 
+variable "kubernetes_cluster" {
+  type = map(object({
+    sku_tier                     = string
+    kubernetes_version           = string
+    local_account_disabled       = bool
+    oidc_issuer_enabled          = bool
+    workload_identity_enabled    = bool
+    image_cleaner_enabled        = bool
+    image_cleaner_interval_hours = number
+    default_node_pool = object({
+      node_count           = number
+      vm_size              = string
+      auto_scaling_enabled = bool
+      min_count            = number
+      max_count            = number
+    })
+  }))
+  default = {
+    app = {
+      sku_tier                     = "Standard"
+      kubernetes_version           = "1.33"
+      local_account_disabled       = false # Kubernetes RBAC を使用したローカルアカウントを使用する
+      oidc_issuer_enabled          = true  # OIDC を有効にする
+      workload_identity_enabled    = true  # ワークロード ID を有効にする
+      image_cleaner_enabled        = true  # イメージクリーナーを有効にする
+      image_cleaner_interval_hours = 168   # イメージクリーナーの間隔 （時間） (7日)
+      default_node_pool = {
+        node_count           = 1
+        vm_size              = "Standard_D2ps_v6" # Arm64
+        auto_scaling_enabled = true
+        min_count            = 1
+        max_count            = 3
+      }
+    }
+  }
+}
+
 variable "app_service_plan" {
   type = map(object({
     name     = string
