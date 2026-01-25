@@ -248,12 +248,13 @@ module "container_app" {
 module "kubernetes_cluster" {
   count = var.resource_enabled.kubernetes_cluster ? 1 : 0
 
-  source              = "../../modules/kubernetes_cluster"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  tags                = local.common.tags
-  kubernetes_cluster  = var.kubernetes_cluster
-  vnet_subnet_id      = module.vnet.subnet["aks"].id
+  source                = "../../modules/kubernetes_cluster"
+  common                = var.common
+  resource_group_name   = azurerm_resource_group.rg.name
+  tags                  = local.common.tags
+  kubernetes_cluster    = var.kubernetes_cluster
+  vnet_subnet_id        = module.vnet.subnet["aks"].id
+  container_registry_id = try(module.container_registry[0].container_registry["app"].id, null)
 }
 
 module "app_service_plan" {
