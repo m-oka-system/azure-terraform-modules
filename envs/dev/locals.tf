@@ -20,6 +20,20 @@ locals {
     }
   }
 
+  # フェデレーション資格情報
+  federated_identity_credential = {
+    gha = {
+      issuer    = "https://token.actions.githubusercontent.com"
+      parent_id = module.user_assigned_identity.user_assigned_identity["gha"].id
+      subject   = "repo:m-oka-system/azure-terraform-modules:environment:${var.common.env}"
+    }
+    k8s = {
+      issuer    = module.kubernetes_cluster[0].kubernetes_cluster.oidc_issuer_url
+      parent_id = module.user_assigned_identity.user_assigned_identity["k8s"].id
+      subject   = "system:serviceaccount:default:${module.user_assigned_identity.user_assigned_identity["k8s"].name}"
+    }
+  }
+
   # プライベートエンドポイント
   private_endpoint = merge(
     {
