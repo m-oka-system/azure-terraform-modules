@@ -1093,6 +1093,9 @@ variable "user_assigned_identity" {
     gha = {
       name = "gha"
     }
+    k8s = {
+      name = "k8s"
+    }
   }
 }
 
@@ -1141,6 +1144,10 @@ variable "role_assignment" {
     gha_storage_blob_data_contributor = {
       target_identity      = "gha"
       role_definition_name = "Storage Blob Data Contributor"
+    }
+    k8s_key_vault_secrets_user = {
+      target_identity      = "k8s"
+      role_definition_name = "Key Vault Secrets User"
     }
   }
 }
