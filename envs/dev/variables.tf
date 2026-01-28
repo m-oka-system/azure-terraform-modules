@@ -1474,7 +1474,7 @@ variable "kubernetes_cluster" {
     image_cleaner_interval_hours = 168   # イメージクリーナーの間隔 （時間） (7日)
     default_node_pool = {
       node_count           = 1
-      vm_size              = "Standard_D2ps_v6" # Arm64
+      vm_size              = "Standard_D2pds_v6" # Arm64
       auto_scaling_enabled = true
       min_count            = 1
       max_count            = 3
