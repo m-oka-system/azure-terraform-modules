@@ -58,8 +58,6 @@ resource "azurerm_kubernetes_cluster" "this" {
 
 # ノード (kubelet) がコンテナーイメージをプルできるようにする
 resource "azurerm_role_assignment" "this" {
-  count = var.container_registry_id != null ? 1 : 0
-
   scope                = var.container_registry_id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.this.kubelet_identity[0].object_id
