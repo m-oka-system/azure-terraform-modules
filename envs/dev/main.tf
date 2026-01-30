@@ -254,6 +254,7 @@ module "kubernetes_cluster" {
   allowed_cidr          = [for ip in split(",", var.allowed_cidr) : (strcontains(trimspace(ip), "/") ? trimspace(ip) : "${trimspace(ip)}/32")]
   vnet_subnet_id        = module.vnet.subnet["aks"].id
   container_registry_id = try(module.container_registry[0].container_registry["app"].id, null)
+  key_vault_id          = module.key_vault.key_vault["app"].id
 }
 
 module "app_service_plan" {

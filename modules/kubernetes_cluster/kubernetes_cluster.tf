@@ -53,12 +53,30 @@ resource "azurerm_kubernetes_cluster" "this" {
     outbound_type       = "loadBalancer" # アウトバウンドのルーティング方式 (loadBalancer, userDefinedRouting, managedNATGateway, userAssignedNATGateway, none)
   }
 
+  # Azure Key Vault シークレット ストア CSI ドライバー
+  dynamic "key_vault_secrets_provider" {
+    for_each = var.kubernetes_cluster.key_vault_secrets_provider != null ? [true] : []
+
+    content {
+      secret_rotation_enabled  = var.kubernetes_cluster.key_vault_secrets_provider.secret_rotation_enabled
+      secret_rotation_interval = var.kubernetes_cluster.key_vault_secrets_provider.secret_rotation_interval
+    }
+  }
+
   tags = var.tags
 }
 
 # ノード (kubelet) がコンテナーイメージをプルできるようにする
-resource "azurerm_role_assignment" "this" {
+resource "azurerm_role_assignment" "kubelet_identity" {
   scope                = var.container_registry_id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.this.kubelet_identity[0].object_id
+}
+
+# CSI Driver アドオン (Key Vault Secrets Provider) で作成されたマネージド ID を使用してシークレットを取得できるようにする
+resource "azurerm_role_assignment" "key_vault_secrets_provider_identity" {
+  count                = var.kubernetes_cluster.key_vault_secrets_provider != null ? 1 : 0
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_kubernetes_cluster.this.key_vault_secrets_provider[0].secret_identity[0].object_id
 }

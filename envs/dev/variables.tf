@@ -1456,6 +1456,10 @@ variable "kubernetes_cluster" {
     workload_identity_enabled    = bool
     image_cleaner_enabled        = bool
     image_cleaner_interval_hours = number
+    key_vault_secrets_provider = optional(object({
+      secret_rotation_enabled  = bool
+      secret_rotation_interval = string
+    }), null)
     default_node_pool = object({
       node_count           = number
       vm_size              = string
@@ -1472,6 +1476,10 @@ variable "kubernetes_cluster" {
     workload_identity_enabled    = true  # ワークロード ID を有効にする
     image_cleaner_enabled        = true  # イメージクリーナーを有効にする
     image_cleaner_interval_hours = 168   # イメージクリーナーの間隔 （時間） (7日)
+    key_vault_secrets_provider = {
+      secret_rotation_enabled  = true # シークレットのローテーションを有効にする
+      secret_rotation_interval = "2m" # シークレットのローテーション間隔
+    }
     default_node_pool = {
       node_count           = 1
       vm_size              = "Standard_D2pds_v6" # Arm64

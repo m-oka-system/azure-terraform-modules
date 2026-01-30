@@ -5,3 +5,4 @@ variable "kubernetes_cluster" {}
 variable "allowed_cidr" {}
 variable "vnet_subnet_id" {}
 variable "container_registry_id" {}
+variable "key_vault_id" {}
