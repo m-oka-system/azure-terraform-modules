@@ -446,6 +446,18 @@ variable "network_security_rule" {
     },
     {
       target_nsg                 = "pe"
+      name                       = "AllowAksSubnetSQLInbound"
+      priority                   = 1300
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "1433"
+      source_address_prefix      = "10.10.12.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
