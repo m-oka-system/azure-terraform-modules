@@ -1461,7 +1461,6 @@ variable "kubernetes_cluster" {
       secret_rotation_interval = string
     }), null)
     default_node_pool = object({
-      node_count           = number
       vm_size              = string
       auto_scaling_enabled = bool
       min_count            = number
@@ -1481,7 +1480,6 @@ variable "kubernetes_cluster" {
       secret_rotation_interval = "2m" # シークレットのローテーション間隔
     }
     default_node_pool = {
-      node_count           = 1
       vm_size              = "Standard_D2pds_v6" # Arm64
       auto_scaling_enabled = true
       min_count            = 1

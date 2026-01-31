@@ -26,7 +26,6 @@ resource "azurerm_kubernetes_cluster" "this" {
   default_node_pool {
     name                 = "default"
     type                 = "VirtualMachineScaleSets"
-    node_count           = var.kubernetes_cluster.default_node_pool.node_count
     vm_size              = var.kubernetes_cluster.default_node_pool.vm_size
     auto_scaling_enabled = var.kubernetes_cluster.default_node_pool.auto_scaling_enabled
     min_count            = var.kubernetes_cluster.default_node_pool.min_count
