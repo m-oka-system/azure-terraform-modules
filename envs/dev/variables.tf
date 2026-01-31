@@ -737,6 +737,31 @@ variable "network_security_rule" {
       source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
+    # AKS
+    {
+      target_nsg                 = "aks"
+      name                       = "AllowInternetHTTPInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "aks"
+      name                       = "AllowInternetHTTPSInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
   ]
 }
 
