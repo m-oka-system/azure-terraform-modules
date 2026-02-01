@@ -1528,6 +1528,9 @@ variable "kubernetes_cluster" {
       min_count            = 1
       max_count            = 3
     }
+    ingress_application_gateway = {
+      sku = "Standard_v2"
+    }
   }
 }
 

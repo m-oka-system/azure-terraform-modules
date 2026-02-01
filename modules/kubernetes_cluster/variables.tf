@@ -6,3 +6,5 @@ variable "allowed_cidr" {}
 variable "aks_subnet_id" {}
 variable "container_registry_id" {}
 variable "key_vault_id" {}
+variable "appgw_subnet_id" {}
+variable "dns_zone" {}
