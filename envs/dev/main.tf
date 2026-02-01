@@ -252,9 +252,11 @@ module "kubernetes_cluster" {
   tags                  = local.common.tags
   kubernetes_cluster    = var.kubernetes_cluster
   allowed_cidr          = [for ip in split(",", var.allowed_cidr) : (strcontains(trimspace(ip), "/") ? trimspace(ip) : "${trimspace(ip)}/32")]
-  vnet_subnet_id        = module.vnet.subnet["aks"].id
+  aks_subnet_id         = module.vnet.subnet["aks"].id
   container_registry_id = try(module.container_registry[0].container_registry["app"].id, null)
   key_vault_id          = module.key_vault.key_vault["app"].id
+  appgw_subnet_id       = module.vnet.subnet["appgw"].id
+  dns_zone              = var.resource_enabled.custom_domain ? data.azurerm_dns_zone.this[0] : null
 }
 
 module "app_service_plan" {

@@ -3,6 +3,8 @@ variable "resource_group_name" {}
 variable "tags" {}
 variable "kubernetes_cluster" {}
 variable "allowed_cidr" {}
-variable "vnet_subnet_id" {}
+variable "aks_subnet_id" {}
 variable "container_registry_id" {}
 variable "key_vault_id" {}
+variable "appgw_subnet_id" {}
+variable "dns_zone" {}

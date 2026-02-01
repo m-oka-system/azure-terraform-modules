@@ -147,7 +147,10 @@ variable "subnet" {
       address_prefixes                  = ["10.10.5.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
+      service_delegation = {
+        name    = "Microsoft.Network/applicationGateways"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
     }
     cae = {
       name                              = "cae"
@@ -1503,6 +1506,9 @@ variable "kubernetes_cluster" {
       min_count            = number
       max_count            = number
     })
+    ingress_application_gateway = optional(object({
+      sku = string
+    }), null)
   })
   default = {
     sku_tier                     = "Standard"
@@ -1521,6 +1527,9 @@ variable "kubernetes_cluster" {
       auto_scaling_enabled = true
       min_count            = 1
       max_count            = 3
+    }
+    ingress_application_gateway = {
+      sku = "Standard_v2"
     }
   }
 }
