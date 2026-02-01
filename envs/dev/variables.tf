@@ -446,6 +446,18 @@ variable "network_security_rule" {
     },
     {
       target_nsg                 = "pe"
+      name                       = "AllowAksSubnetSQLInbound"
+      priority                   = 1300
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "1433"
+      source_address_prefix      = "10.10.12.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "pe"
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
@@ -735,6 +747,31 @@ variable "network_security_rule" {
       source_port_range          = "*"
       destination_port_range     = "*"
       source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # AKS
+    {
+      target_nsg                 = "aks"
+      name                       = "AllowInternetHTTPInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "aks"
+      name                       = "AllowInternetHTTPSInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "Internet"
       destination_address_prefix = "*"
     },
   ]
@@ -1456,8 +1493,11 @@ variable "kubernetes_cluster" {
     workload_identity_enabled    = bool
     image_cleaner_enabled        = bool
     image_cleaner_interval_hours = number
+    key_vault_secrets_provider = optional(object({
+      secret_rotation_enabled  = bool
+      secret_rotation_interval = string
+    }), null)
     default_node_pool = object({
-      node_count           = number
       vm_size              = string
       auto_scaling_enabled = bool
       min_count            = number
@@ -1472,9 +1512,12 @@ variable "kubernetes_cluster" {
     workload_identity_enabled    = true  # ワークロード ID を有効にする
     image_cleaner_enabled        = true  # イメージクリーナーを有効にする
     image_cleaner_interval_hours = 168   # イメージクリーナーの間隔 （時間） (7日)
+    key_vault_secrets_provider = {
+      secret_rotation_enabled  = true # シークレットのローテーションを有効にする
+      secret_rotation_interval = "2m" # シークレットのローテーション間隔
+    }
     default_node_pool = {
-      node_count           = 1
-      vm_size              = "Standard_D2ps_v6" # Arm64
+      vm_size              = "Standard_D2pds_v6" # Arm64
       auto_scaling_enabled = true
       min_count            = 1
       max_count            = 3
