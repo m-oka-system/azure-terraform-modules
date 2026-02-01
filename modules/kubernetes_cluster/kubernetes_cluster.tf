@@ -62,6 +62,15 @@ resource "azurerm_kubernetes_cluster" "this" {
     }
   }
 
+  # Application Gateway イングレスコントローラー アドオン (AGIC)
+  dynamic "ingress_application_gateway" {
+    for_each = var.kubernetes_cluster.ingress_application_gateway != null ? [true] : []
+
+    content {
+      gateway_id = azurerm_application_gateway.this.id
+    }
+  }
+
   tags = var.tags
 }
 

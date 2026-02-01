@@ -1506,6 +1506,9 @@ variable "kubernetes_cluster" {
       min_count            = number
       max_count            = number
     })
+    ingress_application_gateway = optional(object({
+      sku = string
+    }), null)
   })
   default = {
     sku_tier                     = "Standard"
