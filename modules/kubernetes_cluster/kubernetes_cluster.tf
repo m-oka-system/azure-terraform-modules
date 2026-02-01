@@ -85,7 +85,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     for_each = var.kubernetes_cluster.ingress_application_gateway != null ? [true] : []
 
     content {
-      gateway_id = azurerm_application_gateway.this.id
+      gateway_id = azurerm_application_gateway.this[0].id
     }
   }
 
@@ -109,8 +109,7 @@ resource "azurerm_role_assignment" "key_vault_secrets_provider_identity" {
 
 # AGIC アドオンのマネージド ID を使用して Application Gateway を更新できるようにする
 resource "azurerm_role_assignment" "ingress_application_gateway_identity" {
-  for_each = toset(local.agic_role_definition_names)
-
+  for_each             = toset(var.kubernetes_cluster.ingress_application_gateway != null ? local.agic_role_definition_names : [])
   scope                = data.azurerm_resource_group.this.id
   role_definition_name = each.value
   principal_id         = azurerm_kubernetes_cluster.this.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
@@ -118,6 +117,7 @@ resource "azurerm_role_assignment" "ingress_application_gateway_identity" {
 
 # Application Gateway (AGIC)
 resource "azurerm_public_ip" "this" {
+  count               = var.kubernetes_cluster.ingress_application_gateway != null ? 1 : 0
   name                = local.application_gateway_public_ip_name
   resource_group_name = var.resource_group_name
   location            = var.common.location
@@ -129,6 +129,7 @@ resource "azurerm_public_ip" "this" {
 }
 
 resource "azurerm_application_gateway" "this" {
+  count                             = var.kubernetes_cluster.ingress_application_gateway != null ? 1 : 0
   name                              = local.application_gateway_name
   resource_group_name               = var.resource_group_name
   location                          = var.common.location
@@ -151,7 +152,7 @@ resource "azurerm_application_gateway" "this" {
   frontend_ip_configuration {
     name                          = local.frontend_ip_configuration_name
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.this.id
+    public_ip_address_id          = azurerm_public_ip.this[0].id
   }
 
   frontend_port {
@@ -217,12 +218,12 @@ resource "azurerm_application_gateway" "this" {
 
 # DNS A Record
 resource "azurerm_dns_a_record" "appgw" {
-  count               = var.dns_zone != null ? 1 : 0
+  count               = var.dns_zone != null && var.kubernetes_cluster.ingress_application_gateway != null ? 1 : 0
   name                = "task-api"
   zone_name           = var.dns_zone.name
   resource_group_name = var.dns_zone.resource_group_name
   ttl                 = 3600
-  records             = [azurerm_public_ip.this.ip_address]
+  records             = [azurerm_public_ip.this[0].ip_address]
 
   tags = var.tags
 }
