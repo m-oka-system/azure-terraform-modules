@@ -150,10 +150,10 @@ locals {
   metric_alert = {
     "Microsoft.Storage/storageAccounts" = {
       resources = module.storage.storage_account
-      metrics = [
-        {
+      metrics = {
+        Availability = {
+          display_name        = "Availability"
           enabled             = false
-          metric_name         = "Availability"
           aggregation         = "Average"
           operator            = "LessThan"
           threshold           = 100
@@ -161,10 +161,10 @@ locals {
           window_size         = "PT5M"
           severity            = 1
           target_action_group = "info"
-        },
-        {
+        }
+        UsedCapacity = {
+          display_name        = "Used_Capacity"
           enabled             = false
-          metric_name         = "UsedCapacity"
           aggregation         = "Average"
           operator            = "GreaterThan"
           threshold           = 80
@@ -172,15 +172,15 @@ locals {
           window_size         = "PT1H"
           severity            = 3
           target_action_group = "info"
-        },
-      ]
-    },
+        }
+      }
+    }
     "Microsoft.KeyVault/vaults" = {
       resources = module.key_vault.key_vault
-      metrics = [
-        {
+      metrics = {
+        Availability = {
+          display_name        = "Availability"
           enabled             = false
-          metric_name         = "Availability"
           aggregation         = "Average"
           operator            = "LessThan"
           threshold           = 100
@@ -188,10 +188,10 @@ locals {
           window_size         = "PT5M"
           severity            = 1
           target_action_group = "info"
-        },
-        {
+        }
+        ServiceApiLatency = {
+          display_name        = "Service_Api_Latency"
           enabled             = false
-          metric_name         = "ServiceApiLatency"
           aggregation         = "Average"
           operator            = "GreaterThan"
           threshold           = 1000
@@ -199,22 +199,35 @@ locals {
           window_size         = "PT5M"
           severity            = 2
           target_action_group = "info"
-        },
-      ]
-    },
+        }
+      }
+    }
   }
 
   activity_log_alert = {
-    "Microsoft.Storage/storageAccounts/delete" = {
-      enabled     = false
-      signal_name = "Delete Storage Accounts"
-      scopes      = [azurerm_resource_group.rg.id]
-      criteria = {
-        category      = "Administrative"
-        statuses      = ["Started"]
-        resource_type = "Microsoft.Storage/storageAccounts"
+    "Microsoft.Storage/storageAccounts" = {
+      resources = module.storage.storage_account
+      operations = {
+        delete = {
+          display_name        = "Delete_Storage_Account"
+          enabled             = false
+          category            = "Administrative"
+          statuses            = ["Started"]
+          target_action_group = "info"
+        }
       }
-      target_action_group = "info"
+    }
+    "Microsoft.KeyVault/vaults" = {
+      resources = module.key_vault.key_vault
+      operations = {
+        delete = {
+          display_name        = "Delete_Key_Vault"
+          enabled             = false
+          category            = "Administrative"
+          statuses            = ["Started"]
+          target_action_group = "info"
+        }
+      }
     }
   }
 
