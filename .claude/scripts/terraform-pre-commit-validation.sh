@@ -92,17 +92,27 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
     # Initialize if needed
     if [[ ! -d ".terraform" ]]; then
       echo "    → Initializing Terraform..."
-      if ! terraform init -backend=false >/dev/null 2>&1; then
+      set +e
+      INIT_OUTPUT=$(terraform init -backend=false 2>&1)
+      INIT_EXIT=$?
+      set -e
+      if [[ $INIT_EXIT -ne 0 ]]; then
         echo -e "${RED}  ✗ Terraform init failed in $ENV_NAME${NC}" >&2
+        echo "$INIT_OUTPUT" >&2
         VALIDATION_FAILED=1
       fi
     fi
 
-    if terraform validate >/dev/null 2>&1; then
+    set +e
+    VALIDATE_OUTPUT=$(terraform validate 2>&1)
+    VALIDATE_EXIT=$?
+    set -e
+
+    if [[ $VALIDATE_EXIT -eq 0 ]]; then
       echo -e "${GREEN}  ✓ Terraform validate passed ($ENV_NAME)${NC}"
     else
       echo -e "${RED}  ✗ Terraform validate failed in $ENV_NAME${NC}" >&2
-      terraform validate >&2
+      echo "$VALIDATE_OUTPUT" >&2
       VALIDATION_FAILED=1
     fi
   else
@@ -128,8 +138,10 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
       tflint --init $TFLINT_CONFIG >/dev/null 2>&1 || true
     fi
 
+    set +e
     TFLINT_OUTPUT=$(tflint --format compact $TFLINT_CONFIG 2>&1)
     TFLINT_EXIT=$?
+    set -e
 
     # tflint exit codes: 0=no issues, 2=errors found, 3=no files
     if [[ $TFLINT_EXIT -eq 0 ]] || [[ $TFLINT_EXIT -eq 3 ]]; then
