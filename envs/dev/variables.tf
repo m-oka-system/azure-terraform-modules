@@ -153,6 +153,18 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    psql = {
+      name                              = "psql"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.6.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation                = null
+      service_delegation = {
+        name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
     cae = {
       name                              = "cae"
       target_vnet                       = "spoke1"
@@ -217,6 +229,10 @@ variable "network_security_group" {
     appgw = {
       name          = "appgw"
       target_subnet = "appgw"
+    }
+    psql = {
+      name          = "psql"
+      target_subnet = "psql"
     }
     cae = {
       name          = "cae"
@@ -570,7 +586,7 @@ variable "network_security_rule" {
       source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
-    # DB Subnet
+    # MySQL Subnet
     {
       target_nsg                 = "mysql"
       name                       = "AllowAppSubnetMySQLInbound"
@@ -746,6 +762,55 @@ variable "network_security_rule" {
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # PostgreSQL Subnet
+    {
+      target_nsg                 = "psql"
+      name                       = "AllowAppSubnetPostgreSQLInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "5432"
+      source_address_prefix      = "10.10.1.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "AllowVmSubnetPostgreSQLInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "5432"
+      source_address_prefix      = "10.10.4.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
       access                     = "Deny"
       protocol                   = "*"
       source_port_range          = "*"
@@ -2060,7 +2125,7 @@ variable "postgresql_flexible_server" {
     app = {
       name                          = "app"
       target_vnet                   = "spoke1"
-      target_subnet                 = "db"
+      target_subnet                 = "psql"
       sku_name                      = "B_Standard_B1ms"
       version                       = "17"
       backup_retention_days         = 7
