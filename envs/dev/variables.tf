@@ -159,7 +159,6 @@ variable "subnet" {
       address_prefixes                  = ["10.10.6.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
       service_delegation = {
         name    = "Microsoft.DBforPostgreSQL/flexibleServers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
