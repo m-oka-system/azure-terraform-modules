@@ -394,6 +394,21 @@ module "mysql" {
   subnet                  = module.vnet.subnet
 }
 
+module "postgresql" {
+  count = var.resource_enabled.postgresql ? 1 : 0
+
+  source                       = "../../modules/postgresql"
+  common                       = var.common
+  resource_group_name          = azurerm_resource_group.rg.name
+  tags                         = azurerm_resource_group.rg.tags
+  random                       = local.common.random
+  postgresql_flexible_server   = var.postgresql_flexible_server
+  postgresql_authentication    = var.postgresql_authentication
+  postgresql_flexible_database = var.postgresql_flexible_database
+  vnet                         = module.vnet.vnet
+  subnet                       = module.vnet.subnet
+}
+
 module "mssql_server" {
   count = var.resource_enabled.mssql_database ? 1 : 0
 
