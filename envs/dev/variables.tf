@@ -123,8 +123,8 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     }
-    db = {
-      name                              = "db"
+    mysql = {
+      name                              = "mysql"
       target_vnet                       = "spoke1"
       address_prefixes                  = ["10.10.3.0/24"]
       default_outbound_access_enabled   = false
@@ -206,9 +206,9 @@ variable "network_security_group" {
       name          = "func"
       target_subnet = "func"
     }
-    db = {
-      name          = "db"
-      target_subnet = "db"
+    mysql = {
+      name          = "mysql"
+      target_subnet = "mysql"
     }
     vm = {
       name          = "vm"
@@ -572,7 +572,7 @@ variable "network_security_rule" {
     },
     # DB Subnet
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "AllowAppSubnetMySQLInbound"
       priority                   = 1000
       direction                  = "Inbound"
@@ -584,7 +584,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "AllowVmSubnetMySQLInbound"
       priority                   = 1100
       direction                  = "Inbound"
@@ -596,7 +596,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
@@ -608,7 +608,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "DenyAllOutbound"
       priority                   = 4096
       direction                  = "Outbound"
@@ -1995,7 +1995,7 @@ variable "mysql_flexible_server" {
     app = {
       name                         = "app"
       target_vnet                  = "spoke1"
-      target_subnet                = "db"
+      target_subnet                = "mysql"
       sku_name                     = "B_Standard_B1ms"
       version                      = "8.0.21"
       backup_retention_days        = 7
