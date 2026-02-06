@@ -92,17 +92,27 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
     # Initialize if needed
     if [[ ! -d ".terraform" ]]; then
       echo "    → Initializing Terraform..."
-      if ! terraform init -backend=false >/dev/null 2>&1; then
+      set +e
+      INIT_OUTPUT=$(terraform init -backend=false 2>&1)
+      INIT_EXIT=$?
+      set -e
+      if [[ $INIT_EXIT -ne 0 ]]; then
         echo -e "${RED}  ✗ Terraform init failed in $ENV_NAME${NC}" >&2
+        echo "$INIT_OUTPUT" >&2
         VALIDATION_FAILED=1
       fi
     fi
 
-    if terraform validate >/dev/null 2>&1; then
+    set +e
+    VALIDATE_OUTPUT=$(terraform validate 2>&1)
+    VALIDATE_EXIT=$?
+    set -e
+
+    if [[ $VALIDATE_EXIT -eq 0 ]]; then
       echo -e "${GREEN}  ✓ Terraform validate passed ($ENV_NAME)${NC}"
     else
       echo -e "${RED}  ✗ Terraform validate failed in $ENV_NAME${NC}" >&2
-      terraform validate >&2
+      echo "$VALIDATE_OUTPUT" >&2
       VALIDATION_FAILED=1
     fi
   else
@@ -125,11 +135,20 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
     # Initialize tflint if needed
     if [[ ! -d ".tflint.d" ]]; then
       echo "    → Initializing tflint..."
-      tflint --init $TFLINT_CONFIG >/dev/null 2>&1 || true
+      set +e
+      TFLINT_INIT_OUTPUT=$(tflint --init $TFLINT_CONFIG 2>&1)
+      TFLINT_INIT_EXIT=$?
+      set -e
+      if [[ $TFLINT_INIT_EXIT -ne 0 ]]; then
+        echo -e "${YELLOW}  ⚠ tflint init failed, linting may be incomplete${NC}" >&2
+        echo "    $TFLINT_INIT_OUTPUT" >&2
+      fi
     fi
 
+    set +e
     TFLINT_OUTPUT=$(tflint --format compact $TFLINT_CONFIG 2>&1)
     TFLINT_EXIT=$?
+    set -e
 
     # tflint exit codes: 0=no issues, 2=errors found, 3=no files
     if [[ $TFLINT_EXIT -eq 0 ]] || [[ $TFLINT_EXIT -eq 3 ]]; then
@@ -166,9 +185,23 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
       VALIDATION_FAILED=1
     else
       # Check if there are any results (exit code 0=clean, 1=misconfig)
-      MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0' 2>/dev/null || echo "0")
+      # Validate JSON output before parsing
+      if [[ -z "$TRIVY_OUTPUT" ]]; then
+        echo -e "${YELLOW}  ⚠ trivy produced no output, treating as warning${NC}" >&2
+        MISCONFIG_COUNT=0
+      elif ! echo "$TRIVY_OUTPUT" | jq empty 2>/dev/null; then
+        echo -e "${RED}  ✗ trivy output is not valid JSON in $ENV_NAME${NC}" >&2
+        echo "    Raw output (first 500 chars): ${TRIVY_OUTPUT:0:500}" >&2
+        VALIDATION_FAILED=1
+        MISCONFIG_COUNT=-1
+      else
+        MISCONFIG_COUNT=$(echo "$TRIVY_OUTPUT" | jq '[.Results[]?.Misconfigurations // [] | length] | add // 0')
+      fi
 
-      if [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
+      if [[ "$MISCONFIG_COUNT" -eq -1 ]]; then
+        # JSON parse error - already handled above, skip further processing
+        :
+      elif [[ "$MISCONFIG_COUNT" -eq 0 ]]; then
         echo -e "${GREEN}  ✓ trivy scan passed ($ENV_NAME)${NC}"
       else
         echo -e "${RED}  ✗ trivy found $MISCONFIG_COUNT security issue(s) in $ENV_NAME:${NC}" >&2

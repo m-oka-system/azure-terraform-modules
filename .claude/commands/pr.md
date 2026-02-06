@@ -14,10 +14,10 @@ description: Generate PR description and automatically create pull request on Gi
 
 | Option | Action |
 |--------|--------|
-| (none) | Create draft PR |
-| `-p` | Push branch, then create draft PR |
+| (none) | Create PR |
+| `-p` | Push branch, then create PR |
 | `-u` | Update existing PR description |
-| `-r` | Create draft PR, then run automatic review (requires pr-review-toolkit plugin) |
+| `-r` | Create PR, then run automatic review (requires pr-review-toolkit plugin) |
 
 Options can be combined: `/pr -p -r` pushes and creates a PR with automatic review.
 
@@ -27,15 +27,16 @@ Options can be combined: `/pr -p -r` pushes and creates a PR with automatic revi
 
 1. Generate PR description following the template format in Japanese
 2. Include a Mermaid diagram visualizing the changes
+3. After PR creation/update, open the PR in browser: `gh pr view --web`
 
 ### Option-Specific Steps
 
 | Option | Command |
 |--------|---------|
-| (none) | `gh pr create --draft` |
-| `-p` | `git push -u origin <branch>` then `gh pr create --draft` |
+| (none) | `gh pr create` |
+| `-p` | `git push -u origin <branch>` then `gh pr create` |
 | `-u` | `gh pr edit --body <description>` |
-| `-r` | `gh pr create --draft` (exit code 0), then execute `/pr-review-toolkit:review-pr` |
+| `-r` | `gh pr create` (exit code 0), then execute `/pr-review-toolkit:review-pr` |
 
 ## Requirements
 
@@ -61,7 +62,7 @@ Guidelines:
 
 ## Error Handling
 
-- If `gh pr create --draft` fails, abort the workflow and report the error
+- If `gh pr create` fails, abort the workflow and report the error
 - For `-r` option: If PR creation succeeds but `/pr-review-toolkit:review-pr` is unavailable, warn the user but consider PR creation successful
 - For `-r` option: If review execution fails, report the error but preserve the created PR
 

@@ -30,6 +30,7 @@ variable "resource_enabled" {
     aisearch              = optional(bool, false)
     cosmosdb              = optional(bool, false)
     mysql                 = optional(bool, false)
+    postgresql            = optional(bool, false)
     mssql_database        = optional(bool, false)
     redis                 = optional(bool, false)
     vm                    = optional(bool, false)
@@ -122,8 +123,8 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     }
-    db = {
-      name                              = "db"
+    mysql = {
+      name                              = "mysql"
       target_vnet                       = "spoke1"
       address_prefixes                  = ["10.10.3.0/24"]
       default_outbound_access_enabled   = false
@@ -149,6 +150,17 @@ variable "subnet" {
       private_endpoint_network_policies = "Disabled"
       service_delegation = {
         name    = "Microsoft.Network/applicationGateways"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
+    psql = {
+      name                              = "psql"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.6.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation = {
+        name    = "Microsoft.DBforPostgreSQL/flexibleServers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
@@ -205,9 +217,9 @@ variable "network_security_group" {
       name          = "func"
       target_subnet = "func"
     }
-    db = {
-      name          = "db"
-      target_subnet = "db"
+    mysql = {
+      name          = "mysql"
+      target_subnet = "mysql"
     }
     vm = {
       name          = "vm"
@@ -216,6 +228,10 @@ variable "network_security_group" {
     appgw = {
       name          = "appgw"
       target_subnet = "appgw"
+    }
+    psql = {
+      name          = "psql"
+      target_subnet = "psql"
     }
     cae = {
       name          = "cae"
@@ -569,9 +585,9 @@ variable "network_security_rule" {
       source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
-    # DB Subnet
+    # MySQL Subnet
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "AllowAppSubnetMySQLInbound"
       priority                   = 1000
       direction                  = "Inbound"
@@ -583,7 +599,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "AllowVmSubnetMySQLInbound"
       priority                   = 1100
       direction                  = "Inbound"
@@ -595,7 +611,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
@@ -607,7 +623,7 @@ variable "network_security_rule" {
       destination_address_prefix = "*"
     },
     {
-      target_nsg                 = "db"
+      target_nsg                 = "mysql"
       name                       = "DenyAllOutbound"
       priority                   = 4096
       direction                  = "Outbound"
@@ -745,6 +761,55 @@ variable "network_security_rule" {
       name                       = "DenyAllInbound"
       priority                   = 4096
       direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    # PostgreSQL Subnet
+    {
+      target_nsg                 = "psql"
+      name                       = "AllowAppSubnetPostgreSQLInbound"
+      priority                   = 1000
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "5432"
+      source_address_prefix      = "10.10.1.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "AllowVmSubnetPostgreSQLInbound"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "5432"
+      source_address_prefix      = "10.10.4.0/24"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "DenyAllInbound"
+      priority                   = 4096
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    },
+    {
+      target_nsg                 = "psql"
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
       access                     = "Deny"
       protocol                   = "*"
       source_port_range          = "*"
@@ -1994,7 +2059,7 @@ variable "mysql_flexible_server" {
     app = {
       name                         = "app"
       target_vnet                  = "spoke1"
-      target_subnet                = "db"
+      target_subnet                = "mysql"
       sku_name                     = "B_Standard_B1ms"
       version                      = "8.0.21"
       backup_retention_days        = 7
@@ -2033,6 +2098,70 @@ variable "mysql_flexible_database" {
       target_mysql_server = "app"
       charset             = "utf8mb4"
       collation           = "utf8mb4_0900_ai_ci"
+    }
+  }
+}
+
+variable "postgresql_flexible_server" {
+  type = map(object({
+    name                          = string
+    target_vnet                   = string
+    target_subnet                 = string
+    sku_name                      = string
+    version                       = string
+    backup_retention_days         = number
+    geo_redundant_backup_enabled  = bool
+    public_network_access_enabled = bool
+    zone                          = string
+    storage_mb                    = number
+    storage_tier                  = optional(string)
+    high_availability = optional(object({
+      mode                      = string
+      standby_availability_zone = string
+    }))
+  }))
+  default = {
+    app = {
+      name                          = "app"
+      target_vnet                   = "spoke1"
+      target_subnet                 = "psql"
+      sku_name                      = "B_Standard_B1ms"
+      version                       = "17"
+      backup_retention_days         = 7
+      geo_redundant_backup_enabled  = false
+      public_network_access_enabled = false
+      zone                          = "2"
+      storage_mb                    = 32768 # 32GB
+      storage_tier                  = "P4"
+      high_availability             = null
+    }
+  }
+}
+
+variable "postgresql_authentication" {
+  type = map(object({
+    administrator_login               = string
+    administrator_password_wo         = string
+    administrator_password_wo_version = number
+  }))
+  sensitive = true
+  default = {
+    app = {
+      administrator_login               = "your-username"
+      administrator_password_wo         = "your-password"
+      administrator_password_wo_version = 1
+    }
+  }
+}
+
+variable "postgresql_flexible_database" {
+  type = map(map(string))
+  default = {
+    database1 = {
+      name                     = "appdb"
+      target_postgresql_server = "app"
+      charset                  = "UTF8"
+      collation                = "ja_JP.utf8"
     }
   }
 }
