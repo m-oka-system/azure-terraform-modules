@@ -2552,6 +2552,56 @@ variable "application_gateway" {
   }
 }
 
+variable "automation_runbook" {
+  type = map(object({
+    schedule = optional(object({
+      frequency   = string
+      interval    = number
+      start_time  = string
+      description = string
+      week_days   = optional(list(string))
+    }))
+  }))
+  default = {
+    Start-AksCluster = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        start_time  = "08:00"
+        description = "毎日 8:00 に AKS クラスターを開始"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      }
+    }
+    Stop-AksCluster = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        start_time  = "20:00"
+        description = "毎日 20:00 に AKS クラスターを停止"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      }
+    }
+    Start-ApplicationGateway = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        start_time  = "08:00"
+        description = "毎日 8:00 に Application Gateway を開始"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      }
+    }
+    Stop-ApplicationGateway = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        start_time  = "20:00"
+        description = "毎日 20:00 に Application Gateway を停止"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      }
+    }
+  }
+}
+
 variable "bastion" {
   type = object({
     target_subnet             = string
