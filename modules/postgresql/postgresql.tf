@@ -54,6 +54,8 @@ resource "azurerm_private_dns_zone" "this" {
   for_each            = var.postgresql_flexible_server
   name                = "psql-${each.value.name}-${var.common.project}-${var.common.env}-${var.random}.private.postgres.database.azure.com"
   resource_group_name = var.resource_group_name
+
+  tags = var.tags
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "this" {
@@ -62,4 +64,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.this[each.key].name
   virtual_network_id    = var.vnet[each.value.target_vnet].id
+
+  tags = var.tags
 }
