@@ -79,6 +79,7 @@ variable "subnet" {
     address_prefixes                  = list(string)
     default_outbound_access_enabled   = bool
     private_endpoint_network_policies = string
+    service_endpoints                 = optional(list(string), [])
     service_delegation = object({
       name    = string
       actions = list(string)
@@ -159,6 +160,7 @@ variable "subnet" {
       address_prefixes                  = ["10.10.6.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
+      service_endpoints                 = ["Microsoft.Storage"] # PostgreSQL Flexible Server が WAL ファイルを Azure Storage にアーカイブするために必要
       service_delegation = {
         name    = "Microsoft.DBforPostgreSQL/flexibleServers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
