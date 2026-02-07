@@ -80,10 +80,10 @@ variable "subnet" {
     default_outbound_access_enabled   = bool
     private_endpoint_network_policies = string
     service_endpoints                 = optional(list(string), [])
-    service_delegation = object({
+    service_delegation = optional(object({
       name    = string
       actions = list(string)
-    })
+    }))
   }))
   default = {
     bastion = {
@@ -92,7 +92,6 @@ variable "subnet" {
       address_prefixes                  = ["192.168.1.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
     }
     pe = {
       name                              = "pe"
@@ -100,7 +99,6 @@ variable "subnet" {
       address_prefixes                  = ["10.10.0.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Enabled"
-      service_delegation                = null
     }
     app = {
       name                              = "app"
@@ -141,7 +139,6 @@ variable "subnet" {
       address_prefixes                  = ["10.10.4.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
     }
     appgw = {
       name                              = "appgw"
@@ -183,7 +180,6 @@ variable "subnet" {
       address_prefixes                  = ["10.10.12.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
     }
     # Spoke2
     vm2 = {
@@ -192,7 +188,6 @@ variable "subnet" {
       address_prefixes                  = ["10.20.4.0/24"]
       default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Disabled"
-      service_delegation                = null
     }
   }
 }
