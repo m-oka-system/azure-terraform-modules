@@ -125,6 +125,14 @@ module "federated_identity_credential" {
   federated_identity_credential = local.federated_identity_credential
 }
 
+module "automation" {
+  source              = "../../modules/automation"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_id   = azurerm_resource_group.rg.id
+  tags                = azurerm_resource_group.rg.tags
+}
+
 module "activity_log" {
   count = var.resource_enabled.activity_log ? 1 : 0
 
