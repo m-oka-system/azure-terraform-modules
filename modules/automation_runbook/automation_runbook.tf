@@ -40,7 +40,7 @@ resource "azurerm_automation_schedule" "this" {
   automation_account_name = var.automation_account_name
   frequency               = each.value.frequency
   interval                = each.value.interval
-  timezone                = each.value.timezone
+  timezone                = "Asia/Tokyo"
   start_time              = "${formatdate("YYYY-MM-DD", timeadd(time_static.this.rfc3339, "24h"))}T${each.value.start_time}:00+09:00"
   description             = each.value.description
   week_days               = each.value.week_days
