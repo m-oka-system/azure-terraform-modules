@@ -35,7 +35,9 @@ try {
         # クラスター停止
         Write-Output "クラスターを停止しています..."
         Stop-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName
+        $cluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName
         Write-Output "  クラスターの停止が完了しました"
+        Write-Output "  停止後の状態: $($cluster.PowerState.Code)"
     }
 
     # 実行完了をログに記録

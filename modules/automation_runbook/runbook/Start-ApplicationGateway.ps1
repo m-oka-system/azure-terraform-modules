@@ -1,11 +1,11 @@
 ####################################
-# Application Gateway 開始 Runbook
+# Application Gateway 起動 Runbook
 ####################################
 
 try {
     # 実行開始をログに記録
     Write-Output "========================================="
-    Write-Output "Application Gateway 開始処理を開始します"
+    Write-Output "Application Gateway 起動処理を開始します"
     Write-Output "時刻: $((Get-Date).ToUniversalTime().AddHours(9).ToString('yyyy/MM/dd HH:mm:ss')) JST"
     Write-Output "========================================="
 
@@ -32,19 +32,20 @@ try {
         Write-Output "  Application Gateway は既に実行中です。処理をスキップします"
     }
     else {
-        # Application Gateway 開始
-        Write-Output "Application Gateway を開始しています..."
-        Start-AzApplicationGateway -ApplicationGateway $appGw
-        Write-Output "  Application Gateway の開始が完了しました"
+        # Application Gateway 起動
+        Write-Output "Application Gateway を起動しています..."
+        $result = Start-AzApplicationGateway -ApplicationGateway $appGw
+        Write-Output "  Application Gateway の起動が完了しました"
+        Write-Output "  起動後の状態: $($result.OperationalState)"
     }
 
     # 実行完了をログに記録
     Write-Output "========================================="
-    Write-Output "Application Gateway 開始処理が正常に完了しました"
+    Write-Output "Application Gateway 起動処理が正常に完了しました"
     Write-Output "時刻: $((Get-Date).ToUniversalTime().AddHours(9).ToString('yyyy/MM/dd HH:mm:ss')) JST"
     Write-Output "========================================="
 }
 catch {
-    Write-Error "Application Gateway 開始処理でエラーが発生しました: $_"
+    Write-Error "Application Gateway 起動処理でエラーが発生しました: $_"
     throw
 }

@@ -1,11 +1,11 @@
 ####################################
-# AKS クラスター開始 Runbook
+# AKS クラスター起動 Runbook
 ####################################
 
 try {
     # 実行開始をログに記録
     Write-Output "========================================="
-    Write-Output "AKS クラスター開始処理を開始します"
+    Write-Output "AKS クラスター起動処理を開始します"
     Write-Output "時刻: $((Get-Date).ToUniversalTime().AddHours(9).ToString('yyyy/MM/dd HH:mm:ss')) JST"
     Write-Output "========================================="
 
@@ -32,19 +32,21 @@ try {
         Write-Output "  クラスターは既に実行中です。処理をスキップします"
     }
     else {
-        # クラスター開始
-        Write-Output "クラスターを開始しています..."
+        # クラスター起動
+        Write-Output "クラスターを起動しています..."
         Start-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName
-        Write-Output "  クラスターの開始が完了しました"
+        $cluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName
+        Write-Output "  クラスターの起動が完了しました"
+        Write-Output "  起動後の状態: $($cluster.PowerState.Code)"
     }
 
     # 実行完了をログに記録
     Write-Output "========================================="
-    Write-Output "AKS クラスター開始処理が正常に完了しました"
+    Write-Output "AKS クラスター起動処理が正常に完了しました"
     Write-Output "時刻: $((Get-Date).ToUniversalTime().AddHours(9).ToString('yyyy/MM/dd HH:mm:ss')) JST"
     Write-Output "========================================="
 }
 catch {
-    Write-Error "AKS クラスター開始処理でエラーが発生しました: $_"
+    Write-Error "AKS クラスター起動処理でエラーが発生しました: $_"
     throw
 }

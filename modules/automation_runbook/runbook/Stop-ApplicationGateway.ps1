@@ -34,8 +34,9 @@ try {
     else {
         # Application Gateway 停止
         Write-Output "Application Gateway を停止しています..."
-        Stop-AzApplicationGateway -ApplicationGateway $appGw
+        $result = Stop-AzApplicationGateway -ApplicationGateway $appGw
         Write-Output "  Application Gateway の停止が完了しました"
+        Write-Output "  停止後の状態: $($result.OperationalState)"
     }
 
     # 実行完了をログに記録
