@@ -140,6 +140,18 @@ locals {
     "ResourceHealth",
   ]
 
+  # Automation 変数
+  automation_variable = {
+    aks_cluster_name = {
+      name  = "AksClusterName"
+      value = module.kubernetes_cluster[0].kubernetes_cluster.name
+    }
+    app_gateway_name = {
+      name  = "AppGatewayName"
+      value = module.kubernetes_cluster[0].application_gateway_ingress[0].name
+    }
+  }
+
   # Azure ポータルの IP アドレス
   azure_portal_ips = {
     aisearch = "52.139.243.237"                                         # https://learn.microsoft.com/ja-jp/azure/search/service-configure-firewall

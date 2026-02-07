@@ -2552,7 +2552,7 @@ variable "application_gateway" {
   }
 }
 
-variable "kubernetes_cluster_runbook" {
+variable "automation_runbook" {
   type = map(object({
     schedule = optional(object({
       frequency   = string
@@ -2584,21 +2584,6 @@ variable "kubernetes_cluster_runbook" {
         week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
       }
     }
-  }
-}
-
-variable "application_gateway_ingress_runbook" {
-  type = map(object({
-    schedule = optional(object({
-      frequency   = string
-      interval    = number
-      timezone    = string
-      start_time  = string
-      description = string
-      week_days   = optional(list(string))
-    }))
-  }))
-  default = {
     Start-ApplicationGateway = {
       schedule = {
         frequency   = "Week"

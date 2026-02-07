@@ -125,14 +125,6 @@ module "federated_identity_credential" {
   federated_identity_credential = local.federated_identity_credential
 }
 
-module "automation" {
-  source              = "../../modules/automation"
-  common              = var.common
-  resource_group_name = azurerm_resource_group.rg.name
-  resource_group_id   = azurerm_resource_group.rg.id
-  tags                = azurerm_resource_group.rg.tags
-}
-
 module "activity_log" {
   count = var.resource_enabled.activity_log ? 1 : 0
 
@@ -267,40 +259,24 @@ module "kubernetes_cluster" {
   dns_zone              = var.resource_enabled.custom_domain ? data.azurerm_dns_zone.this[0] : null
 }
 
-module "kubernetes_cluster_runbook" {
-  count = var.resource_enabled.kubernetes_cluster ? 1 : 0
-
-  source                  = "../../modules/automation_runbook"
-  common                  = var.common
-  resource_group_name     = azurerm_resource_group.rg.name
-  tags                    = azurerm_resource_group.rg.tags
-  automation_account_name = module.automation.automation_account.name
-  automation_runbook      = var.kubernetes_cluster_runbook
-
-  automation_variable = {
-    aks_cluster_name = {
-      name  = "AksClusterName"
-      value = module.kubernetes_cluster[0].kubernetes_cluster.name
-    }
-  }
+module "automation" {
+  source              = "../../modules/automation"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_id   = azurerm_resource_group.rg.id
+  tags                = azurerm_resource_group.rg.tags
 }
 
-module "application_gateway_ingress_runbook" {
+module "automation_runbook" {
   count = var.resource_enabled.kubernetes_cluster ? 1 : 0
 
   source                  = "../../modules/automation_runbook"
   common                  = var.common
   resource_group_name     = azurerm_resource_group.rg.name
   tags                    = azurerm_resource_group.rg.tags
+  automation_variable     = local.automation_variable
+  automation_runbook      = var.automation_runbook
   automation_account_name = module.automation.automation_account.name
-  automation_runbook      = var.application_gateway_ingress_runbook
-
-  automation_variable = {
-    app_gateway_name = {
-      name  = "AppGatewayName"
-      value = module.kubernetes_cluster[0].application_gateway_ingress[0].name
-    }
-  }
 }
 
 module "app_service_plan" {
