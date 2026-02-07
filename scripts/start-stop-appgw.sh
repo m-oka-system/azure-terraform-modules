@@ -43,10 +43,18 @@ fi
 while [[ $# -gt 0 ]]; do
     case $1 in
         -g|--resource-group)
+            if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
+                echo "エラー: -g/--resource-group には値が必要です" >&2
+                usage
+            fi
             RESOURCE_GROUP="$2"
             shift 2
             ;;
         -n|--name)
+            if [[ $# -lt 2 ]] || [[ "$2" == -* ]]; then
+                echo "エラー: -n/--name には値が必要です" >&2
+                usage
+            fi
             APPGW_NAME="$2"
             shift 2
             ;;
@@ -91,6 +99,17 @@ else
     ALREADY_MSG="Application Gatewayは既に停止しています"
 fi
 
+# Azure CLI の事前チェック
+if ! command -v az &>/dev/null; then
+    echo "エラー: Azure CLI (az) がインストールされていません" >&2
+    exit 1
+fi
+
+if ! az account show &>/dev/null; then
+    echo "エラー: Azure にログインしていません。'az login' を実行してください" >&2
+    exit 1
+fi
+
 echo "=== Application Gateway ${ACTION_LABEL} ==="
 echo "リソースグループ: $RESOURCE_GROUP"
 echo "Application Gateway名: $APPGW_NAME"
@@ -98,14 +117,18 @@ echo ""
 
 # Application Gatewayの状態確認
 echo "Application Gatewayの状態を確認中..."
+AZ_STDERR=$(mktemp)
 OPERATIONAL_STATE=$(az network application-gateway show \
     --resource-group "$RESOURCE_GROUP" \
     --name "$APPGW_NAME" \
     --query "operationalState" \
-    --output tsv 2>/dev/null) || {
+    --output tsv 2>"$AZ_STDERR") || {
     echo "エラー: Application Gatewayの状態を取得できませんでした" >&2
+    cat "$AZ_STDERR" >&2
+    rm -f "$AZ_STDERR"
     exit 1
 }
+rm -f "$AZ_STDERR"
 
 if [[ "$OPERATIONAL_STATE" == "$EXPECTED_STATE" ]]; then
     echo "$ALREADY_MSG"
@@ -124,7 +147,10 @@ fi
 az network application-gateway "$ACTION" \
     --resource-group "$RESOURCE_GROUP" \
     --name "$APPGW_NAME" \
-    "${NO_WAIT_FLAG[@]}"
+    "${NO_WAIT_FLAG[@]}" || {
+    echo "エラー: Application Gateway '$APPGW_NAME' の${ACTION_LABEL}に失敗しました" >&2
+    exit 1
+}
 
 if [[ "$NO_WAIT" == true ]]; then
     echo "Application Gateway '$APPGW_NAME' の${ACTION_LABEL}を要求しました (非同期)"
