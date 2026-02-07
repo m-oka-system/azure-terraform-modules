@@ -2552,6 +2552,41 @@ variable "application_gateway" {
   }
 }
 
+variable "application_gateway_ingress_runbook" {
+  type = map(object({
+    schedule = optional(object({
+      frequency   = string
+      interval    = number
+      timezone    = string
+      start_time  = string
+      description = string
+      week_days   = optional(list(string))
+    }))
+  }))
+  default = {
+    Start-ApplicationGateway = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        timezone    = "Asia/Tokyo"
+        start_time  = "08:00"
+        description = "毎日 8:00 に Application Gateway を開始"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      }
+    }
+    Stop-ApplicationGateway = {
+      schedule = {
+        frequency   = "Week"
+        interval    = 1
+        timezone    = "Asia/Tokyo"
+        start_time  = "20:00"
+        description = "毎日 20:00 に Application Gateway を停止"
+        week_days   = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      }
+    }
+  }
+}
+
 variable "bastion" {
   type = object({
     target_subnet             = string
