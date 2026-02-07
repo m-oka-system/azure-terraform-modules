@@ -2,10 +2,11 @@
 # Automation Account
 ################################
 resource "azurerm_automation_account" "this" {
-  name                = "aa-${var.common.project}-${var.common.env}"
-  location            = var.common.location
-  resource_group_name = var.resource_group_name
-  sku_name            = "Basic"
+  name                         = "aa-${var.common.project}-${var.common.env}"
+  location                     = var.common.location
+  resource_group_name          = var.resource_group_name
+  sku_name                     = "Basic"
+  local_authentication_enabled = false
 
   identity {
     type = "SystemAssigned"
