@@ -141,7 +141,7 @@ locals {
   ]
 
   # Automation 変数
-  automation_variable = {
+  automation_variable = var.resource_enabled.kubernetes_cluster ? {
     aks_cluster_name = {
       name  = "AksClusterName"
       value = module.kubernetes_cluster[0].kubernetes_cluster.name
@@ -150,7 +150,7 @@ locals {
       name  = "AppGatewayName"
       value = module.kubernetes_cluster[0].application_gateway_ingress[0].name
     }
-  }
+  } : {}
 
   # Azure ポータルの IP アドレス
   azure_portal_ips = {
