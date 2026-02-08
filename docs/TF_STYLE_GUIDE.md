@@ -460,7 +460,7 @@ dynamic "ip_security_restriction" {
 }
 ```
 
-### 5.7 `target_*` プレフィックスパターン
+### 5.6 `target_*` プレフィックスパターン
 
 リソースが別モジュールのリソースを参照する場合、参照先のキーを `target_*` プレフィックス付きの変数で指定します。
 
@@ -495,7 +495,7 @@ resource "azurerm_subnet" "this" {
 }
 ```
 
-### 5.8 `"MyIP"` マジックストリングパターン
+### 5.7 `"MyIP"` マジックストリングパターン
 
 IP ホワイトリストの変数値に `"MyIP"` を指定すると、実行時に `var.allowed_cidr` へ置換されます。開発環境で動的な IP アドレスを許可リストに追加する用途で使用します。
 
@@ -505,7 +505,7 @@ ip_rules = join(",", lookup(each.value.network_rules, "ip_rules", null)) == "MyI
   : lookup(each.value.network_rules, "ip_rules", null)
 ```
 
-### 5.9 ランダムサフィックスパターン
+### 5.8 ランダムサフィックスパターン
 
 グローバルに一意な名前が必要なリソース（Storage Account、Redis Cache 等）には `var.random` を付与します。
 
@@ -524,7 +524,7 @@ locals {
 }
 ```
 
-### 5.10 `lifecycle` ブロック
+### 5.9 `lifecycle` ブロック
 
 Terraform 外で変更される属性は `lifecycle.ignore_changes` で無視します。
 
@@ -548,7 +548,7 @@ lifecycle {
 }
 ```
 
-### 5.11 `moved` / `import` ブロック
+### 5.10 `moved` / `import` ブロック
 
 リソースアドレスの変更や既存リソースの取り込みには `moved` / `import` ブロックを使用します。`terraform state mv` / `terraform import` コマンドは使用しません。
 
