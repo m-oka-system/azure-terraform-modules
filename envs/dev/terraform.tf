@@ -5,7 +5,7 @@ terraform {
   # リソースプロバイダーのバージョン
   required_providers {
     azurerm = {
-      version = "~>4.50.0"
+      version = "~> 4.50.0"
       source  = "hashicorp/azurerm"
     }
     azapi = {
