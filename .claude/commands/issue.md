@@ -1,6 +1,6 @@
 ---
-allowed-tools: mcp__Azure*,mcp__Terraoform*
-description: コンテキストに基づいて GitHub Issue を作成する
+allowed-tools: Bash(gh:*), mcp__Azure*, mcp__Terraform*
+description: コンテキストに基づいて GitHub Issue を作成・更新する
 ---
 
 Issue テンプレートの形式に従って Issue を作成または更新します。
@@ -34,18 +34,14 @@ Issue テンプレートの形式に従って Issue を作成または更新し�
 - body: コンテキストに基づいて生成した説明
 - assignees: 現在の作業ユーザー
 
+5. Issue の作成/更新後、ブラウザで開く： `gh issue view <number> --web`
+
 ### オプション別の手順
 
-| Option | Command                                                                          |
-| ------ | -------------------------------------------------------------------------------- |
-| (なし) | `gh issue create --title <title> --body <body> --assignee @me`                   |
-| `-u`   | `gh issue edit <number> --title <title> --body <body>`                           |
-
-5. Issue の作成/更新後、ブラウザで開く：
-
-```bash
-gh issue view <number> --web
-```
+| Option | Command                                                        |
+| ------ | -------------------------------------------------------------- |
+| (なし) | `gh issue create --title <title> --body <body> --assignee @me` |
+| `-u`   | `gh issue edit <number> --body <body>`                         |
 
 ## 注意事項
 
