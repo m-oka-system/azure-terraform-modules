@@ -5,12 +5,12 @@ terraform {
   # リソースプロバイダーのバージョン
   required_providers {
     azurerm = {
-      version = "~> 4.50.0"
       source  = "hashicorp/azurerm"
+      version = "~> 4.50.0"
     }
     azapi = {
-      version = "~> 2.8.0"
       source  = "azure/azapi"
+      version = "~> 2.8.0"
     }
     random = {
       source  = "hashicorp/random"
