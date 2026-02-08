@@ -1,7 +1,9 @@
 output "vnet" {
-  value = azurerm_virtual_network.this
+  description = "仮想ネットワークのリソース情報"
+  value       = azurerm_virtual_network.this
 }
 
 output "subnet" {
-  value = azurerm_subnet.this
+  description = "サブネットのリソース情報"
+  value       = azurerm_subnet.this
 }
