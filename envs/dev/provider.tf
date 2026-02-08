@@ -1,32 +1,3 @@
-terraform {
-  # Terraform のバージョン
-  required_version = "~> 1.13.0"
-
-  # リソースプロバイダーのバージョン
-  required_providers {
-    azurerm = {
-      version = "~>4.50.0"
-      source  = "hashicorp/azurerm"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.7.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.1.0"
-    }
-    http = {
-      source  = "hashicorp/http"
-      version = "~> 3.5.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.13.0"
-    }
-  }
-}
-
 provider "azurerm" {
   # サブスクリプション ID (環境変数 ARM_SUBSCRIPTION_ID を設定していない場合は必要)
   # subscription_id = "00000000-0000-0000-0000-000000000000"
