@@ -60,106 +60,85 @@ variable "subnet" {
   }))
   default = {
     bastion = {
-      name                              = "AzureBastionSubnet"
-      target_vnet                       = "hub"
-      address_prefixes                  = ["192.168.1.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "AzureBastionSubnet"
+      target_vnet      = "hub"
+      address_prefixes = ["192.168.1.0/24"]
     }
     pe = {
       name                              = "pe"
       target_vnet                       = "spoke1"
       address_prefixes                  = ["10.10.0.0/24"]
-      default_outbound_access_enabled   = false
       private_endpoint_network_policies = "Enabled"
     }
     app = {
-      name                              = "app"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.1.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "app"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.1.0/24"]
       service_delegation = {
         name    = "Microsoft.Web/serverFarms"
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     }
     func = {
-      name                              = "func"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.2.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "func"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.2.0/24"]
       service_delegation = {
         name    = "Microsoft.Web/serverFarms"
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     }
     mysql = {
-      name                              = "mysql"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.3.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "mysql"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.3.0/24"]
       service_delegation = {
         name    = "Microsoft.DBforMySQL/flexibleServers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
     vm = {
-      name                              = "vm"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.4.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "vm"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.4.0/24"]
     }
     appgw = {
-      name                              = "appgw"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.5.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "appgw"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.5.0/24"]
       service_delegation = {
         name    = "Microsoft.Network/applicationGateways"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
     psql = {
-      name                              = "psql"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.6.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
-      service_endpoints                 = ["Microsoft.Storage"]
+      name              = "psql"
+      target_vnet       = "spoke1"
+      address_prefixes  = ["10.10.6.0/24"]
+      service_endpoints = ["Microsoft.Storage"] # PostgreSQL Flexible Server が WAL ファイルを Azure Storage にアーカイブするために必要
       service_delegation = {
         name    = "Microsoft.DBforPostgreSQL/flexibleServers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
     cae = {
-      name                              = "cae"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.11.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "cae"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.11.0/24"]
       service_delegation = {
         name    = "Microsoft.App/environments"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
     aks = {
-      name                              = "aks"
-      target_vnet                       = "spoke1"
-      address_prefixes                  = ["10.10.12.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "aks"
+      target_vnet      = "spoke1"
+      address_prefixes = ["10.10.12.0/24"]
     }
     vm2 = {
-      name                              = "vm2"
-      target_vnet                       = "spoke2"
-      address_prefixes                  = ["10.20.4.0/24"]
-      default_outbound_access_enabled   = false
-      private_endpoint_network_policies = "Disabled"
+      name             = "vm2"
+      target_vnet      = "spoke2"
+      address_prefixes = ["10.20.4.0/24"]
     }
   }
   nullable = false
