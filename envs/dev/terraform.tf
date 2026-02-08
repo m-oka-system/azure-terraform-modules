@@ -1,0 +1,32 @@
+terraform {
+  # Terraform のバージョン
+  required_version = "~> 1.13.0"
+
+  # リソースプロバイダーのバージョン
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.50.0"
+    }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.8.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.7.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.1.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.5.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13.0"
+    }
+  }
+}
