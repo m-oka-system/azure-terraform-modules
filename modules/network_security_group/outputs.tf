@@ -1,3 +1,4 @@
 output "network_security_group" {
-  value = azurerm_network_security_group.this
+  description = "ネットワークセキュリティグループのリソース情報"
+  value       = azurerm_network_security_group.this
 }
