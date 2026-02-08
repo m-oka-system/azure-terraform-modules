@@ -1,5 +1,5 @@
 variable "resource_group_name" {
-  description = "リソースグループ名"
+  description = "VNet ピアリングを作成するリソースグループ名（Hub と Spoke の両方の VNet が同一リソースグループに存在する必要があります）"
   type        = string
   nullable    = false
 }
