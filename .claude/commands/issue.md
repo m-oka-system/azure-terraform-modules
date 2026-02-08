@@ -1,34 +1,39 @@
 ---
 allowed-tools: mcp__Azure*,mcp__Terraoform*
-description: Create GitHub issues with title and description based on context, following Issue Templates.
+description: コンテキストに基づいて GitHub Issue を作成する
 ---
 
-Create an issue URL following the Issue Template format.
-If no context is provided, ALWAYS ask the user for input.
+Issue テンプレートの形式に従って Issue を作成します。
+コンテキストが提供されていない場合は、必ずユーザーに入力を求めてください。
 
-## Work Steps
+## 作業手順
 
-1. If not specified, select an appropriate template from Issue Templates in `.github/ISSUE_TEMPLATE/*.md`
+1. テンプレートが指定されていない場合は、`.github/ISSUE_TEMPLATE/*.md` の Issue テンプレートから適切なものを選択する
 
-2. Generate issue title and description based on the provided context
+2. 提供されたコンテキストに基づいて Issue のタイトルと説明を生成する
 
-3. Use the Azure MCP/Terraform MCP to retrieve the following information and add it to the description and notes:
+3. Azure MCP/Terraform MCP を使用して以下の情報を取得し、説明と備考に追加する：
 
-- Development best practices
-- Code implementation examples
-- azurerm resource block references
-- Documentation URLs (prioritize jp locale)
+- 開発のベストプラクティス
+- コード実装例
+- azurerm リソースブロックのリファレンス
+- ドキュメント URL（jp ロケールを優先）
 
-4. Present a Markdown format draft to the user and ask for confirmation (y/n)
+4. Markdown 形式のドラフトをユーザーに提示し、確認を求める（y/n）
 
-- title: Title generated based on context
-- body: Description generated based on context
-- assignees: Current working user
+- title: コンテキストに基づいて生成したタイトル
+- body: コンテキストに基づいて生成した説明
+- assignees: 現在の作業ユーザー
 
-5. Create the issue using `gh issue create --title <title> --body <body> --assignee @me`
+5. Issue を作成し、ブラウザで開く：
 
-## Notes
+```bash
+ISSUE_URL=$(gh issue create --title <title> --body <body> --assignee @me)
+gh issue view "$ISSUE_URL" --web
+```
 
-- Issue title and description should be written in Japanese
-- Provide URLs with jp locale whenever possible
-- Use Markdown tables and Mermaid syntax for better visual clarity
+## 注意事項
+
+- Issue のタイトルと説明は日本語で記述する
+- 可能な限り jp ロケールの URL を提供する
+- Markdown のテーブルや Mermaid 記法を活用して視覚的にわかりやすくする
