@@ -1,69 +1,71 @@
 ---
 allowed-tools: Bash(gh:*), Bash(git:*)
-description: Generate PR description and automatically create pull request on GitHub
+description: PR の説明を生成し、GitHub にプルリクエストを作成する
 ---
 
-## Context
+## コンテキスト
 
-- Current git status: !`git status`
-- Changes in this PR: !`git diff main...HEAD`
-- Commits in this PR: !`git log --oneline main..HEAD`
-- PR template: @.github/pull_request_template.md
+- 現在の git ステータス: !`git status`
+- この PR の変更内容: !`git diff main...HEAD`
+- この PR のコミット一覧: !`git log --oneline main..HEAD`
+- PR テンプレート: @.github/pull_request_template.md
 
-## Options
+## オプション
 
-| Option | Action |
-|--------|--------|
-| (none) | Create PR |
-| `-p` | Push branch, then create PR |
-| `-u` | Update existing PR description |
-| `-r` | Create PR, then run automatic review (requires pr-review-toolkit plugin) |
+| Option | Action                                                                    |
+| ------ | ------------------------------------------------------------------------- |
+| (なし) | PR を作成する                                                             |
+| `-p`   | ブランチを push してから PR を作成する                                    |
+| `-u`   | 既存の PR の説明を更新する                                                |
+| `-r`   | PR を作成し、自動レビューを実行する（pr-review-toolkit プラグインが必要） |
 
-Options can be combined: `/pr -p -r` pushes and creates a PR with automatic review.
+オプションは組み合わせ可能： `/pr -p -r` で push と PR 作成、自動レビューを実行。
 
-## Workflow
+## ワークフロー
 
-### Common Steps (all options)
+### 共通手順（全オプション共通）
 
-1. Generate PR description following the template format in Japanese
-2. Include a Mermaid diagram visualizing the changes
-3. After PR creation/update, open the PR in browser: `gh pr view --web`
+1. テンプレートの形式に従って、日本語で PR の説明を生成する
+2. 変更内容を視覚化する Mermaid Diagram を含める
+3. PR の作成/更新後、ブラウザで PR を開く： `gh pr view --web`
 
-### Option-Specific Steps
+### オプション別の手順
 
-| Option | Command |
-|--------|---------|
-| (none) | `gh pr create` |
-| `-p` | `git push -u origin <branch>` then `gh pr create` |
-| `-u` | `gh pr edit --body <description>` |
-| `-r` | `gh pr create` (exit code 0), then execute `/pr-review-toolkit:review-pr` |
+| Option | Command                                                                    |
+| ------ | -------------------------------------------------------------------------- |
+| (なし) | `gh pr create`                                                             |
+| `-p`   | `git push -u origin <branch>` の後に `gh pr create`                        |
+| `-u`   | `gh pr edit --body <description>`                                          |
+| `-r`   | `gh pr create`（終了コード 0）の後に `/pr-review-toolkit:review-pr` を実行 |
 
-## Requirements
+## 要件
 
-### PR Description
+### PR の説明
 
-- Follow template structure exactly
-- Write all content in Japanese
-- Include specific implementation details and testing steps
-- Be comprehensive but concise
+- テンプレートの構成に正確に従う
+- すべての内容を日本語で記述する
+- 具体的な実装の詳細とテスト手順を含める
+- 包括的かつ簡潔に記述する
 
 ### Mermaid Diagram
 
-Include a diagram showing relevant aspects:
-- Architecture or data flow changes
-- Component relationships
-- Process flows affected
+関連する側面を示す図を含める：
 
-Guidelines:
-- Use appropriate diagram types (flowchart, sequence, class, etc.)
-- Show before/after states when applicable
-- Highlight new or modified components
-- **No colors or styling**: Avoid `style`, `classDef`, `fill`, `stroke`, or color directives
+- アーキテクチャやデータフローの変更
+- コンポーネント間の関係
+- 影響を受けるプロセスフロー
 
-## Error Handling
+ガイドライン：
 
-- If `gh pr create` fails, abort the workflow and report the error
-- For `-r` option: If PR creation succeeds but `/pr-review-toolkit:review-pr` is unavailable, warn the user but consider PR creation successful
-- For `-r` option: If review execution fails, report the error but preserve the created PR
+- 適切な図の種類を使用する（flowchart、sequence、class など）
+- 該当する場合は変更前後の状態を示す
+- 新規または変更されたコンポーネントを強調する
+- **色やスタイリングは使用しない**： `style`、`classDef`、`fill`、`stroke`、色の指定は避ける
 
-**Generate the PR description and execute the appropriate command based on the option.**
+## エラーハンドリング
+
+- `gh pr create` が失敗した場合、ワークフローを中断しエラーを報告する
+- `-r` オプション：PR の作成は成功したが `/pr-review-toolkit:review-pr` が利用できない場合、ユーザーに警告するが PR の作成は成功とみなす
+- `-r` オプション：レビューの実行が失敗した場合、エラーを報告するが作成済みの PR は保持する
+
+**オプションに基づいて PR の説明を生成し、適切なコマンドを実行してください。**

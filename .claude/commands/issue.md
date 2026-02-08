@@ -1,34 +1,51 @@
 ---
-allowed-tools: mcp__Azure*,mcp__Terraoform*
-description: Create GitHub issues with title and description based on context, following Issue Templates.
+allowed-tools: Bash(gh:*), mcp__Azure*, mcp__Terraform*
+description: コンテキストに基づいて GitHub Issue を作成・更新する
 ---
 
-Create an issue URL following the Issue Template format.
-If no context is provided, ALWAYS ask the user for input.
+Issue テンプレートの形式に従って Issue を作成または更新します。
+コンテキストが提供されていない場合は、必ずユーザーに入力を求めてください。
 
-## Work Steps
+## オプション
 
-1. If not specified, select an appropriate template from Issue Templates in `.github/ISSUE_TEMPLATE/*.md`
+| Option | Action                                       |
+| ------ | -------------------------------------------- |
+| (なし) | Issue を作成し、ブラウザで開く               |
+| `-u`   | 既存の Issue の説明を更新し、ブラウザで開く  |
 
-2. Generate issue title and description based on the provided context
+## 作業手順
 
-3. Use the Azure MCP/Terraform MCP to retrieve the following information and add it to the description and notes:
+### 共通手順（全オプション共通）
 
-- Development best practices
-- Code implementation examples
-- azurerm resource block references
-- Documentation URLs (prioritize jp locale)
+1. テンプレートが指定されていない場合は、`.github/ISSUE_TEMPLATE/*.md` の Issue テンプレートから適切なものを選択する
 
-4. Present a Markdown format draft to the user and ask for confirmation (y/n)
+2. 提供されたコンテキストに基づいて Issue のタイトルと説明を生成する
 
-- title: Title generated based on context
-- body: Description generated based on context
-- assignees: Current working user
+3. Azure MCP/Terraform MCP を使用して以下の情報を取得し、説明と備考に追加する：
 
-5. Create the issue using `gh issue create --title <title> --body <body> --assignee @me`
+- 開発のベストプラクティス
+- コード実装例
+- azurerm リソースブロックのリファレンス
+- ドキュメント URL（jp ロケールを優先）
 
-## Notes
+4. Markdown 形式のドラフトをユーザーに提示し、確認を求める（y/n）
 
-- Issue title and description should be written in Japanese
-- Provide URLs with jp locale whenever possible
-- Use Markdown tables and Mermaid syntax for better visual clarity
+- title: コンテキストに基づいて生成したタイトル
+- body: コンテキストに基づいて生成した説明
+- assignees: 現在の作業ユーザー
+
+5. Issue の作成/更新後、ブラウザで開く： `gh issue view <number> --web`
+
+### オプション別の手順
+
+| Option | Command                                                        |
+| ------ | -------------------------------------------------------------- |
+| (なし) | `gh issue create --title <title> --body <body> --assignee @me` |
+| `-u`   | `gh issue edit <number> --body <body>`                         |
+
+## 注意事項
+
+- Issue のタイトルと説明は日本語で記述する
+- 可能な限り jp ロケールの URL を提供する
+- Markdown のテーブルや Mermaid 記法を活用して視覚的にわかりやすくする
+- `-u` オプション使用時、Issue 番号が指定されていない場合はユーザーに確認する
