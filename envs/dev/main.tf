@@ -15,8 +15,6 @@ module "vnet" {
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name
   tags                = azurerm_resource_group.rg.tags
-  vnet                = var.vnet
-  subnet              = var.subnet
 }
 
 module "vnet_peering_hub_spoke1" {
