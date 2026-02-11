@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CC 1",
+      "type": "shell",
+      "command": "claude",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "claude"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CC 2",
+      "type": "shell",
+      "command": "claude",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "claude"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CC 3",
+      "type": "shell",
+      "command": "claude",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "claude"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Claude Code x3",
+      "dependsOn": ["CC 1", "CC 2", "CC 3"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}
