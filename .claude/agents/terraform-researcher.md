@@ -78,6 +78,7 @@ mcp__Terraform__search_modules(query='azure {service_name}')
 日付は調査実行日を使用してください。
 
 保存する内容:
+
 - プロバイダーバージョン（調査時点の最新）
 - 主要リソースの必須属性・推奨オプション属性
 - ネストブロック構成
@@ -94,10 +95,10 @@ mcp__Terraform__search_modules(query='azure {service_name}')
 ```markdown
 ## プロバイダーバージョン
 
-| プロバイダー | 最新バージョン | 推奨制約       |
-|-------------|--------------|---------------|
-| azurerm     | {version}    | ~> {version}  |
-| azapi       | {version}    | ~> {version}  |
+| プロバイダー | 最新バージョン | 推奨制約     |
+| ------------ | -------------- | ------------ |
+| azurerm      | {version}      | ~> {version} |
+| azapi        | {version}      | ~> {version} |
 
 ## 対象リソース一覧
 
@@ -105,18 +106,18 @@ mcp__Terraform__search_modules(query='azure {service_name}')
 
 ### リソース
 
-| # | リソースタイプ                  | 用途               | プロバイダー |
-|---|-------------------------------|--------------------|------------|
-| 1 | azurerm_resource_group        | リソースグループ     | azurerm    |
-| 2 | azurerm_kubernetes_cluster    | AKS クラスター      | azurerm    |
-| ...                                                                     |
+| #   | リソースタイプ             | 用途             | プロバイダー |
+| --- | -------------------------- | ---------------- | ------------ |
+| 1   | azurerm_resource_group     | リソースグループ | azurerm      |
+| 2   | azurerm_kubernetes_cluster | AKS クラスター   | azurerm      |
+| ... |
 
 ### データソース
 
-| データソースタイプ        | 用途                    |
-|-------------------------|------------------------|
-| azurerm_client_config   | テナント・サブスクリプション情報 |
-| ...                     | ...                    |
+| データソースタイプ    | 用途                             |
+| --------------------- | -------------------------------- |
+| azurerm_client_config | テナント・サブスクリプション情報 |
+| ...                   | ...                              |
 
 ## リソース属性詳細
 
@@ -124,36 +125,36 @@ mcp__Terraform__search_modules(query='azure {service_name}')
 
 #### 必須属性
 
-| 属性名              | 型      | 説明                        |
-|--------------------|---------|----------------------------|
-| name               | string  | クラスター名                 |
-| location           | string  | リージョン                   |
-| resource_group_name| string  | リソースグループ名            |
-| ...                | ...     | ...                        |
+| 属性名              | 型     | 説明               |
+| ------------------- | ------ | ------------------ |
+| name                | string | クラスター名       |
+| location            | string | リージョン         |
+| resource_group_name | string | リソースグループ名 |
+| ...                 | ...    | ...                |
 
 #### 推奨オプション属性
 
-| 属性名                       | 型      | デフォルト値 | 推奨値    | 説明           |
-|-----------------------------|---------|------------|----------|---------------|
-| private_cluster_enabled     | bool    | false      | true     | プライベートクラスター |
-| ...                         | ...     | ...        | ...      | ...           |
+| 属性名                  | 型   | デフォルト値 | 推奨値 | 説明                   |
+| ----------------------- | ---- | ------------ | ------ | ---------------------- |
+| private_cluster_enabled | bool | false        | true   | プライベートクラスター |
+| ...                     | ...  | ...          | ...    | ...                    |
 
 #### ネストブロック
 
-| ブロック名         | 必須  | 主要属性                                |
-|-------------------|------|-----------------------------------------|
-| default_node_pool | Yes  | name, vm_size, node_count               |
-| network_profile   | No   | network_plugin, network_policy, pod_cidr|
-| identity          | Yes  | type, identity_ids                      |
-| ...               | ...  | ...                                     |
+| ブロック名        | 必須 | 主要属性                                 |
+| ----------------- | ---- | ---------------------------------------- |
+| default_node_pool | Yes  | name, vm_size, node_count                |
+| network_profile   | No   | network_plugin, network_policy, pod_cidr |
+| identity          | Yes  | type, identity_ids                       |
+| ...               | ...  | ...                                      |
 
 ## azapi 対応状況
 
-| 項目                    | 状態                               |
-|------------------------|-----------------------------------|
-| azurerm で対応済み       | {Yes / No / 一部}                  |
-| azapi が必要な機能       | {プレビュー機能の具体名}             |
-| 推奨 API バージョン      | {例: 2024-01-01}                   |
+| 項目                | 状態                     |
+| ------------------- | ------------------------ |
+| azurerm で対応済み  | {Yes / No / 一部}        |
+| azapi が必要な機能  | {プレビュー機能の具体名} |
+| 推奨 API バージョン | {例: 2024-01-01}         |
 
 ## プロジェクト既存パターンとの整合
 
@@ -162,7 +163,7 @@ mcp__Terraform__search_modules(query='azure {service_name}')
 - 命名規則: `{resource_type}-{name}-{var.common.project}-{var.common.env}`
 - 共通変数: `var.common` （project, env, location）
 - ループ: `for_each` を使用（count は使わない）
-- ID管理: User Assigned Managed Identity を優先
+- ID 管理: User Assigned Managed Identity を優先
 ```
 
 ## 品質基準
