@@ -1,7 +1,7 @@
 ---
 name: terraform-researcher
 description: "Terraform プロバイダーのリソース詳細、属性仕様、バージョン情報を調査するリサーチャーです。azurerm/azapi プロバイダーのリソースタイプ、必須属性、オプション属性、データソースの調査が必要な場合に使用します。"
-tools: Read, Write, Edit, Grep, Glob, WebFetch, WebSearch, mcp__Terraform__get_latest_provider_version, mcp__Terraform__get_latest_module_version, mcp__Terraform__get_provider_details, mcp__Terraform__get_provider_capabilities, mcp__Terraform__search_providers, mcp__Terraform__search_modules, mcp__Terraform__get_module_details
+tools: Read, Write, Edit, Grep, Glob, WebFetch, WebSearch, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs, mcp__Terraform__get_latest_provider_version, mcp__Terraform__get_latest_module_version, mcp__Terraform__get_provider_details, mcp__Terraform__get_provider_capabilities, mcp__Terraform__search_providers, mcp__Terraform__search_modules, mcp__Terraform__get_module_details
 model: haiku
 color: purple
 ---
@@ -71,7 +71,43 @@ mcp__Terraform__get_latest_provider_version(namespace='azure', name='azapi')
 mcp__Terraform__search_modules(query='azure {service_name}')
 ```
 
-### 6. 調査結果の保存（最後に必ず実行）
+### 6. Terraform Core・周辺ツールの調査（必要に応じて）
+
+HCL 文法、組み込み関数、または周辺ツールの詳細が必要な場合、Context7 を使用してください。
+
+```
+# Terraform Core の文法・関数
+mcp__plugin_context7_context7__query-docs(
+  libraryId='/hashicorp/terraform',
+  query='for_each vs count の使い分け'
+)
+
+# tflint のルール確認
+mcp__plugin_context7_context7__query-docs(
+  libraryId='/terraform-linters/tflint',
+  query='azurerm plugin rules'
+)
+
+# terraform-compliance のパターン
+mcp__plugin_context7_context7__query-docs(
+  libraryId='/eerknut/terraform-compliance',
+  query='BDD test examples for Azure'
+)
+
+# Trivy のセキュリティポリシー
+mcp__plugin_context7_context7__query-docs(
+  libraryId='/aquasecurity/trivy',
+  query='terraform security scanning'
+)
+```
+
+**使い分けの目安:**
+
+- プロバイダー・モジュール仕様 → Terraform MCP
+- HCL 文法・関数・State 管理 → Context7
+- linter/compliance/security ツール → Context7
+
+### 7. 調査結果の保存（最後に必ず実行）
 
 調査完了後、以下の内容を `docs/research/` に保存してください。
 ファイル名は `yyyy-mm-dd_{resource_type}.md`（例: `2026-02-09_kubernetes_cluster.md`）とします。
