@@ -25,4 +25,5 @@ paths:
 
 ## 変更後の検証
 
-- `.tf` ファイルの変更後は `bash .claude/scripts/terraform-pre-commit-validation.sh` を実行すること
+- `.tf` ファイルの変更後は必ず `bash .claude/scripts/test-validation-hook.sh` を実行すること
+- `terraform-pre-commit-validation.sh` を直接実行してはならない（hook 専用で stdin に JSON が必要なため、直接実行すると何も検証せず終了する）
