@@ -1,9 +1,0 @@
-variable "common" {}
-variable "resource_group_name" {}
-variable "tags" {}
-variable "random" {}
-variable "mysql_flexible_server" {}
-variable "mysql_authentication" {}
-variable "mysql_flexible_database" {}
-variable "vnet" {}
-variable "subnet" {}
