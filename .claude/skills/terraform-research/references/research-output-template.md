@@ -1,11 +1,12 @@
 # リサーチ統合フォーマット
 
-以下のテンプレートに従って、Azure MCP と Terraform MCP の調査結果を統合してください。
+以下のテンプレートに従って、3 Agent（azure-researcher、terraform-researcher、context7-researcher）の調査結果を統合してください。
 
 ```markdown
 # {サービス正式名称} 調査結果
 
 > 調査日: YYYY-MM-DD
+> プロバイダーバージョン: azurerm ~> {version} / azapi ~> {version}
 
 ## サービス概要
 
@@ -77,6 +78,50 @@
 - ループ: `for_each` を使用（count は使わない）
 - ID 管理: User Assigned Managed Identity を優先
 - 命名制約: {ハイフン不可等の制約があれば記載}
+
+## azapi 対応状況
+
+| 項目 | 状態 |
+|---|---|
+| azurerm で対応済み | {Yes / No / 一部} |
+| azapi が必要な機能 | {具体名、なければ「なし」} |
+| 推奨 API バージョン | {例: 2024-01-01} |
+
+### azapi 実装例
+
+{azapi が必要な場合のみ記載。不要な場合はこのサブセクションを省略}
+
+```hcl
+resource "azapi_resource" "example" {
+  type      = "{Azure リソースタイプ}@{API バージョン}"
+  name      = "{リソース名}"
+  parent_id = "{親リソース ID}"
+
+  body = {
+    properties = {
+      # 具体的なプロパティ
+    }
+  }
+}
+```
+
+## AVM 参考情報
+
+- モジュール名: {AVM モジュール名、該当なしの場合は記載}
+- リポジトリ: {GitHub URL}
+- 主な特徴: {箇条書き}
+
+### 参考構成
+
+{AVM モジュールが存在する場合のみ記載。該当なしの場合はこのサブセクションを省略}
+
+```hcl
+module "example" {
+  source  = "{モジュールソース}"
+  version = "{バージョン}"
+  # ...
+}
+```
 
 ## 注意事項・既知の制約
 

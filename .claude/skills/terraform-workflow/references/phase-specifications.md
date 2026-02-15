@@ -15,7 +15,13 @@ Task tool の `subagent_type` に `azure-researcher` を指定:
 
 サービス名: {サービス名}
 
-調査完了後、結果をそのまま返してください。docs/research/ へのファイル保存は不要です。
+以下の 4 セクションを返してください:
+- サービス概要
+- 必須セキュリティ設定
+- ネットワーク要件
+- 注意事項（Azure 観点）
+
+docs/research/ へのファイル保存は不要です。結果をそのまま返してください。
 ```
 
 **Agent 2: terraform-researcher**
@@ -28,7 +34,12 @@ Task tool の `subagent_type` に `terraform-researcher` を指定:
 サービス名: {サービス名}
 対象プロバイダー: azurerm（優先）、azapi（必要に応じて）
 
-調査完了後、結果をそのまま返してください。docs/research/ へのファイル保存は不要です。
+以下の 3 セクションを返してください:
+- プロバイダーバージョン
+- Terraform リソース構成（リソース一覧、データソース、必須属性、推奨オプション属性、ネストブロック）
+- プロジェクトパターンとの整合
+
+docs/research/ へのファイル保存は不要です。結果をそのまま返してください。
 ```
 
 **Agent 3: context7-researcher**
@@ -40,21 +51,38 @@ Task tool の `subagent_type` に `context7-researcher` を指定:
 
 サービス名: {サービス名}
 
-調査対象:
-- azapi プロバイダーの実装例・サンプルコード
-- Azure Verified Modules (AVM) の構成例
-- azurerm では対応できない機能の代替手段
+以下の 3 セクションを返してください:
+- azapi 対応状況（azapi 実装例を含む）
+- AVM 参考情報
+- 注意事項（Context7 観点）
 
-調査完了後、結果をそのまま返してください。docs/research/ へのファイル保存は不要です。
+docs/research/ へのファイル保存は不要です。結果をそのまま返してください。
 ```
 
 **重要**: Agent にはファイル保存を依頼しないでください。結果の統合とファイル保存はワークフロー側で行います。
 
-### 統合フォーマット
+### 統合ルール
 
-両 Agent の結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
+3 Agent の結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
 
 統合フォーマットは `.claude/skills/terraform-research/references/research-output-template.md` を Read ツールで読み込んでください。
+
+セクション単位で各 Agent の結果をマッピングしてください:
+
+| テンプレートのセクション | ソース |
+|---|---|
+| サービス概要 | azure-researcher |
+| 必須セキュリティ設定 | azure-researcher |
+| Terraform リソース構成 | terraform-researcher |
+| ネットワーク要件 | azure-researcher |
+| プロジェクトパターンとの整合 | terraform-researcher |
+| azapi 対応状況 | context7-researcher |
+| AVM 参考情報 | context7-researcher |
+| 注意事項・既知の制約 | azure-researcher + context7-researcher を統合 |
+
+- プロバイダーバージョン（terraform-researcher）はファイル先頭のメタ情報として調査日の下に記載します
+- 「未取得」と報告されたセクションはそのまま「未取得」と記載してください
+- 情報が競合する場合はより具体的な情報を優先してください
 
 ### 完了確認条件
 
