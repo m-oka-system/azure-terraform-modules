@@ -15,12 +15,12 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Task, AskUserQuestion
 
 ## コンテキスト収集
 
-以下のコマンドを実行して現在の状態を把握してください:
+以下のコマンドを **1 回の Bash 呼び出し** で実行して現在の状態を把握してください。並列 Bash 呼び出しは 1 つの失敗で他が連鎖エラーになるため、必ず単一コマンドとして実行します:
 
 ```bash
-ls docs/research/ 2>/dev/null || echo "(なし)"   # 既存リサーチファイル
-ls modules/                                       # 既存モジュール一覧
-date +%Y-%m-%d                                    # 現在日付
+echo "=== 既存リサーチファイル ===" && ls docs/research/ 2>/dev/null || echo "(なし)"; \
+echo "=== 既存モジュール一覧 ===" && ls modules/ 2>/dev/null || echo "(なし)"; \
+echo "=== 現在日付 ===" && date +%Y-%m-%d
 ```
 
 ## 制約
