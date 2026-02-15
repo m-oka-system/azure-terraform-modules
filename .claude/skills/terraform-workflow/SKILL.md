@@ -2,6 +2,7 @@
 name: terraform-workflow
 description: "Terraform コード実装の全ワークフロー（リサーチ → 実装 → 検証）をオーケストレーションします。Child Module と Root Module（envs/dev/）を網羅的に実装します。「モジュールを作って」「ワークフロー」「workflow」「〜のモジュールを作成して」などのキーワードでトリガーされます。"
 model: opus
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, AskUserQuestion
 ---
 
 ## 前提条件
