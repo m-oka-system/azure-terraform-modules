@@ -39,13 +39,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, AskUserQuestion
 
 ## コンテキスト収集
 
-以下のコマンドを実行して現在の状態を把握してください:
+以下のコマンドを **1 回の Bash 呼び出し** で実行して現在の状態を把握してください。並列 Bash 呼び出しは 1 つの失敗で他が連鎖エラーになるため、必ず単一コマンドとして実行します:
 
 ```bash
-ls docs/research/ 2>/dev/null || echo "(なし)"   # 既存リサーチファイル
-ls modules/                                       # 既存モジュール一覧
-date +%Y-%m-%d                                    # 現在日付
-git status --short                                # Git 状態
+echo "=== 既存リサーチファイル ===" && ls docs/research/ 2>/dev/null || echo "(なし)"; \
+echo "=== 既存モジュール一覧 ===" && ls modules/ 2>/dev/null || echo "(なし)"; \
+echo "=== 現在日付 ===" && date +%Y-%m-%d; \
+echo "=== Git 状態 ===" && git status --short
 ```
 
 ## 制約
@@ -82,7 +82,11 @@ git status --short                                # Git 状態
 
 **スキップ条件**: `--skip-research`、`--from implement`、`--from validate` のいずれか
 
-Azure MCP と Terraform MCP の 2 つの Agent を並列起動し、結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
+以下の 3 つの Agent を `run_in_background: true` で並列起動し、結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
+
+- azure-researcher
+- terraform-researcher
+- context7-researcher
 
 **完了確認**: `docs/research/*_{サービス名}.md` が存在することを確認してから次へ進む。
 

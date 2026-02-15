@@ -4,7 +4,7 @@
 
 ### Agent プロンプトテンプレート
 
-以下の 2 つの Agent を **1 回のレスポンスで並列に** Task tool で起動してください。
+以下の 3 つの Agent を **1 回のレスポンスで並列に** Task tool で起動してください。
 
 **Agent 1: azure-researcher**
 
@@ -27,6 +27,23 @@ Task tool の `subagent_type` に `terraform-researcher` を指定:
 
 サービス名: {サービス名}
 対象プロバイダー: azurerm（優先）、azapi（必要に応じて）
+
+調査完了後、結果をそのまま返してください。docs/research/ へのファイル保存は不要です。
+```
+
+**Agent 3: context7-researcher**
+
+Task tool の `subagent_type` に `context7-researcher` を指定:
+
+```
+以下の Azure サービスについて、Context7 を使用して補足情報を調査してください。
+
+サービス名: {サービス名}
+
+調査対象:
+- azapi プロバイダーの実装例・サンプルコード
+- Azure Verified Modules (AVM) の構成例
+- azurerm では対応できない機能の代替手段
 
 調査完了後、結果をそのまま返してください。docs/research/ へのファイル保存は不要です。
 ```
