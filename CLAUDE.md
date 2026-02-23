@@ -1,12 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## プロジェクト概要
 
-## Project Overview
+Azure Terraform Modules - 再利用可能な Terraform モジュールライブラリで、Azure インフラストラクチャを管理する。
 
-Azure Terraform Modules - Reusable Terraform module library for managing infrastructure on Azure focused on security, availability, and scalability.
-
-**Tech Stack:**
+## 技術スタック
 
 - IaC: Terraform (HCL)
 - Cloud Provider: Microsoft Azure
@@ -14,431 +12,67 @@ Azure Terraform Modules - Reusable Terraform module library for managing infrast
 - Security Scanning: Trivy
 - Testing: terraform test, terraform-compliance
 
-## Working Guidelines
+## コア原則
 
-**Language Policy:**
-- **Think in English:** Perform all reasoning and analysis in English
-- **Output in Japanese:** All responses, comments, and documentation should be in Japanese
-- **Commit Messages in Japanese:** Write all git commit messages in Japanese using Conventional Commits format
+- **シンプルさ最優先**: すべての変更を可能な限りシンプルにする。影響するコードを最小限にする。
+- **怠慢の禁止**: 根本原因を見つける。一時的な修正は行わない。シニア開発者の基準を守る。
+- **最小限の影響**: 変更は必要な箇所のみに留める。バグの混入を避ける。
 
-## Development Commands
+## 言語ポリシー
 
-### Terraform Workflow
+- **思考は英語で:** 推論と分析はすべて英語で行う
+- **出力は日本語で:** 全ての応答、コメント、ドキュメントは日本語で書く
+- **コミットメッセージは日本語で:** 全ての git コミットメッセージは Conventional Commits 形式で日本語で書く
 
-```bash
-# Initialize and format
-cd envs/dev
-terraform init
-terraform fmt -recursive
+## ワークフロー オーケストレーション
 
-# Validation
-terraform validate
+### 1. プランモードをデフォルトにする
 
-# Linting (requires tflint)
-tflint --init  # First time or plugin updates
-tflint
+- 些細でないタスク（3 ステップ以上、またはアーキテクチャ上の判断が必要な場合）には必ずプランモードに入る
+- 想定外の事態が起きたら、即座に停止して再計画する - 無理に押し進めない
+- 検証ステップにもプランモードを使う（構築時だけではない）
+- 曖昧さを減らすために、事前に詳細な仕様を書く
 
-# Plan and apply
-terraform plan
-terraform apply
+### 2. サブエージェント戦略
 
-# Security scan (CRITICAL and HIGH only)
-trivy config envs/dev/ --severity HIGH,CRITICAL
-```
+- メインのコンテキストウィンドウをクリーンに保つため、サブエージェントを積極的に使う
+- 調査、探索、並列分析はサブエージェントに委譲する
+- 複雑な問題には、サブエージェント経由でより多くの計算リソースを投入する
+- 集中した実行のために、サブエージェント 1 つにつき 1 タスクとする
 
-### Testing
+### 3. 自己改善ループ
 
-```bash
-# Run Terraform native tests (dev environment)
-cd envs/dev
-terraform test                                    # All tests
-terraform test -filter=tests/storage.tftest.hcl  # Specific test file
+- ユーザーからの修正指摘があった場合は必ず: `claudedocs/lessons.md` にパターンを記録する
+- 同じミスを防ぐためのルールを自分自身に課す
+- ミス率が下がるまで、これらの教訓を徹底的に反復改善する
+- セッション開始時に関連プロジェクトの教訓を見直す
 
-# Run compliance tests (terraform-compliance)
-cd tests/compliance
-make plan dev      # Generate plan for dev environment
-make test dev      # Run all compliance tests
-make test-security dev   # Security tests only
-make test-critical dev   # Critical tests only
+### 4. 完了前の検証
 
-# Or use uvx directly (no installation needed)
-uvx terraform-compliance -f features -p ../../envs/dev/tfplan.json
-```
+- 動作を証明せずにタスクを完了とマークしない
+- 必要に応じて、main ブランチと変更内容の差分を確認する
+- 自問する: 「スタッフエンジニアがこれを承認するか？」
+- テストを実行し、ログを確認し、正しさを実証する
 
-### Validation Pipeline (Pre-Commit)
+### 5. エレガンスを追求する（バランスよく）
 
-Git hooks automatically run validation before commit:
+- 些細でない変更には: 一度立ち止まって「もっとエレガントな方法はないか？」と問う
+- 修正がハック的に感じたら: 「今知っていることをすべて踏まえて、エレガントな解決策を実装する」
+- シンプルで明白な修正にはこれを省略する - 過剰設計しない
+- 提示する前に自分自身の成果物に疑問を投げかける
 
-```bash
-# Enable pre-commit hooks
-git config core.hooksPath .githooks
+### 6. 自律的なバグ修正
 
-# Manual validation (same as pre-commit)
-bash .claude/scripts/terraform-pre-commit-validation.sh
-```
+- バグ報告を受けたら: とにかく修正する。手取り足取りの指示を求めない
+- ログ、エラー、失敗テストを特定し - それらを解決する
+- ユーザーにコンテキストスイッチを一切求めない
+- 失敗している CI テストは、指示されなくても自ら修正しに行く
 
-The pre-commit hook runs:
+## タスク管理
 
-1. `terraform validate` for each environment
-2. `tflint` for each environment
-3. `trivy config` scan (CRITICAL, HIGH only)
-
-Skip validation only in emergencies: `git commit --no-verify`
-
-## Module Structure
-
-### Standard 3-File Pattern
-
-Every module follows this structure:
-
-```
-modules/<module_name>/
-├── variables.tf          # Input variables (alphabetically ordered)
-├── <module_name>.tf      # Resource definitions
-└── outputs.tf            # Output values (alphabetically ordered)
-```
-
-### Common Variables Pattern
-
-All modules use `var.common` for consistency:
-
-```hcl
-variable "common" {
-  type = object({
-    project  = string
-    env      = string
-    location = string
-  })
-}
-```
-
-### Resource Naming Convention
-
-Pattern: `<resource_type>-<name>-<project>-<env>`
-
-```hcl
-name = "webapp-${each.value.name}-${var.common.project}-${var.common.env}"
-```
-
-**Exception:** Storage Accounts have constraints:
-
-```hcl
-name = "st${each.value.name}${var.common.project}${var.common.env}${random_string.suffix.result}"
-```
-
-## Architecture Patterns
-
-### Security Requirements (Mandatory)
-
-All web-facing resources MUST implement:
-
-```hcl
-https_only                                    = true
-minimum_tls_version                           = "1.2"
-ftp_publish_basic_authentication_enabled      = false
-webdeploy_publish_basic_authentication_enabled = false
-ip_restriction_default_action                 = "Deny"
-ftps_state                                    = "Disabled"
-```
-
-### Identity Management
-
-- **Prefer:** User Assigned Managed Identity
-- **Avoid:** System Assigned Identity (complex to manage)
-
-```hcl
-identity {
-  type         = "UserAssigned"
-  identity_ids = [var.user_assigned_identity_id]
-}
-
-key_vault_reference_identity_id = var.user_assigned_identity_id
-```
-
-### VNet Integration
-
-```hcl
-vnet_route_all_enabled     = true
-virtual_network_subnet_id  = var.subnet_id
-```
-
-### Dynamic Blocks Pattern
-
-Use `for_each` for multiple resources:
-
-```hcl
-resource "azurerm_linux_web_app" "this" {
-  for_each = var.app_service
-  name     = "webapp-${each.value.name}-${var.common.project}-${var.common.env}"
-  # ...
-}
-```
-
-Use `dynamic` for conditional blocks:
-
-```hcl
-dynamic "cors" {
-  for_each = each.value.site_config.cors != null ? [true] : []
-  content {
-    allowed_origins = var.allowed_origins[each.key]
-  }
-}
-```
-
-### CI/CD Lifecycle Management
-
-Ignore CI/CD-managed values:
-
-```hcl
-lifecycle {
-  ignore_changes = [
-    site_config[0].application_stack[0].docker_image_name,
-    tags["hidden-link: /app-insights-conn-string"],
-  ]
-}
-```
-
-## Code Style Conventions
-
-### Naming
-
-- Use snake_case: `resource_group_name` ✅, `resourceGroupName` ❌
-- No type redundancy: `azurerm_virtual_network.main` ✅, `azurerm_virtual_network.vnet_main` ❌
-
-### Comments
-
-- Write in Japanese for Azure-specific configurations
-- Use `####` for section separators
-- Comment sparingly - code should be self-explanatory
-
-### Variables
-
-Every variable MUST have:
-
-```hcl
-variable "example" {
-  description = "Clear explanation in Japanese"
-  type        = string
-  default     = "value"  # Optional
-
-  validation {  # Optional, for constrained values
-    condition     = contains(["dev", "stg", "prod"], var.example)
-    error_message = "Must be dev, stg, or prod."
-  }
-}
-```
-
-## Task Completion Checklist
-
-After ANY code changes, run the validation pipeline:
-
-```bash
-# Run pre-commit validation (includes fmt, validate, tflint, trivy)
-bash .claude/scripts/terraform-pre-commit-validation.sh
-
-# Additional steps
-cd envs/dev && terraform plan
-terraform test  # If applicable
-```
-
-Or run each step manually:
-
-```bash
-terraform fmt -recursive
-terraform validate
-tflint
-trivy config envs/dev/ --severity HIGH,CRITICAL
-cd envs/dev && terraform plan
-terraform test  # If applicable
-```
-
-Before creating a PR:
-
-- [ ] All validation passes (format, validate, lint, security scan)
-- [ ] Tests pass (if modified test files)
-- [ ] Commit messages follow convention
-- [ ] No `.terraform/`, `*.tfstate`, or binary files included
-
-## Git Commit Convention
-
-### Commit Message Format
-
-**REQUIREMENT: Write ALL commit messages in Japanese** using Conventional Commits format:
-
-```
-<type>: <description>
-
-<detailed explanation if needed>
-```
-
-Types: `feat`, `fix`, `refactor`, `docs`, `chore`
-
-**IMPORTANT:** Do NOT include Claude Code signature:
-
-```
-# ❌ DON'T include:
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
-
-## Security Best Practices
-
-### Storage Account
-
-```hcl
-min_tls_version                = "TLS1_2"
-enable_https_traffic_only      = true
-public_network_access_enabled  = false  # Control as needed
-shared_key_access_enabled      = false
-```
-
-### Key Vault
-
-```hcl
-purge_protection_enabled    = true
-soft_delete_retention_days  = 90
-enable_rbac_authorization   = true
-```
-
-### Database (SQL/Cosmos)
-
-```hcl
-minimum_tls_version = "1.2"
-# Enable Azure AD authentication
-# Enable automated backups
-```
-
-## Testing Strategy
-
-### terraform test (Native Tests)
-
-- Location: `envs/dev/tests/*.tftest.hcl`
-- Scope: Environment-specific validation
-- Cost: Free (plan tests don't create resources)
-- Run: `terraform test` in `envs/dev/`
-
-### terraform-compliance (BDD Tests)
-
-- Location: `tests/compliance/features/`
-- Scope: Cross-environment policy validation
-- Categories: security, network, tagging, data-protection
-- Run: `make test dev` in `tests/compliance/`
-
-## MCP Servers and Tools
-
-This project is configured to use:
-
-### Azure MCP (Terraform development)
-
-```bash
-# Research Azure service documentation
-mcp__Azure__documentation('<service_name>')
-mcp__Azure__azureterraformbestpractices('<service_name>')
-mcp__Azure__get_bestpractices('<service_name>')
-```
-
-### Terraform MCP (Provider research)
-
-```bash
-# Research Terraform providers
-mcp__Terraform__get_provider_details('hashicorp', 'azurerm')
-mcp__Terraform__get_provider_details('azure', 'azapi')
-mcp__Terraform__get_latest_provider_version()
-```
-
-## Project-Specific Skills
-
-### `/terraform-code` Skill
-
-Triggers on: "write terraform", "create tf module", "implement infrastructure as code"
-
-Workflow:
-
-1. **Research Phase:** Launch parallel agents for Azure MCP + Terraform MCP research
-2. **Implementation:** Follow HashiCorp style guide
-3. **Validation:** Run validation scripts before completion
-
-See `.claude/skills/terraform-code/SKILL.md` for detailed workflow.
-
-## Directory Organization
-
-```
-azure-terraform-modules/
-├── modules/              # 45+ reusable modules
-│   ├── app_service/
-│   ├── function/
-│   ├── vnet/
-│   ├── key_vault/
-│   └── ...
-├── envs/                 # Environment configurations
-│   └── dev/
-│       ├── main.tf
-│       ├── variables.tf
-│       ├── terraform.tfvars
-│       └── tests/        # terraform test files
-├── tests/
-│   └── compliance/       # terraform-compliance BDD tests
-├── scripts/              # Utility scripts
-├── .githooks/            # Pre-commit validation hooks
-└── .claude/              # Claude Code configuration
-    ├── skills/           # Project-specific skills
-    └── scripts/          # Validation scripts
-```
-
-## Key Files
-
-- `.githooks/pre-commit` - Automatic validation before commits
-- `.tflint.hcl` - TFLint configuration (per environment)
-- `envs/dev/check.tf` - Terraform check blocks for validation
-- `tests/compliance/Makefile` - Compliance test automation
-
-## Common Workflows
-
-### Adding a New Module
-
-```bash
-# 1. Create module directory
-mkdir -p modules/new_module
-
-# 2. Create standard files
-touch modules/new_module/{variables.tf,new_module.tf,outputs.tf}
-
-# 3. Implement with security defaults
-# (Use existing modules as reference)
-
-# 4. Add to dev environment main.tf
-# module "new_module" { ... }
-
-# 5. Validate
-terraform fmt -recursive
-terraform validate
-tflint
-trivy config modules/new_module/
-
-# 6. Test
-cd envs/dev && terraform plan
-```
-
-### Debugging Issues
-
-```bash
-# Check state
-terraform state list
-terraform state show module.app_service.azurerm_linux_web_app.this["api"]
-
-# Enable debug logging
-export TF_LOG=DEBUG
-terraform plan
-unset TF_LOG
-
-# Refresh state
-terraform refresh
-```
-
-## Notes
-
-- This repository uses Japanese comments for Azure-specific configurations
-- All modules are designed for production use with security best practices
-- Pre-commit hooks ensure code quality - avoid `--no-verify` unless emergency
-- Tests should pass before merging PRs
-- Use terraform-compliance for cross-environment policy enforcement
+1. **計画を先に**: `claudedocs/todo.md` にチェック可能な項目付きの計画を書く
+2. **計画を検証**: 実装を始める前に確認を取る
+3. **進捗を追跡**: 進めながら項目を完了としてマークする
+4. **変更を説明**: 各ステップでハイレベルなサマリーを提供する
+5. **結果を文書化**: `claudedocs/todo.md` にレビューセクションを追加する
+6. **教訓を記録**: 修正指摘後に `claudedocs/lessons.md` を更新する
