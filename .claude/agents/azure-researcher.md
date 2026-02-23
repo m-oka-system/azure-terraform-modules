@@ -61,6 +61,15 @@ mcp__Azure__get_azure_bestpractices('{service_name}')
 - {プレビュー機能の有無}
 ````
 
+## MCP ツール失敗時のフォールバック
+
+MCP ツールがエラーを返した場合や応答がない場合は、以下の手順で代替してください:
+
+1. エラー内容を記録する（どのツールが、どのようなエラーで失敗したか）
+2. WebSearch で同等の情報を検索する（例: `WebSearch(query='Azure {service_name} security best practices site:learn.microsoft.com')`）
+3. 必要に応じて WebFetch で公式ドキュメントページを直接取得する
+4. 取得できなかったセクションは「未取得 - MCP ツール '{ツール名}' が応答なし。WebSearch でも該当情報なし」と明記する
+
 ## 品質基準
 
 - 属性名は Terraform の HCL で使う正確な名前を記載すること

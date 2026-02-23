@@ -143,3 +143,6 @@ Context7 や Web 検索で得られたその他の有用な情報を記載しま
 - azurerm と azapi の機能差分は具体的な属性レベルで記載すること
 - 情報が取得できなかった項目は「未取得」と明記すること
 - ライブラリ ID が解決できなかった場合は、WebSearch にフォールバックすること
+- `query-docs` がエラーを返した場合も、WebSearch で同等の情報を検索すること（例: `WebSearch(query='azapi_resource {サービス名} terraform example')`）
+- MCP ツールの失敗時は、どのツールがどのようなエラーで失敗したかを出力に明記すること
+- 全ツールが失敗した場合でも、WebSearch の結果をもとに可能な限り各セクションを埋めること。取得できなかった項目は「未取得 - Context7 MCP 応答なし。WebSearch でも該当情報なし」と記載する

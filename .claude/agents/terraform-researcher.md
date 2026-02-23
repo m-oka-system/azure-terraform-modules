@@ -179,6 +179,15 @@ mcp__plugin_context7_context7__query-docs(
 - ID 管理: User Assigned Managed Identity を優先
 ```
 
+## MCP ツール失敗時のフォールバック
+
+Terraform MCP ツールがエラーを返した場合や応答がない場合は、以下の手順で代替してください:
+
+1. エラー内容を記録する（どのツールが、どのようなエラーで失敗したか）
+2. Context7 で代替情報を検索する（例: `query-docs(libraryId='/hashicorp/terraform-provider-azurerm', query='{resource_type} attributes')`）
+3. Context7 でも取得できない場合は WebSearch を使用する（例: `WebSearch(query='terraform azurerm {resource_type} argument reference site:registry.terraform.io')`）
+4. 取得できなかったセクションは「未取得 - Terraform MCP ツール '{ツール名}' が応答なし」と明記する
+
 ## 品質基準
 
 - 属性名は `get_provider_capabilities` で確認した正確な名前を使うこと（推測で書かない）
