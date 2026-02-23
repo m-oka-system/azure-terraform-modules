@@ -209,6 +209,8 @@ resource "azurerm_application_gateway" "this" {
       http_listener,
       request_routing_rule,
       probe,
+      ssl_certificate,
+      redirect_configuration,
       tags,
     ]
   }
