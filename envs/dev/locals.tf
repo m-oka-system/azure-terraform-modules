@@ -24,6 +24,7 @@ locals {
   federated_identity_credential = merge(
     {
       gha = {
+        name      = "github-actions"
         issuer    = "https://token.actions.githubusercontent.com"
         parent_id = module.user_assigned_identity.user_assigned_identity["gha"].id
         subject   = "repo:m-oka-system/azure-terraform-modules:environment:${var.common.env}"
@@ -31,9 +32,16 @@ locals {
     },
     var.resource_enabled.kubernetes_cluster ? {
       k8s = {
+        name      = "app"
         issuer    = module.kubernetes_cluster[0].kubernetes_cluster.oidc_issuer_url
         parent_id = module.user_assigned_identity.user_assigned_identity["k8s"].id
         subject   = "system:serviceaccount:default:${module.user_assigned_identity.user_assigned_identity["k8s"].name}"
+      }
+      certmanager = {
+        name      = "cert-manager"
+        issuer    = module.kubernetes_cluster[0].kubernetes_cluster.oidc_issuer_url
+        parent_id = module.user_assigned_identity.user_assigned_identity["certmanager"].id
+        subject   = "system:serviceaccount:cert-manager:${module.user_assigned_identity.user_assigned_identity["certmanager"].name}"
       }
     } : {}
   )

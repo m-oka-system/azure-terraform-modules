@@ -1210,6 +1210,9 @@ variable "user_assigned_identity" {
     k8s = {
       name = "k8s"
     }
+    certmanager = {
+      name = "certmanager"
+    }
   }
 }
 
@@ -1262,6 +1265,10 @@ variable "role_assignment" {
     k8s_key_vault_secrets_user = {
       target_identity      = "k8s"
       role_definition_name = "Key Vault Secrets User"
+    }
+    certmanager_dns_zone_contributor = {
+      target_identity      = "certmanager"
+      role_definition_name = "DNS Zone Contributor"
     }
   }
 }

@@ -4,7 +4,7 @@
 resource "azurerm_federated_identity_credential" "this" {
   for_each = var.federated_identity_credential
 
-  name                = "${each.key}-${var.common.project}-${var.common.env}"
+  name                = each.value.name
   resource_group_name = var.resource_group_name
   audience            = ["api://AzureADTokenExchange"]
   issuer              = each.value.issuer
