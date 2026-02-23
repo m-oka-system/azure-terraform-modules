@@ -115,7 +115,11 @@ module "user_assigned_identity" {
   resource_group_name    = azurerm_resource_group.rg.name
   tags                   = azurerm_resource_group.rg.tags
   user_assigned_identity = var.user_assigned_identity
-  role_assignment        = var.role_assignment
+}
+
+module "role_assignment" {
+  source          = "../../modules/role_assignment"
+  role_assignment = local.role_assignment
 }
 
 module "federated_identity_credential" {
