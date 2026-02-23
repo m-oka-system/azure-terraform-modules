@@ -8,11 +8,22 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Shell",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
             "command": "bash .claude/scripts/terraform-pre-commit-validation.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/auto-format.sh"
           }
         ]
       }
