@@ -1216,63 +1216,6 @@ variable "user_assigned_identity" {
   }
 }
 
-variable "role_assignment" {
-  type = map(object({
-    target_identity      = string
-    role_definition_name = string
-  }))
-  default = {
-    app_acr_pull = {
-      target_identity      = "app"
-      role_definition_name = "AcrPull"
-    }
-    app_key_vault_secrets_user = {
-      target_identity      = "app"
-      role_definition_name = "Key Vault Secrets User"
-    }
-    app_storage_blob_data_contributor = {
-      target_identity      = "app"
-      role_definition_name = "Storage Blob Data Contributor"
-    }
-    func_acr_pull = {
-      target_identity      = "func"
-      role_definition_name = "AcrPull"
-    }
-    func_key_vault_secrets_user = {
-      target_identity      = "func"
-      role_definition_name = "Key Vault Secrets User"
-    }
-    appgw_key_vault_secrets_user = {
-      target_identity      = "appgw"
-      role_definition_name = "Key Vault Secrets User"
-    }
-    mssql_blob_data_contributor = {
-      target_identity      = "mssql"
-      role_definition_name = "Storage Blob Data Contributor"
-    }
-    gha_contributor = {
-      target_identity      = "gha"
-      role_definition_name = "Contributor"
-    }
-    gha_key_vault_secrets_user = {
-      target_identity      = "gha"
-      role_definition_name = "Key Vault Secrets User"
-    }
-    gha_storage_blob_data_contributor = {
-      target_identity      = "gha"
-      role_definition_name = "Storage Blob Data Contributor"
-    }
-    k8s_key_vault_secrets_user = {
-      target_identity      = "k8s"
-      role_definition_name = "Key Vault Secrets User"
-    }
-    certmanager_dns_zone_contributor = {
-      target_identity      = "certmanager"
-      role_definition_name = "DNS Zone Contributor"
-    }
-  }
-}
-
 variable "custom_domain" {
   type = map(object({
     dns_zone_name             = string

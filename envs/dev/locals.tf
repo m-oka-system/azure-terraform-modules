@@ -20,6 +20,85 @@ locals {
     }
   }
 
+  # ロール割り当て
+  role_assignment = merge(
+    # Resource Group スコープ
+    {
+      gha_contributor = {
+        scope                = azurerm_resource_group.rg.id
+        role_definition_name = "Contributor"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["gha"].principal_id
+      }
+    },
+    # Key Vault スコープ
+    {
+      app_key_vault_secrets_user = {
+        scope                = module.key_vault.key_vault["app"].id
+        role_definition_name = "Key Vault Secrets User"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["app"].principal_id
+      }
+      func_key_vault_secrets_user = {
+        scope                = module.key_vault.key_vault["app"].id
+        role_definition_name = "Key Vault Secrets User"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["func"].principal_id
+      }
+      appgw_key_vault_secrets_user = {
+        scope                = module.key_vault.key_vault["app"].id
+        role_definition_name = "Key Vault Secrets User"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["appgw"].principal_id
+      }
+      gha_key_vault_secrets_user = {
+        scope                = module.key_vault.key_vault["app"].id
+        role_definition_name = "Key Vault Secrets User"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["gha"].principal_id
+      }
+      k8s_key_vault_secrets_user = {
+        scope                = module.key_vault.key_vault["app"].id
+        role_definition_name = "Key Vault Secrets User"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["k8s"].principal_id
+      }
+    },
+    # Storage Account スコープ
+    {
+      app_storage_blob_data_contributor = {
+        scope                = module.storage.storage_account["app"].id
+        role_definition_name = "Storage Blob Data Contributor"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["app"].principal_id
+      }
+      mssql_blob_data_contributor = {
+        scope                = module.storage.storage_account["log"].id
+        role_definition_name = "Storage Blob Data Contributor"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["mssql"].principal_id
+      }
+      gha_storage_blob_data_contributor = {
+        scope                = module.storage.storage_account["app"].id
+        role_definition_name = "Storage Blob Data Contributor"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["gha"].principal_id
+      }
+    },
+    # Container Registry スコープ (条件付き)
+    var.resource_enabled.container_registry ? {
+      app_acr_pull = {
+        scope                = module.container_registry[0].container_registry["app"].id
+        role_definition_name = "AcrPull"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["app"].principal_id
+      }
+      func_acr_pull = {
+        scope                = module.container_registry[0].container_registry["app"].id
+        role_definition_name = "AcrPull"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["func"].principal_id
+      }
+    } : {},
+    # DNS Zone スコープ (条件付き)
+    var.resource_enabled.custom_domain ? {
+      certmanager_dns_zone_contributor = {
+        scope                = data.azurerm_dns_zone.this[0].id
+        role_definition_name = "DNS Zone Contributor"
+        principal_id         = module.user_assigned_identity.user_assigned_identity["certmanager"].principal_id
+      }
+    } : {}
+  )
+
   # フェデレーション資格情報
   federated_identity_credential = merge(
     {
