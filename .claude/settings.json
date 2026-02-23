@@ -1,15 +1,29 @@
 {
+  "language": "Japanese",
+  "plansDirectory": "claudedocs/plans",
   "env": {
-    "ENABLE_TOOL_SEARCH": "true"
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Shell",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
             "command": "bash .claude/scripts/terraform-pre-commit-validation.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/auto-format.sh"
           }
         ]
       }

@@ -28,6 +28,7 @@ echo -e "${YELLOW}🔍 Pre-commit validation triggered${NC}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 ENVS_DIR="$PROJECT_DIR/envs"
 VALIDATION_FAILED=0
+TOOLS_SKIPPED=0
 
 # Function to check if command exists
 command_exists() {
@@ -117,6 +118,7 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
     fi
   else
     echo -e "${YELLOW}  ⚠ terraform not found, skipping${NC}"
+    TOOLS_SKIPPED=$((TOOLS_SKIPPED + 1))
   fi
 
   echo ""
@@ -162,6 +164,7 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
     fi
   else
     echo -e "${YELLOW}  ⚠ tflint not found, skipping${NC}"
+    TOOLS_SKIPPED=$((TOOLS_SKIPPED + 1))
   fi
 
   echo ""
@@ -215,6 +218,7 @@ for ENV_DIR in "${ENV_DIRS[@]}"; do
   else
     echo -e "${YELLOW}  ⚠ trivy not found, skipping${NC}"
     echo "  Install: brew install trivy (macOS) or https://trivy.dev/latest/getting-started/installation/"
+    TOOLS_SKIPPED=$((TOOLS_SKIPPED + 1))
   fi
 
   echo ""
@@ -232,7 +236,14 @@ if [[ $VALIDATION_FAILED -eq 1 ]]; then
   echo "" >&2
   echo "💡 Tip: Fix the issues and commit again, or use --no-verify to skip validation" >&2
   exit 2  # Exit code 2 = blocking error for Claude
+elif [[ $TOOLS_SKIPPED -ge 3 ]]; then
+  echo -e "${YELLOW}⚠ All validation tools (terraform, tflint, trivy) are missing - no checks were performed${NC}" >&2
+  echo "  Install the required tools before committing." >&2
+  exit 2
 else
+  if [[ $TOOLS_SKIPPED -gt 0 ]]; then
+    echo -e "${YELLOW}⚠ $TOOLS_SKIPPED of 3 validation tools were not found (checks were incomplete)${NC}"
+  fi
   echo -e "${GREEN}✅ All validations passed successfully${NC}"
   exit 0
 fi
