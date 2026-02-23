@@ -41,7 +41,7 @@ locals {
         name      = "cert-manager"
         issuer    = module.kubernetes_cluster[0].kubernetes_cluster.oidc_issuer_url
         parent_id = module.user_assigned_identity.user_assigned_identity["certmanager"].id
-        subject   = "system:serviceaccount:cert-manager:${module.user_assigned_identity.user_assigned_identity["certmanager"].name}"
+        subject   = "system:serviceaccount:cert-manager:cert-manager"
       }
     } : {}
   )
