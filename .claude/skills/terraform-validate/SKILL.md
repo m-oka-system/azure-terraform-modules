@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Glob, Grep
 引数を以下のように解釈してください:
 
 - **第 1 引数**: 対象モジュール名（例: `storage`、`key_vault`）。省略時はプロジェクト全体を検証
-- **`--fix`**: 検出した問題を自動修正する（`terraform fmt -write=true` の適用等）
+- **`--fix`**: `terraform fmt` を適用してフォーマットを自動修正する
 
 ## コンテキスト収集
 

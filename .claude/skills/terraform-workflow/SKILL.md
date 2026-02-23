@@ -82,7 +82,7 @@ echo "=== Git 状態 ===" && git status --short
 
 **スキップ条件**: `--skip-research`、`--from implement`、`--from validate` のいずれか
 
-以下の 3 つの Agent を `run_in_background: true` で並列起動し、結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
+以下の 3 つの Agent を **1 回のレスポンスで並列に** Task tool で起動し、結果を統合して `docs/research/YYYY-MM-DD_{サービス名}.md` に保存します。
 
 - azure-researcher
 - terraform-researcher
@@ -107,6 +107,12 @@ echo "=== Git 状態 ===" && git status --short
    - `variables.tf` の `resource_enabled` に追加（必要な場合）
 
 **完了確認**: `modules/<モジュール名>/` に 3 ファイルが存在し、`envs/dev/main.tf` に module ブロックが追加されていることを確認してから次へ進む。
+
+**実装途中で失敗した場合**:
+
+- Child Module が不完全な場合: 作成済みファイルを削除し、`modules/<モジュール名>/` ディレクトリごと削除してからエラーを報告する
+- Root Module 更新が不完全な場合: `git checkout envs/dev/` で変更を元に戻してからエラーを報告する
+- エラー内容とどのステップで失敗したかをユーザーに明示する
 
 #### フェーズ 3: 検証
 

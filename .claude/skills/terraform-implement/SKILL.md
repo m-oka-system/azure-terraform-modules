@@ -2,7 +2,7 @@
 name: terraform-implement
 description: "リサーチ結果に基づいて Terraform コードを実装します。Child Module と Root Module（envs/dev/）の両方を網羅的に実装します。「実装して」「implement」「モジュール作成」「モジュールを作って」などのキーワードでトリガーされます。"
 model: opus
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
 ## 前提条件

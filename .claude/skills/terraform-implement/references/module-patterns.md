@@ -164,7 +164,7 @@ module "<モジュール名>" {
 - `source` は `"../../modules/<モジュール名>"` の相対パスを使用する
 - `common`、`resource_group_name`、`tags` は定型パターンで記述する
 - 他モジュールの output を参照する場合は `module.<name>.<output>` を使用する
-- `count` を使用する場合は `for_each` の前（ブロック先頭）に配置する
+- `count` を使用する場合はブロック先頭に配置する（`count` と `for_each` は排他的なため同時に使用しない）
 
 ## envs/dev/variables.tf - 完全宣言
 
