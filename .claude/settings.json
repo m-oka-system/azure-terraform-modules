@@ -1,4 +1,6 @@
 {
+  "language": "Japanese",
+  "plansDirectory": "claudedocs/plans",
   "env": {
     "ENABLE_TOOL_SEARCH": "true",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
