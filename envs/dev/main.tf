@@ -614,6 +614,17 @@ module "log_query_alert" {
   log_query_alert     = local.log_query_alert
 }
 
+module "alert_processing_rule" {
+  count = var.resource_enabled.backup_vault ? 1 : 0
+
+  source                = "../../modules/monitor_alert_processing_rule"
+  common                = var.common
+  resource_group_name   = azurerm_resource_group.rg.name
+  tags                  = azurerm_resource_group.rg.tags
+  action_group          = module.action_group.action_group
+  alert_processing_rule = local.alert_processing_rule
+}
+
 module "diagnostic_setting" {
   count = var.resource_enabled.diagnostic_setting ? 1 : 0
 
