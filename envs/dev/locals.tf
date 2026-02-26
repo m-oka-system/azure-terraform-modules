@@ -353,4 +353,17 @@ locals {
       target_action_group              = "info"
     }
   }
+
+  # Alert Processing Rule
+  alert_processing_rule = {
+    backup_failure = {
+      name                = "backup-failure"
+      description         = "Azure Backup ジョブ失敗アラートを通知する"
+      target_action_group = "info"
+      scopes              = [module.backup_vault[0].backup_vault.id]
+      condition = {
+        severity = { operator = "Equals", values = ["Sev0", "Sev1"] }
+      }
+    }
+  }
 }
