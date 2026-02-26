@@ -355,7 +355,7 @@ locals {
   }
 
   # Alert Processing Rule
-  alert_processing_rule = {
+  alert_processing_rule = var.resource_enabled.backup_vault ? {
     backup_failure = {
       name                = "backup-failure"
       description         = "Azure Backup ジョブ失敗アラートを通知する"
@@ -365,5 +365,5 @@ locals {
         severity = { operator = "Equals", values = ["Sev0", "Sev1"] }
       }
     }
-  }
+  } : {}
 }
