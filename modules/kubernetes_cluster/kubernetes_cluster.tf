@@ -133,7 +133,7 @@ resource "azurerm_application_gateway" "this" {
   name                              = local.application_gateway_name
   resource_group_name               = var.resource_group_name
   location                          = var.common.location
-  enable_http2                      = true
+  http2_enabled                     = true
   fips_enabled                      = false
   force_firewall_policy_association = false
   zones                             = ["1", "2", "3"]

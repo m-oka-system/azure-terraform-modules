@@ -125,7 +125,6 @@ module "role_assignment" {
 module "federated_identity_credential" {
   source                        = "../../modules/federated_identity_credential"
   common                        = var.common
-  resource_group_name           = azurerm_resource_group.rg.name
   federated_identity_credential = local.federated_identity_credential
 }
 
