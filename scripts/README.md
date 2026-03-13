@@ -16,7 +16,7 @@ Azure Front Door のエンドポイントに対して、セキュリティヘッ
 
 ### 使用方法
 
-#### 方法1: 環境変数で設定（推奨）
+#### 方法 1: 環境変数で設定（推奨）
 
 ```bash
 export DNS_ZONE="example.com"
@@ -24,7 +24,7 @@ export ENV="dev"
 ./scripts/verify-security-headers.sh
 ```
 
-#### 方法2: スクリプト内で直接設定
+#### 方法 2: スクリプト内で直接設定
 
 スクリプトを編集して、設定セクションのコメントを外して値を設定：
 
@@ -40,13 +40,14 @@ ENV="dev"
 ./scripts/verify-security-headers.sh
 ```
 
-#### 方法3: URL を直接指定
+#### 方法 3: URL を直接指定
 
 ```bash
 ./scripts/verify-security-headers.sh https://api.example.com https://www.example.com
 ```
 
-**方法1または2を使用した場合、以下の URL が自動的に生成されます：**
+**方法 1 または 2 を使用した場合、以下の URL が自動的に生成されます：**
+
 - `https://api-${ENV}.${DNS_ZONE}`
 - `https://www-${ENV}.${DNS_ZONE}`
 - `https://static-${ENV}.${DNS_ZONE}`
@@ -99,11 +100,11 @@ export ENV="dev"
 
 ### 終了コード
 
-| コード | 意味 |
-|--------|------|
-| 0 | すべてのチェックが成功 |
-| 1 | 引数エラー |
-| 2 | いずれかのチェックが失敗 |
+| コード | 意味                     |
+| ------ | ------------------------ |
+| 0      | すべてのチェックが成功   |
+| 1      | 引数エラー               |
+| 2      | いずれかのチェックが失敗 |
 
 ### CI/CD での使用
 
@@ -131,20 +132,24 @@ SUBDOMAIN_PREFIXES=(
 )
 ```
 
-## gh-secret-variable-set.sh
+## gh-secret-set.sh / gh-variable-set.sh
 
-GitHub Actions の Secrets と Variables を環境ごとに一括登録するスクリプトです。
+GitHub Actions の Secrets と Variables を登録するスクリプトです。スコープ（Environment / Repository）を選択できます。
 
-### 概要
+### スコープの違い
 
-GitHub リポジトリの環境（dev, stg, prod など）に対して、Secrets（機密情報）と Variables（設定値）を一括で登録します。
+| スコープ    | オプション    | 参照元                              | 用途                            |
+| ----------- | ------------- | ----------------------------------- | ------------------------------- |
+| Environment | `-e <環境名>` | `environment:` を指定したジョブのみ | Secrets（認証情報等）           |
+| Repository  | `-r`          | すべてのジョブ                      | Variables（ツールバージョン等） |
 
 ### 必要なファイル
 
-スクリプトと同じディレクトリに以下のファイルが必要です：
+スクリプトと同じディレクトリに以下のファイルが必要です。
 
 #### `.secrets`
-機密情報を格納するファイル（**Gitにコミットしないこと**）
+
+機密情報を格納するファイルです（**Git にコミットしないこと**）。
 
 ```bash
 # Azure 認証情報
@@ -158,74 +163,42 @@ VM_ADMIN_PASSWORD=your-secure-password
 ```
 
 #### `variables`
-非機密の設定値を格納するファイル
+
+非機密の設定値を格納するファイルです。
 
 ```bash
 # ツールバージョン
-TF_VERSION=1.13.4
+TF_VERSION=1.14.7
 TFLINT_VERSION=v0.59.1
 TRIVY_VERSION=v0.67.2
 ```
 
-### 使用方法
-
-#### 事前準備
-
-1. **GitHub CLI のインストールと認証**
+### 事前準備
 
 ```bash
-# GitHub CLI がインストールされていない場合
+# GitHub CLI のインストールと認証
 brew install gh
-
-# GitHub にログイン
 gh auth login
+
+# .secrets ファイルを作成
+cd scripts/
+cp .secrets.example .secrets
+vim .secrets
 ```
 
-2. **ファイルの準備**
+### 使用方法
 
 ```bash
 cd scripts/
 
-# .secrets ファイルを作成（サンプルをコピーして編集）
-cp .secrets.example .secrets
-vim .secrets  # 実際の値を設定
+# Secrets を Environment スコープで登録
+./gh-secret-set.sh -e dev
 
-# variables ファイルは既に存在（必要に応じて編集）
-vim variables
-```
+# Variables を Repository スコープで登録（全ジョブから参照可能）
+./gh-variable-set.sh -r
 
-#### スクリプトの実行
-
-```bash
-# dev 環境に登録
-./gh-secret-variable-set.sh dev
-
-# stg 環境に登録
-./gh-secret-variable-set.sh stg
-
-# prod 環境に登録
-./gh-secret-variable-set.sh prod
-
-# 環境名を省略した場合は dev がデフォルト
-./gh-secret-variable-set.sh
-```
-
-### 実行例
-
-```bash
-$ ./gh-secret-variable-set.sh dev
-Environment: dev
-Registering secrets for environment: dev
-✓ Set Actions secret AZURE_CLIENT_ID for environment dev
-✓ Set Actions secret AZURE_SUBSCRIPTION_ID for environment dev
-✓ Set Actions secret AZURE_TENANT_ID for environment dev
-✓ Set Actions secret ALLOWED_CIDR for environment dev
-✓ Set Actions secret VM_ADMIN_PASSWORD for environment dev
-Registering variables for environment: dev
-✓ Set Actions variable TF_VERSION for environment dev
-✓ Set Actions variable TFLINT_VERSION for environment dev
-✓ Set Actions variable TRIVY_VERSION for environment dev
-Successfully registered secrets and variables for dev environment
+# Variables を Environment スコープで登録
+./gh-variable-set.sh -e dev
 ```
 
 ### セキュリティ上の注意
@@ -235,46 +208,16 @@ Successfully registered secrets and variables for dev environment
 - Secrets は GitHub 上で暗号化されて保存されます
 - Variables は暗号化されません（機密情報を含めないでください）
 
-### トラブルシューティング
-
-#### エラー: `.secrets file not found`
-
-```bash
-# .secrets ファイルが存在しない
-# scripts/ ディレクトリ内で .secrets ファイルを作成してください
-cd scripts/
-touch .secrets
-# 必要な Secrets を記述
-```
-
-#### エラー: `Not authenticated with GitHub CLI`
-
-```bash
-# GitHub CLI で認証していない
-gh auth login
-# 画面の指示に従って認証
-```
-
-#### エラー: `environment not found`
-
-```bash
-# 指定した環境が GitHub リポジトリに存在しない
-# GitHub のリポジトリ設定で環境を作成してください
-# Settings > Environments > New environment
-```
-
 ### 関連コマンド
 
 ```bash
-# 登録済みの Secrets を確認（値は表示されません）
+# 登録済みの確認
 gh secret list -e dev
-
-# 登録済みの Variables を確認
 gh variable list -e dev
+gh variable list
 
-# 特定の Secret を削除
+# 削除
 gh secret delete SECRET_NAME -e dev
-
-# 特定の Variable を削除
 gh variable delete VARIABLE_NAME -e dev
+gh variable delete VARIABLE_NAME
 ```
