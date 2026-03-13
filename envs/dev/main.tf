@@ -183,6 +183,15 @@ module "private_link_scope" {
   private_link_scoped_service = local.private_link_scoped_service
 }
 
+module "private_dns_resolver" {
+  source              = "../../modules/private_dns_resolver"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  virtual_network_id  = module.vnet.vnet["spoke1"].id
+  subnet_id           = module.vnet.subnet["resolver"].id
+}
+
 module "frontdoor" {
   count = var.resource_enabled.frontdoor ? 1 : 0
 

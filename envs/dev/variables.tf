@@ -163,6 +163,17 @@ variable "subnet" {
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    resolver = {
+      name                              = "resolver"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.7.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation = {
+        name    = "Microsoft.Network/dnsResolvers"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
     cae = {
       name                              = "cae"
       target_vnet                       = "spoke1"
