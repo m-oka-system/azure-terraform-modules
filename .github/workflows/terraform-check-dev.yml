@@ -34,9 +34,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TF_VERSION: ${{ vars.TF_VERSION || '1.13.4' }}
+  TF_VERSION: ${{ vars.TF_VERSION || '1.14.7' }}
   TFLINT_VERSION: ${{ vars.TFLINT_VERSION || 'v0.59.1' }}
-  TRIVY_VERSION: ${{ vars.TRIVY_VERSION || 'v0.67.2' }}
+  TRIVY_VERSION: ${{ vars.TRIVY_VERSION || 'v0.69.3' }}
 
 jobs:
   terraform-validate:
