@@ -1,12 +1,12 @@
 terraform {
   # Terraform のバージョン
-  required_version = "~> 1.13.0"
+  required_version = "~> 1.14.0"
 
   # リソースプロバイダーのバージョン
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.50.0"
+      version = "~> 4.64.0"
     }
     azapi = {
       source  = "azure/azapi"

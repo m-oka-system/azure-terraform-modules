@@ -125,7 +125,6 @@ module "role_assignment" {
 module "federated_identity_credential" {
   source                        = "../../modules/federated_identity_credential"
   common                        = var.common
-  resource_group_name           = azurerm_resource_group.rg.name
   federated_identity_credential = local.federated_identity_credential
 }
 
@@ -182,6 +181,17 @@ module "private_link_scope" {
   tags                        = azurerm_resource_group.rg.tags
   private_link_scope          = var.private_link_scope
   private_link_scoped_service = local.private_link_scoped_service
+}
+
+module "private_dns_resolver" {
+  count = var.resource_enabled.private_dns_resolver ? 1 : 0
+
+  source              = "../../modules/private_dns_resolver"
+  common              = var.common
+  resource_group_name = azurerm_resource_group.rg.name
+  tags                = azurerm_resource_group.rg.tags
+  virtual_network_id  = module.vnet.vnet["spoke1"].id
+  subnet_id           = module.vnet.subnet["resolver"].id
 }
 
 module "frontdoor" {

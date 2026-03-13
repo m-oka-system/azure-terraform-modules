@@ -19,6 +19,7 @@ variable "resource_enabled" {
     private_dns_zone      = optional(bool, false)
     private_endpoint      = optional(bool, false)
     custom_domain         = optional(bool, false)
+    private_dns_resolver  = optional(bool, false)
     frontdoor             = optional(bool, false)
     frontdoor_waf         = optional(bool, false)
     container_registry    = optional(bool, false)
@@ -160,6 +161,17 @@ variable "subnet" {
       service_endpoints                 = ["Microsoft.Storage"] # PostgreSQL Flexible Server が WAL ファイルを Azure Storage にアーカイブするために必要
       service_delegation = {
         name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
+    resolver = {
+      name                              = "resolver"
+      target_vnet                       = "spoke1"
+      address_prefixes                  = ["10.10.7.0/24"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+      service_delegation = {
+        name    = "Microsoft.Network/dnsResolvers"
         actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
