@@ -184,6 +184,8 @@ module "private_link_scope" {
 }
 
 module "private_dns_resolver" {
+  count = var.resource_enabled.private_dns_resolver ? 1 : 0
+
   source              = "../../modules/private_dns_resolver"
   common              = var.common
   resource_group_name = azurerm_resource_group.rg.name

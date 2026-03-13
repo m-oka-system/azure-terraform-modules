@@ -19,6 +19,7 @@ variable "resource_enabled" {
     private_dns_zone      = optional(bool, false)
     private_endpoint      = optional(bool, false)
     custom_domain         = optional(bool, false)
+    private_dns_resolver  = optional(bool, false)
     frontdoor             = optional(bool, false)
     frontdoor_waf         = optional(bool, false)
     container_registry    = optional(bool, false)
