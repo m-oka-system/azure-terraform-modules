@@ -32,3 +32,29 @@ resource "azurerm_virtual_network_gateway" "this" {
 
   tags = var.tags
 }
+
+resource "azurerm_local_network_gateway" "this" {
+  for_each = var.local_network_gateway
+
+  name                = "lgw-${each.value.name}-${var.common.project}-${var.common.env}"
+  resource_group_name = var.resource_group_name
+  location            = var.common.location
+  gateway_address     = each.value.gateway_address
+  address_space       = each.value.address_space
+
+  tags = var.tags
+}
+
+resource "azurerm_virtual_network_gateway_connection" "this" {
+  for_each = var.local_network_gateway
+
+  name                       = "vcn-${each.value.name}-${var.common.project}-${var.common.env}"
+  resource_group_name        = var.resource_group_name
+  location                   = var.common.location
+  type                       = "IPsec"
+  virtual_network_gateway_id = azurerm_virtual_network_gateway.this.id
+  local_network_gateway_id   = azurerm_local_network_gateway.this[each.key].id
+  shared_key                 = each.value.shared_key
+
+  tags = var.tags
+}

@@ -2664,6 +2664,23 @@ variable "vpn_gateway" {
   }
 }
 
+variable "local_network_gateway" {
+  type = map(object({
+    name            = string
+    gateway_address = string
+    address_space   = list(string)
+    shared_key      = string
+  }))
+  default = {
+    onpremise = {
+      name            = "onpremise"
+      gateway_address = "203.0.113.1"
+      address_space   = ["10.0.0.0/16"]
+      shared_key      = "YourPreSharedKey123!"
+    }
+  }
+}
+
 variable "action_group" {
   type = map(object({
     name = string
