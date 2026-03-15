@@ -48,7 +48,7 @@ resource "azurerm_local_network_gateway" "this" {
 resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.local_network_gateway
 
-  name                       = "vcn-${each.value.name}-${var.common.project}-${var.common.env}"
+  name                       = "con-${each.value.name}-${var.common.project}-${var.common.env}"
   resource_group_name        = var.resource_group_name
   location                   = var.common.location
   type                       = "IPsec"
