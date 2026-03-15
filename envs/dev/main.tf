@@ -561,6 +561,18 @@ module "nat_gateway" {
   subnet              = module.vnet.subnet
 }
 
+module "vpn_gateway" {
+  count = var.resource_enabled.vpn_gateway ? 1 : 0
+
+  source                = "../../modules/vpn_gateway"
+  common                = var.common
+  resource_group_name   = azurerm_resource_group.rg.name
+  tags                  = azurerm_resource_group.rg.tags
+  vpn_gateway           = var.vpn_gateway
+  local_network_gateway = var.local_network_gateway
+  subnet                = module.vnet.subnet
+}
+
 module "action_group" {
   source              = "../../modules/monitor_action_group"
   common              = var.common

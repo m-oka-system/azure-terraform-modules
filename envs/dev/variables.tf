@@ -39,6 +39,7 @@ variable "resource_enabled" {
     loadbalancer          = optional(bool, false)
     bastion               = optional(bool, false)
     nat_gateway           = optional(bool, false)
+    vpn_gateway           = optional(bool, false)
     resource_health_alert = optional(bool, false)
     diagnostic_setting    = optional(bool, false)
     backup_vault          = optional(bool, false)
@@ -87,6 +88,13 @@ variable "subnet" {
     }))
   }))
   default = {
+    gateway = {
+      name                              = "GatewaySubnet"
+      target_vnet                       = "hub"
+      address_prefixes                  = ["192.168.0.0/26"]
+      default_outbound_access_enabled   = false
+      private_endpoint_network_policies = "Disabled"
+    }
     bastion = {
       name                              = "AzureBastionSubnet"
       target_vnet                       = "hub"
@@ -2624,6 +2632,51 @@ variable "nat_gateway" {
       sku               = "Standard"
       allocation_method = "Static"
       zones             = ["1"]
+    }
+  }
+}
+
+variable "vpn_gateway" {
+  type = object({
+    type          = string
+    vpn_type      = string
+    sku           = string
+    active_active = optional(bool, false)
+    bgp_enabled   = optional(bool, false)
+    generation    = optional(string)
+    target_subnet = string
+    public_ip = object({
+      sku               = string
+      allocation_method = string
+      zones             = list(string)
+    })
+  })
+  default = {
+    type          = "Vpn"
+    vpn_type      = "RouteBased"
+    sku           = "VpnGw1AZ"
+    target_subnet = "gateway"
+    public_ip = {
+      sku               = "Standard"
+      allocation_method = "Static"
+      zones             = ["1", "2", "3"]
+    }
+  }
+}
+
+variable "local_network_gateway" {
+  type = map(object({
+    name            = string
+    gateway_address = string
+    address_space   = list(string)
+    shared_key      = string
+  }))
+  default = {
+    onpremise = {
+      name            = "onpremise"
+      gateway_address = "203.0.113.1"
+      address_space   = ["10.0.0.0/16"]
+      shared_key      = "YourPreSharedKey123!"
     }
   }
 }
